@@ -1,3 +1,6 @@
+<pre>
+
+
 1. Push changes:
     a) git add .
     b) git commit
@@ -13,3 +16,7 @@
     git rm -r --cached <directory>
     <1b>
     <1c>
+
+
+
+</pre>
