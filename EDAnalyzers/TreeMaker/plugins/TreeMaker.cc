@@ -134,6 +134,8 @@ class TreeMaker : public edm::one::EDAnalyzer<edm::one::SharedResources>
     bool storeHGCALlayerClus;
     bool storeSuperClusTICLclus;
     
+    double TICLeleGenMatchDR;
+    
     
     // Gen particles //
     edm::EDGetTokenT <std::vector <reco::GenParticle> > tok_genParticle;
@@ -217,6 +219,8 @@ TreeMaker::TreeMaker(const edm::ParameterSet& iConfig)
     storeRecHit = iConfig.getParameter <bool>("storeRecHit");
     storeHGCALlayerClus = iConfig.getParameter <bool>("storeHGCALlayerClus");
     storeSuperClusTICLclus = iConfig.getParameter <bool>("storeSuperClusTICLclus");
+    
+    TICLeleGenMatchDR = iConfig.getParameter <double>("TICLeleGenMatchDR");
     
     
     // Gen particles //
@@ -1740,15 +1744,10 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     
     std::vector <CLHEP::HepLorentzVector> v_gsfEleFromTICL_4mom;
     
+    
     for(int iEle = 0; iEle < nEleFromTICL; iEle++)
     {
         reco::GsfElectron gsfEle = v_gsfEleFromTICL->at(iEle);
-        
-        //if(fabs(gsfEle.eta()) < HGCal_minEta)
-        //{
-        //    continue;
-        //}
-        
         
         CLHEP::HepLorentzVector gsfEleFromTICL_4mom;
         gsfEleFromTICL_4mom.setT(gsfEle.energy());
@@ -1757,6 +1756,55 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         gsfEleFromTICL_4mom.setZ(gsfEle.pz());
         
         v_gsfEleFromTICL_4mom.push_back(gsfEleFromTICL_4mom);
+    }
+    
+    
+    // TICL-ele gen-matching
+    TMatrixD mat_gsfEleFromTICL_gelEl_deltaR;
+    
+    std::vector <int> v_gsfEleFromTICL_matchedGenEl_index;
+    
+    std::vector <double> v_gsfEleFromTICL_gelEl_minDeltaR = Common::getMinDeltaR(
+        v_gsfEleFromTICL_4mom,
+        v_genEl_4mom,
+        mat_gsfEleFromTICL_gelEl_deltaR,
+        v_gsfEleFromTICL_matchedGenEl_index
+    );
+    
+    for(int iEle = 0; iEle < (int) v_gsfEleFromTICL_gelEl_minDeltaR.size(); iEle++)
+    {
+        double deltaR = v_gsfEleFromTICL_gelEl_minDeltaR.at(iEle);
+        
+        if(deltaR > TICLeleGenMatchDR)
+        {
+            continue;
+        }
+        
+        treeOutput->v_gsfEleFromTICL_genEl_minDeltaR.push_back(deltaR);
+        
+        int index = v_gsfEleFromTICL_matchedGenEl_index.at(iEle);
+        
+        double energy = -1;
+        
+        if(index >= 0)
+        {
+            energy = v_genEl_4mom.at(index).e();
+        }
+        
+        treeOutput->v_gsfEleFromTICL_matchedGenEl_E.push_back(energy);
+    }
+    
+    
+    for(int iEle = 0; iEle < nEleFromTICL; iEle++)
+    {
+        if(v_gsfEleFromTICL_gelEl_minDeltaR.at(iEle) > TICLeleGenMatchDR)
+        {
+            continue;
+        }
+        
+        reco::GsfElectron gsfEle = v_gsfEleFromTICL->at(iEle);
+        
+        CLHEP::HepLorentzVector gsfEleFromTICL_4mom = v_gsfEleFromTICL_4mom.at(iEle);
         
         
         treeOutput->v_gsfEleFromTICL_E.push_back(gsfEle.energy());
@@ -2388,36 +2436,6 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     }
     
     //printf("m_gsfEle_superClus.size(): %d \n", (int) m_gsfEle_superClus.size() );
-    
-    
-    // TICL-ele gen-matching
-    TMatrixD mat_gsfEleFromTICL_gelEl_deltaR;
-    
-    std::vector <int> v_gsfEleFromTICL_matchedGenEl_index;
-    
-    std::vector <double> v_gsfEleFromTICL_gelEl_minDeltaR = Common::getMinDeltaR(
-        v_gsfEleFromTICL_4mom,
-        v_genEl_4mom,
-        mat_gsfEleFromTICL_gelEl_deltaR,
-        v_gsfEleFromTICL_matchedGenEl_index
-    );
-    
-    for(int iEle = 0; iEle < (int) v_gsfEleFromTICL_gelEl_minDeltaR.size(); iEle++)
-    {
-        treeOutput->v_gsfEleFromTICL_genEl_minDeltaR.push_back(v_gsfEleFromTICL_gelEl_minDeltaR.at(iEle));
-        
-        int index = v_gsfEleFromTICL_matchedGenEl_index.at(iEle);
-        
-        double energy = -1;
-        
-        if(index >= 0)
-        {
-            energy = v_genEl_4mom.at(index).e();
-        }
-        
-        treeOutput->v_gsfEleFromTICL_matchedGenEl_E.push_back(energy);
-    }
-    
     
     
     // PFRecHits

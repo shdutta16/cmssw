@@ -1,0 +1,11 @@
+scram b -j8 USER_CXXFLAGS="-fopenmp -Wno-unused-but-set-variable"
+
+rsync -asP --exclude "*.root" ./* sobhatta@lxplus.cern.ch:/eos/user/s/sobhatta/www/HGCal_ele-reco/analysis/CMSSW_10_6_0_pre4/src
+
+rsync -asP getDataFileList_dpm.* sobhatta@lxplus.cern.ch:/afs/cern.ch/work/s/sobhatta/private/HGCal_ele-reco/CMSSW_10_6_0_pre4/src/
+
+rsync -asP --exclude "*.root" --exclude "*.svn*" --exclude "*fuse*" --exclude "weights/*" --exclude "temp/*" --exclude "*cmsShow*" --exclude "plots/*" --exclude "documentation/*" --exclude "*sourceFiles*" --exclude "*.pdf" --exclude "*.log" --exclude "*.pyc" --exclude "*_cc.*" --exclude "*.pcm" ./* sobhatta@ui.indiacms.res.in:/home/sobhatta/t3store2/HGCal_ele-reco/analysis/CMSSW_10_6_0_pre4/src/
+
+rsync -asP --exclude "*.root" --exclude "*.svn*" --exclude "*fuse*" --exclude "weights/*" --exclude "temp/*" --exclude "*cmsShow*" --exclude "plots/*" --exclude "documentation/*" --exclude "*sourceFiles*" --exclude "*.pdf" --exclude "*.log" --exclude "*.pyc"  --exclude "*_cc.*"  --exclude "*.pcm" ./* sobhatta@ui.indiacms.res.in:/home/sobhatta/t3store2/HGCal_ele-reco/analysis/CMSSW_9_4_10/src/
+
+rsync -asP --exclude "*.root" --exclude "*.svn*" --exclude "*fuse*" --exclude "weights/*" --exclude "temp/*" --exclude "*cmsShow*" --exclude "plots/*" --exclude "documentation/*" --exclude "*sourceFiles*" --exclude "*.pdf" --exclude "*.log" --exclude "*.pyc" --exclude "*_cc.*" --exclude "*.pcm" ./* sobhatta@lxplus.cern.ch:/afs/cern.ch/work/s/sobhatta/private/HGCal_ele-reco/analysis/CMSSW_10_6_0_pre4/src/

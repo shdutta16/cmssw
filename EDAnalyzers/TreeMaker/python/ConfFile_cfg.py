@@ -150,6 +150,13 @@ options.register("storeSuperClusTICLclus",
     "Store info about TICL-electron SC, SC seed, and TICL-cluster matches" # Description
 )
 
+options.register("TICLeleGenMatchDR",
+    99999, # Default value
+    VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+    VarParsing.VarParsing.varType.float, # string, int, or float
+    "DeltaR to use for TICL-ele ctron gen-matching (will store only the gen-matched ones)" # Description
+)
+
 options.register("trace",
     0, # Default value
     VarParsing.VarParsing.multiplicity.singleton, # singleton or list
@@ -439,6 +446,8 @@ process.treeMaker = cms.EDAnalyzer(
     storeRecHit = cms.bool(bool(options.storeRecHit)),
     storeHGCALlayerClus = cms.bool(bool(options.storeHGCALlayerClus)),
     storeSuperClusTICLclus = cms.bool(bool(options.storeSuperClusTICLclus)),
+    
+    TICLeleGenMatchDR = cms.double(options.TICLeleGenMatchDR),
     
     
     ############################## GEN ##############################
