@@ -21,7 +21,7 @@ Git stuff
 1. Push changes:
     a) git add .
     b) git commit
-    c) git push -u my-cmssw SohamBhattacharya/HGCal_ele-reco:HGCal_ele-reco 
+    c) git push -u my-cmssw from-CMSSW_11_1_0_pre3:HGCal_ele-reco_analysis_11_1_0_pre3 
 
 2. Delete from remote branch ONLY:
     git rm --cached <file>
