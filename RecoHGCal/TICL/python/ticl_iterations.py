@@ -140,14 +140,14 @@ def TICL_iterations_withReco(process):
 
   process.schedule.associate(process.TICL_Task)
 
-  process.ticlPFValidation = ticlPFValidation
-  process.hgcalValidation.insert(-1, process.ticlPFValidation)
+  #process.ticlPFValidation = ticlPFValidation
+  #process.hgcalValidation.insert(-1, process.ticlPFValidation)
   
-  if getattr(process,'hgcalValidator'):
-    process.hgcalValidator.label_lcl = cms.InputTag("hgcalLayerClusters")
-    process.hgcalValidator.label_mcl = cms.VInputTag(cms.InputTag("multiClustersFromTrackstersEM", "MultiClustersFromTracksterByCA"), cms.InputTag("multiClustersFromTrackstersHAD", "MultiClustersFromTracksterByCA"))
-
-    process.hgcalValidator.domulticlustersPlots = True
+  #if getattr(process,'hgcalValidator'):
+  #  process.hgcalValidator.label_lcl = cms.InputTag("hgcalLayerClusters")
+  #  process.hgcalValidator.label_mcl = cms.VInputTag(cms.InputTag("multiClustersFromTrackstersEM", "MultiClustersFromTracksterByCA"), cms.InputTag("multiClustersFromTrackstersHAD", "MultiClustersFromTracksterByCA"))
+  #
+  #  process.hgcalValidator.domulticlustersPlots = True
     
   return process
 
