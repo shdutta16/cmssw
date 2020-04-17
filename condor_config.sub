@@ -23,6 +23,7 @@ getenv = True
 request_memory = 6GB
 
 # In seconds
-+MaxRuntime = 172800
+#+MaxRuntime = 172800
++MaxRuntime = 259200
 
 queue

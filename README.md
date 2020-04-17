@@ -8,7 +8,8 @@ cmsRun EDAnalyzers/TreeMaker/python/ConfFile_cfg.py \
     sourceFile=[file containing list of input files. Will use only if <inputFiles> is not provided] \
     modTICLele=1 \
     rerunTICL=[1 if you want to rerun the TICL sequence] \
-    modTICLeleWithRerunTICL=[1 if you want TICL-electrons with the rerun TICL objects]
+    modTICLeleWithRerunTICL=[1 if you want TICL-electrons with the rerun TICL objects] \
+    TICLeleGenMatchDR=[TICLELEGENMATCHDR (by default all TICL-electrons will be stored as the default value is very large)]
 
 
 
@@ -28,6 +29,7 @@ Git stuff
     <1b>
     <1c>
 
-
+3. If files become untracked for some weird reason, do:
+    for f in $(find | grep -v .git | grep -v .pyc | grep -v __init__); do echo $f; git update-index --no-skip-worktree $f; done
 
 </pre>
