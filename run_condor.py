@@ -65,13 +65,6 @@ parser.add_argument(
     default = -1,
 )
 
-parser.add_argument(
-    "--test",
-    help = "Only create job files (do not submit)",
-    default = False,
-    action = "store_true",
-)
-
 
 # Parse arguments
 args = parser.parse_args()
@@ -156,12 +149,11 @@ if (__name__ == "__main__") :
         condorScript_content = f.read()
     
     
-    nDigit = max(4, len(str(nJob)))
+    nDigit = len(str(nJob))
     
     for iJob in range(0, nJob) :
         
-        #jobNumberStr = "%0*d" %(nDigit, iJob+1)
-        jobNumberStr = "%d" %(iJob+1)
+        jobNumberStr = "%0*d" %(nDigit, iJob+1)
         
         if (iJob < nJob-1) :
             
@@ -204,7 +196,6 @@ if (__name__ == "__main__") :
         
         # Condor script
         lineBreakStr = " \\\n"
-        lineBreakStr_noSp = "\\\n"
         
         cmsRun_cmd = "cmsRun %s" %(args.cmsRunFile) + lineBreakStr
         cmsRun_cmd += "\t print" + lineBreakStr
@@ -212,38 +203,19 @@ if (__name__ == "__main__") :
         cmsRun_cmd += "\t outputDir=%s" %(outputDir) + lineBreakStr
         cmsRun_cmd += "\t outFileNumber=%d" %(iJob+1) + lineBreakStr
         
-        cmsRun_cmd += "\t keepList=" + lineBreakStr_noSp
-        cmsRun_cmd += "*_*BeamSpot*_*_*," + lineBreakStr_noSp
-        cmsRun_cmd += "*_*FromMultiCl_*_*," + lineBreakStr_noSp
-        cmsRun_cmd += "*_*FromTICL*_*_*," + lineBreakStr_noSp
-        cmsRun_cmd += "*_*particleFlowRecHitHGC*_*_*," + lineBreakStr_noSp
-        cmsRun_cmd += "*_HGCalRecHit_*_*," + lineBreakStr_noSp
-        cmsRun_cmd += "*_addPileupInfo_*_*," + lineBreakStr_noSp
-        cmsRun_cmd += "*_allConversions_*_*," + lineBreakStr_noSp
-        cmsRun_cmd += "*_ecalDrivenGsfElectrons*_*_*," + lineBreakStr_noSp
-        cmsRun_cmd += "*_ecalRecHit_*_*," + lineBreakStr_noSp
-        cmsRun_cmd += "*_fixedGridRhoFastjetAll_*_*," + lineBreakStr_noSp
-        cmsRun_cmd += "*_g4SimHits_*_*," + lineBreakStr_noSp
-        cmsRun_cmd += "*_genParticles_*_*," + lineBreakStr_noSp
-        cmsRun_cmd += "*_generalTracks_*_*," + lineBreakStr_noSp
-        cmsRun_cmd += "*_generator_*_*," + lineBreakStr_noSp
-        cmsRun_cmd += "*_hbhereco_*_*," + lineBreakStr_noSp
-        cmsRun_cmd += "*_hfreco_*_*," + lineBreakStr_noSp
-        cmsRun_cmd += "*_horeco_*_*," + lineBreakStr_noSp
-        cmsRun_cmd += "*_mix_MergedCaloTruth_*," + lineBreakStr_noSp
-        cmsRun_cmd += "*_offlinePrimaryVertices_*_*," + lineBreakStr_noSp
-        cmsRun_cmd += "*_particleFlowClusterECAL_*_*," + lineBreakStr_noSp
-        cmsRun_cmd += "*_particleFlowSuperClusterECAL_*_*," + lineBreakStr_noSp
-        cmsRun_cmd += "*_pfTrackElec_*_*," + lineBreakStr_noSp
-        cmsRun_cmd += "*_siPhase2Clusters_*_*," + lineBreakStr_noSp
-        cmsRun_cmd += "*_siPixelClusterShapeCache_*_*," + lineBreakStr_noSp
-        cmsRun_cmd += "*_siPixelClustersCache_*_*," + lineBreakStr_noSp
-        cmsRun_cmd += "*_siPixelClusters_*_*," + lineBreakStr_noSp
-        cmsRun_cmd += "*_siPixelRecHits*_*_*," + lineBreakStr_noSp
-        cmsRun_cmd += "*_siStripDigis_*_*," + lineBreakStr_noSp
-        cmsRun_cmd += "*_towerMaker_*_*," + lineBreakStr_noSp
-        cmsRun_cmd += "*_trackerDrivenElectronSeeds_*_*," + lineBreakStr_noSp
-        cmsRun_cmd += "*_tracksters*_*_*," + lineBreakStr_noSp
+        #cmsRun_cmd += "\t onRaw=1" + lineBreakStr
+        
+        cmsRun_cmd += "\t rerunTICL=1" + lineBreakStr
+        cmsRun_cmd += "\t modTICLele=1" + lineBreakStr
+        cmsRun_cmd += "\t modTICLeleWithRerunTICL=1" + lineBreakStr
+        
+        cmsRun_cmd += "\t storeRecHit=0" + lineBreakStr
+        cmsRun_cmd += "\t storeSimHit=0" + lineBreakStr
+        cmsRun_cmd += "\t storeHGCALlayerClus=0" + lineBreakStr
+        cmsRun_cmd += "\t storeSuperClusTICLclus=0" + lineBreakStr
+        cmsRun_cmd += "\t debugFile=0" + lineBreakStr
+        
+        #cmsRun_cmd += "\t maxEvents=20" + lineBreakStr
         
         condorScript_content_mod = condorScript_content
         condorScript_content_mod = condorScript_content_mod.replace("@dir@", cwd)
@@ -266,12 +238,10 @@ if (__name__ == "__main__") :
         
         commandReturn = 1
         
-        if (not args.test) :
+        # Repeat until job is submission is successful (returns 0)
+        while (commandReturn) :
             
-            # Repeat until job is submission is successful (returns 0)
-            while (commandReturn) :
-                
-                commandReturn = os.system(command)
+            commandReturn = os.system(command)
         
         
         print "\n"
@@ -283,11 +253,6 @@ if (__name__ == "__main__") :
     print "****************************************************************************************************"
     print "Total # unit:", nInputFile
     print "Total # job:", nJob
-    
-    if (args.test) :
-        
-        print "Jobs NOT submitted"
-    
     print "****************************************************************************************************"
     print "****************************************************************************************************"
     print "\n"
