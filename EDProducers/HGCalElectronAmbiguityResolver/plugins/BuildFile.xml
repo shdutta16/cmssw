@@ -29,6 +29,7 @@
 <use name="L1Trigger/Skimmer"/>
 <use name="L1TriggerConfig/L1GtConfigProducers"/>
 <use name="PhysicsTools/PatAlgos"/>
+<use name="RecoEgamma/EgammaElectronAlgos"/>
 <use name="RecoJets/JetAssociationProducers"/>
 <use name="RecoLocalCalo/HGCalRecAlgos"/>
 <use name="SimDataFormats/CaloAnalysis"/>

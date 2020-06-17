@@ -224,6 +224,29 @@ namespace Common
     }
     
     
+    double getEnergySum(
+        std::vector <std::pair <DetId, float> > v_hit_HandF,
+        std::vector <std::pair <DetId, float> > v_HandF,
+        std::map <DetId, const HGCRecHit*> m_hit,
+        bool useHandF = false
+    )
+    {
+        std::vector <DetId> v_hit_detId;
+        
+        for(int iHit = 0; iHit < (int) v_hit_HandF.size(); iHit++)
+        {
+            v_hit_detId.push_back(v_hit_HandF.at(iHit).first);
+        }
+        
+        return getEnergySum(
+            v_hit_detId,
+            v_HandF,
+            m_hit,
+            useHandF
+        );
+    }
+    
+    
     std::vector <DetId> getNeighborR(
         DetId detId,
         std::vector <std::pair <DetId, float> > v_HandF,

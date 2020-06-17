@@ -33,6 +33,14 @@ parser.add_argument(
     required = True,
 )
 
+parser.add_argument(
+    "--cmsRunOptions",
+    help = "Options for the cmsRun file",
+    type = str,
+    required = False,
+    default = "",
+)
+
 # /eos/cms/store/group/phys_egamma/sobhatta/HGCal_TreeMaker
 parser.add_argument(
     "--outputDir",
@@ -204,6 +212,8 @@ if (__name__ == "__main__") :
         cmsRun_cmd += "\t outFileNumber=%d" %(iJob+1) + lineBreakStr
         
         #cmsRun_cmd += "\t onRaw=1" + lineBreakStr
+        
+        cmsRun_cmd += "\t %s" %(args.cmsRunOptions) + lineBreakStr
         
         cmsRun_cmd += "\t rerunTICL=1" + lineBreakStr
         cmsRun_cmd += "\t modTICLele=1" + lineBreakStr

@@ -69,7 +69,7 @@ private:
   bool isPreselected(reco::GsfElectron const& ele) const;
   void setAmbiguityData(reco::GsfElectronCollection& electrons,
                         edm::Event const& event,
-                        bool ignoreNotPreselected = true) const;
+                        bool ignoreNotPreselected = false) const;
 
   // check expected configuration of previous modules
   bool ecalSeedingParametersChecked_;

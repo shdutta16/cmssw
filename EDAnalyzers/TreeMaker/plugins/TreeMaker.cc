@@ -87,9 +87,9 @@
 
 
 double HGCal_minEta = 1.479;
-double HGCal_maxEta = 3.0;
+double HGCal_maxEta = 3.1;
 
-double el_minPt = 0; //15;
+double el_minPt = 10; //15;
 double el_maxPt = 99999; //30;
 
 
@@ -116,6 +116,15 @@ class TreeMaker : public edm::one::EDAnalyzer<edm::one::SharedResources>
         std::map <DetId, const HGCRecHit*> m_recHit
     );
     
+    void fill_isoVar(
+        TreeOutputInfo::TreeOutput::IsoVarContent *isoVarContent,
+        const std::vector <reco::CaloCluster> *v_layerCluster,
+        reco::GsfElectron *sigObj,
+        double dR_max
+        //double dz_max,
+        //double dtSigni_max
+    );
+    
     
     hgcal::RecHitTools recHitTools;
     
@@ -128,6 +137,7 @@ class TreeMaker : public edm::one::EDAnalyzer<edm::one::SharedResources>
     
     // My stuff //
     bool debug;
+    bool isGunSample;
     
     bool storeSimHit;
     bool storeRecHit;
@@ -211,9 +221,14 @@ TreeMaker::TreeMaker(const edm::ParameterSet& iConfig)
     
     treeOutput = new TreeOutputInfo::TreeOutput("tree", fs);
     
+    treeOutput->init_isoVarContent("gsfEleFromTICL", "dR0p3");
+    treeOutput->init_isoVarContent("gsfEleFromTICL", "dR0p4");
+    treeOutput->init_isoVarContent("gsfEleFromTICL", "dR0p5");
+    
     
     // My stuff //
     debug = iConfig.getParameter <bool>("debug");
+    isGunSample = iConfig.getParameter <bool>("isGunSample");
     
     storeSimHit = iConfig.getParameter <bool>("storeSimHit");
     storeRecHit = iConfig.getParameter <bool>("storeRecHit");
@@ -283,9 +298,90 @@ TreeMaker::~TreeMaker()
 // member functions
 //
 
+
+void TreeMaker::fill_isoVar(
+    TreeOutputInfo::TreeOutput::IsoVarContent *isoVarContent,
+    const std::vector <reco::CaloCluster> *v_layerCluster,
+    reco::GsfElectron *sigObj,
+    double dR_max
+    //double dz_max,
+    //double dtSigni_max
+)
+{
+    
+    
+    double iso_sumETratio = 0;
+    double iso_sumETratio_charged = 0;
+    double iso_sumETratio_neutral = 0;
+    double iso_sumETratio_ecal = 0;
+    double iso_sumETratio_hcal = 0;
+    
+    double HoverE = 0;
+    
+    
+    CLHEP::HepLorentzVector sigObj_4mom;
+    sigObj_4mom.setT(sigObj->energy());
+    sigObj_4mom.setX(sigObj->px());
+    sigObj_4mom.setY(sigObj->py());
+    sigObj_4mom.setZ(sigObj->pz());
+    
+    
+    int nLayerClus = v_layerCluster->size();
+    
+    for(int iClus = 0; iClus < nLayerClus; iClus++)
+    {
+        reco::CaloCluster cluster = v_layerCluster->at(iClus);
+        
+        //std::vector <std::pair <DetId, float> > v_hit = cluster.hitsAndFractions();
+        //int nHit = v_hit.size();
+        
+        CLHEP::Hep3Vector cluster_3vec(
+            cluster.x(),
+            cluster.y(),
+            cluster.z()
+        );
+        
+        int layer = recHitTools.getLayer(cluster.seed()); // Starts from 1
+        
+        double dR = cluster_3vec.deltaR(sigObj_4mom.v());
+        
+        if(dR > dR_max)
+        {
+            continue;
+        }
+        
+        
+        iso_sumETratio += cluster.energy() * std::sin(cluster.position().theta());
+        
+        //if(layer > 28)
+        if(cluster.seed().det() == DetId::HGCalHSi || cluster.seed().det() == DetId::HGCalHSc)
+        {
+            HoverE += cluster.energy();
+        }
+    }
+    
+    double superClus_E = sigObj->superCluster()->energy();
+    //double superClus_ET = sigObj->superCluster()->et();
+    
+    
+    // Subtract the signal
+    iso_sumETratio -= sigObj->et();
+    iso_sumETratio /= sigObj->et();
+    
+    
+    HoverE /= superClus_E;
+    
+    
+    // Fill
+    isoVarContent->v_iso_sumETratio.push_back(iso_sumETratio);
+    
+    isoVarContent->v_HoverE.push_back(HoverE);
+    
+}
+
+
 // ------------ method called for each event  ------------
-void
-TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
+void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
 {
     using namespace edm;
     
@@ -337,7 +433,13 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         
         // Gen ele
         //if(abs(pdgId) == 11 && status == 1)
-        if(abs(pdgId) == 11 && (part.isHardProcess() || status == 1))
+        //if(abs(pdgId) == 11 && (part.isHardProcess() || status == 1))
+        if(
+            abs(pdgId) == 11 && (
+                (isGunSample && status == 1) ||
+                (!isGunSample && part.isHardProcess())
+            )
+        )
         {
             //printf("[%llu] Gen electron found: E %0.2f, pT %0.2f, eta %+0.2f \n", eventNumber, part.energy(), part.pt(), part.eta());
             
@@ -650,62 +752,62 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     //printf("[%llu] # of TICL multiClusters: %d \n", eventNumber, (int) v_TICLmultiCluster->size());
     ////printf("[%llu] # of TICL multiClustersMIP: %d \n", eventNumber, (int) v_TICLmultiClusterMIP->size());
     
-    std::vector <int> v_genEl_multiClus_n(v_genEl_4mom.size(), 0);
-    std::vector <double> v_genEl_multiClus_E(v_genEl_4mom.size(), 0.0);
-    std::vector <double> v_genEl_nearestMultiClus_E(v_genEl_4mom.size(), 0.0);
-    
-    std::vector <int> v_multiClus_genElIndex(v_TICLmultiCluster->size(), -1);
-    
-    for(int iGenEl = 0; iGenEl < (int) v_genEl_4mom.size(); iGenEl++)
-    {
-        CLHEP::HepLorentzVector genEl_4mom = v_genEl_4mom.at(iGenEl);
-        
-        double deltaR_min = 9999;
-        
-        for(int iTICLmultiCluster = 0; iTICLmultiCluster < (int) v_TICLmultiCluster->size(); iTICLmultiCluster++)
-        {
-            reco::HGCalMultiCluster TICLmultiCluster = v_TICLmultiCluster->at(iTICLmultiCluster);
-            
-            CLHEP::Hep3Vector TICLmultiCluster_3vec(
-                TICLmultiCluster.x(),
-                TICLmultiCluster.y(),
-                TICLmultiCluster.z()
-            );
-            
-            double deltaR = genEl_4mom.v().deltaR(TICLmultiCluster_3vec);
-            
-            if(deltaR < 0.4)
-            {
-                v_genEl_multiClus_n.at(iGenEl)++;
-                v_genEl_multiClus_E.at(iGenEl) += TICLmultiCluster.energy();
-                
-                v_multiClus_genElIndex.at(iTICLmultiCluster) = iGenEl;
-                
-                if(deltaR < deltaR_min)
-                {
-                    deltaR_min = deltaR;
-                    
-                    v_genEl_nearestMultiClus_E.at(iGenEl) = TICLmultiCluster.energy();
-                }
-            }
-        }
-        
-        //printf(
-        //    "[%llu] "
-        //    "Gen-ele found: E %0.2f, pT %0.2f, eta %+0.2f, pz %+0.2f, "
-        //    //"multiClus n %d, multiClus E %0.2f, "
-        //    "\n",
-        //    eventNumber,
-        //    genEl_4mom.e(), genEl_4mom.perp(), genEl_4mom.eta(), genEl_4mom.pz()
-        //    //v_genEl_multiClus_n.at(iGenEl),
-        //    //v_genEl_multiClus_E.at(iGenEl)
-        //);
-        
-        treeOutput->v_genEl_multiClus_n.push_back(v_genEl_multiClus_n.at(iGenEl));
-        
-        treeOutput->v_genEl_nearestMultiClusEnRatio.push_back(v_genEl_nearestMultiClus_E.at(iGenEl) / genEl_4mom.e());
-        treeOutput->v_genEl_multiClusEnRatio.push_back(v_genEl_multiClus_E.at(iGenEl) / genEl_4mom.e());
-    }
+    //std::vector <int> v_genEl_multiClus_n(v_genEl_4mom.size(), 0);
+    //std::vector <double> v_genEl_multiClus_E(v_genEl_4mom.size(), 0.0);
+    //std::vector <double> v_genEl_nearestMultiClus_E(v_genEl_4mom.size(), 0.0);
+    //
+    //std::vector <int> v_multiClus_genElIndex(v_TICLmultiCluster->size(), -1);
+    //
+    //for(int iGenEl = 0; iGenEl < (int) v_genEl_4mom.size(); iGenEl++)
+    //{
+    //    CLHEP::HepLorentzVector genEl_4mom = v_genEl_4mom.at(iGenEl);
+    //    
+    //    double deltaR_min = 9999;
+    //    
+    //    for(int iTICLmultiCluster = 0; iTICLmultiCluster < (int) v_TICLmultiCluster->size(); iTICLmultiCluster++)
+    //    {
+    //        reco::HGCalMultiCluster TICLmultiCluster = v_TICLmultiCluster->at(iTICLmultiCluster);
+    //        
+    //        CLHEP::Hep3Vector TICLmultiCluster_3vec(
+    //            TICLmultiCluster.x(),
+    //            TICLmultiCluster.y(),
+    //            TICLmultiCluster.z()
+    //        );
+    //        
+    //        double deltaR = genEl_4mom.v().deltaR(TICLmultiCluster_3vec);
+    //        
+    //        if(deltaR < 0.4)
+    //        {
+    //            v_genEl_multiClus_n.at(iGenEl)++;
+    //            v_genEl_multiClus_E.at(iGenEl) += TICLmultiCluster.energy();
+    //            
+    //            v_multiClus_genElIndex.at(iTICLmultiCluster) = iGenEl;
+    //            
+    //            if(deltaR < deltaR_min)
+    //            {
+    //                deltaR_min = deltaR;
+    //                
+    //                v_genEl_nearestMultiClus_E.at(iGenEl) = TICLmultiCluster.energy();
+    //            }
+    //        }
+    //    }
+    //    
+    //    //printf(
+    //    //    "[%llu] "
+    //    //    "Gen-ele found: E %0.2f, pT %0.2f, eta %+0.2f, pz %+0.2f, "
+    //    //    //"multiClus n %d, multiClus E %0.2f, "
+    //    //    "\n",
+    //    //    eventNumber,
+    //    //    genEl_4mom.e(), genEl_4mom.perp(), genEl_4mom.eta(), genEl_4mom.pz()
+    //    //    //v_genEl_multiClus_n.at(iGenEl),
+    //    //    //v_genEl_multiClus_E.at(iGenEl)
+    //    //);
+    //    
+    //    treeOutput->v_genEl_multiClus_n.push_back(v_genEl_multiClus_n.at(iGenEl));
+    //    
+    //    treeOutput->v_genEl_nearestMultiClusEnRatio.push_back(v_genEl_nearestMultiClus_E.at(iGenEl) / genEl_4mom.e());
+    //    treeOutput->v_genEl_multiClusEnRatio.push_back(v_genEl_multiClus_E.at(iGenEl) / genEl_4mom.e());
+    //}
     
     
     // Tracksters
@@ -715,678 +817,680 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     // Multiclusters
     int nTICLmultiCluster = v_TICLmultiCluster->size();
     
-    int multiClus1_HGCalEEP_idx = -1;
-    int multiClus1_HGCalEEM_idx = -1;
-    
-    double multiClus_HGCalEEP_meanX = 0;
-    double multiClus_HGCalEEP_meanY = 0;
-    double multiClus_HGCalEEP_meanZ = 0;
-    double multiClus_HGCalEEP_meanEta = 0;
-    double multiClus_HGCalEEP_meanPhi = 0;
-    
-    double multiClus_HGCalEEM_meanX = 0;
-    double multiClus_HGCalEEM_meanY = 0;
-    double multiClus_HGCalEEM_meanZ = 0;
-    double multiClus_HGCalEEM_meanEta = 0;
-    double multiClus_HGCalEEM_meanPhi = 0;
-    
-    double multiClus_HGCalEEP_totE = 0;
-    double multiClus_HGCalEEP_totET = 0;
-    
-    double multiClus_HGCalEEM_totE = 0;
-    double multiClus_HGCalEEM_totET = 0;
-    
-    std::vector <DetId> v_detId_temp;
-    
-    std::vector <std::vector <double> > v_clusterInfo_temp;
-    
-    // <pointer, count>
-    std::map <const reco::CaloCluster*, int> m_TICLmultiClus_clus;
-    
-    int multiClust_clust_startIndex = 0;
-    
-    for(int iTICLmultiCluster = 0; iTICLmultiCluster < nTICLmultiCluster; iTICLmultiCluster++)
-    {
-        reco::HGCalMultiCluster TICLmultiCluster = v_TICLmultiCluster->at(iTICLmultiCluster);
-        
-        ticl::Trackster TICLtrackster = v_TICLtrackster->at(iTICLmultiCluster);
-        
-        CLHEP::Hep3Vector TICLmultiCluster_3vec(
-            TICLmultiCluster.x(),
-            TICLmultiCluster.y(),
-            TICLmultiCluster.z()
-        );
-        
-        treeOutput->multiClus_n++;
-        
-        treeOutput->v_multiClus_genElIndex.push_back(v_multiClus_genElIndex.at(iTICLmultiCluster));
-        treeOutput->v_multiClus_E.push_back(TICLmultiCluster.energy());
-        treeOutput->v_multiClus_x.push_back(TICLmultiCluster.x());
-        treeOutput->v_multiClus_y.push_back(TICLmultiCluster.y());
-        treeOutput->v_multiClus_z.push_back(TICLmultiCluster.z());
-        treeOutput->v_multiClus_eta.push_back(TICLmultiCluster_3vec.eta());
-        treeOutput->v_multiClus_phi.push_back(TICLmultiCluster_3vec.phi());
-        treeOutput->v_multiClus_ET.push_back(TICLmultiCluster.energy() * sin(TICLmultiCluster_3vec.theta()));
-        
-        //treeOutput->v_multiClus_corrE.push_back(TICLtrackster.regressed_energy);
-        //treeOutput->v_multiClus_corrET.push_back(TICLtrackster.regressed_energy * sin(TICLmultiCluster_3vec.theta()));
-        
-        //auto tup_TICLmultiClus_PCAinfo = Common::getMultiClusterPCAinfo(
-        //    &TICLmultiCluster,
-        //    m_recHit,
-        //    &recHitTools,
-        //    debug
-        //);
-        
-        //if(iTICLmultiCluster < 2)
-        //{
-        //    printf(
-        //        "[%llu] "
-        //        "Multi-cluster %d/%d: \n",
-        //        eventNumber,
-        //        iTICLmultiCluster+1, nTICLmultiCluster
-        //    );
-        //    
-        //    std::get<0>(tup_TICLmultiClus_PCAinfo).Print();
-        //    std::get<1>(tup_TICLmultiClus_PCAinfo).Print();
-        //    std::get<2>(tup_TICLmultiClus_PCAinfo).Print();
-        //}
-        
-        //TMatrixD mat_TICLmultiClus_rEtaPhiCov = std::get<0>(tup_TICLmultiClus_PCAinfo);
-        //TVectorD v_multiClus_rEtaPhiCov_eigVal = std::get<2>(tup_TICLmultiClus_PCAinfo);
-        //
-        //treeOutput->v_multiClus_sigma2rr.push_back(    mat_TICLmultiClus_rEtaPhiCov(0, 0));
-        //treeOutput->v_multiClus_sigma2etaEta.push_back(mat_TICLmultiClus_rEtaPhiCov(1, 1));
-        //treeOutput->v_multiClus_sigma2phiPhi.push_back(mat_TICLmultiClus_rEtaPhiCov(2, 2));
-        //
-        //treeOutput->v_multiClus_sigma2rEta.push_back(  mat_TICLmultiClus_rEtaPhiCov(0, 1));
-        //treeOutput->v_multiClus_sigma2rPhi.push_back(  mat_TICLmultiClus_rEtaPhiCov(0, 2));
-        //treeOutput->v_multiClus_sigma2etaPhi.push_back(mat_TICLmultiClus_rEtaPhiCov(1, 2));
-        //
-        //treeOutput->v_multiClus_sigma2diag1.push_back(v_multiClus_rEtaPhiCov_eigVal(0));
-        //treeOutput->v_multiClus_sigma2diag2.push_back(v_multiClus_rEtaPhiCov_eigVal(1));
-        //treeOutput->v_multiClus_sigma2diag3.push_back(v_multiClus_rEtaPhiCov_eigVal(2));
-        
-        treeOutput->v_multiClus_EsortedIndex.push_back(iTICLmultiCluster);
-        
-        
-        if(TICLmultiCluster.z() > 0)
-        {
-            multiClus_HGCalEEP_meanX += TICLmultiCluster.energy() * TICLmultiCluster.x();
-            multiClus_HGCalEEP_meanY += TICLmultiCluster.energy() * TICLmultiCluster.y();
-            multiClus_HGCalEEP_meanZ += TICLmultiCluster.energy() * TICLmultiCluster.z();
-            
-            multiClus_HGCalEEP_meanEta += TICLmultiCluster.energy() * TICLmultiCluster_3vec.eta();
-            multiClus_HGCalEEP_meanPhi += TICLmultiCluster.energy() * TICLmultiCluster_3vec.phi();
-            
-            multiClus_HGCalEEP_totE += TICLmultiCluster.energy();
-            multiClus_HGCalEEP_totET += TICLmultiCluster.energy() * sin(TICLmultiCluster_3vec.theta());
-            
-            treeOutput->v_multiClus_HGCalEEP_EsortedIndex.push_back(iTICLmultiCluster);
-            
-            
-            if(multiClus1_HGCalEEP_idx < 0 || TICLmultiCluster.energy() > v_TICLmultiCluster->at(multiClus1_HGCalEEP_idx).energy())
-            {
-                multiClus1_HGCalEEP_idx = iTICLmultiCluster;
-            }
-        }
-        
-        else
-        {
-            multiClus_HGCalEEM_meanX += TICLmultiCluster.energy() * TICLmultiCluster.x();
-            multiClus_HGCalEEM_meanY += TICLmultiCluster.energy() * TICLmultiCluster.y();
-            multiClus_HGCalEEM_meanZ += TICLmultiCluster.energy() * TICLmultiCluster.z();
-            
-            multiClus_HGCalEEM_meanEta += TICLmultiCluster.energy() * TICLmultiCluster_3vec.eta();
-            multiClus_HGCalEEM_meanPhi += TICLmultiCluster.energy() * TICLmultiCluster_3vec.phi();
-            
-            multiClus_HGCalEEM_totE += TICLmultiCluster.energy();
-            multiClus_HGCalEEM_totET += TICLmultiCluster.energy() * sin(TICLmultiCluster_3vec.theta());
-            
-            treeOutput->v_multiClus_HGCalEEM_EsortedIndex.push_back(iTICLmultiCluster);
-            
-            
-            if(multiClus1_HGCalEEM_idx < 0 || TICLmultiCluster.energy() > v_TICLmultiCluster->at(multiClus1_HGCalEEM_idx).energy())
-            {
-                multiClus1_HGCalEEM_idx = iTICLmultiCluster;
-            }
-        }
-        
-        edm::PtrVector <reco::CaloCluster> v_cluster = TICLmultiCluster.clusters();
-        
-        int nCluster = v_cluster.size();
-        treeOutput->v_multiClus_clus_n.push_back(nCluster);
-        
-        treeOutput->v_multiClus_clus_startIndex.push_back(multiClust_clust_startIndex);
-        multiClust_clust_startIndex += nCluster;
-        
-        for(int iCluster = 0; iCluster < nCluster; iCluster++)
-        {
-            const reco::CaloCluster *cluster = v_cluster[iCluster].get();
-            std::vector <std::pair <DetId, float> > v_hit = cluster->hitsAndFractions();
-            
-            CLHEP::Hep3Vector cluster_3vec(
-                cluster->x(),
-                cluster->y(),
-                cluster->z()
-            );
-            
-            bool isClusterRecorded = false;
-            
-            treeOutput->v_multiClus_clus_E.push_back(cluster->energy());
-            treeOutput->v_multiClus_clus_x.push_back(cluster->x());
-            treeOutput->v_multiClus_clus_y.push_back(cluster->y());
-            treeOutput->v_multiClus_clus_z.push_back(cluster->z());
-            treeOutput->v_multiClus_clus_eta.push_back(cluster->eta());
-            treeOutput->v_multiClus_clus_phi.push_back(cluster->phi());
-            treeOutput->v_multiClus_clus_ET.push_back(cluster->energy() * sin(cluster_3vec.theta()));
-            
-            treeOutput->v_multiClus_clus_nHit.push_back(cluster->size());
-            
-            //for(int iRecordedClus = 0; iRecordedClus < (int) v_clusterInfo_temp.size(); iRecordedClus++)
-            //{
-            //    if(
-            //        v_clusterInfo_temp.at(iRecordedClus).at(0) == cluster->energy() &&
-            //        v_clusterInfo_temp.at(iRecordedClus).at(1) == cluster->x() &&
-            //        v_clusterInfo_temp.at(iRecordedClus).at(2) == cluster->y() &&
-            //        v_clusterInfo_temp.at(iRecordedClus).at(3) == cluster->z()
-            //    )
-            //    {
-            //        isClusterRecorded = true;
-            //        break;
-            //    }
-            //}
-            //
-            //if(isClusterRecorded)
-            //{
-            //    printf(
-            //        "[%llu] Cluster recorded before (%d): %0.2f, %0.2f, %0.2f, %0.2f \n",
-            //        eventNumber,
-            //        m_TICLmultiClus_clus.find(cluster) != m_TICLmultiClus_clus.end(),
-            //        cluster->energy(),
-            //        cluster->x(),
-            //        cluster->y(),
-            //        cluster->z()
-            //    );
-            //}
-            //
-            //else
-            //{
-            //    v_clusterInfo_temp.push_back({
-            //        cluster->energy(),
-            //        cluster->x(),
-            //        cluster->y(),
-            //        cluster->z()
-            //    });
-            //}
-            
-            if(m_TICLmultiClus_clus.find(cluster) == m_TICLmultiClus_clus.end())
-            {
-                m_TICLmultiClus_clus[cluster] = 1;
-            }
-            
-            else
-            {
-                m_TICLmultiClus_clus[cluster]++;
-            }
-            
-            int nHit = v_hit.size();
-            
-            for(int iHit = 0; iHit < nHit; iHit++)
-            {
-                std::pair <DetId, float> hit = v_hit.at(iHit);
-                
-                //HGCEEDetId detId(hit.first);
-                HGCalDetId detId(hit.first);
-                //HGCEEDetId detId(HGCalDetId(hit.first).rawId());
-                
-                //if(!detId.isHGCal())
-                //{
-                //    continue;
-                //}
-                
-                //if(!detId.isEE())
-                //{
-                //    continue;
-                //}
-                
-                // int layer = detId.layer();
-                int layer = recHitTools.getLayer(hit.first); // Start from 1
-                
-                //int zside = detId.zside();
-                int zside = recHitTools.zside(hit.first);
-                
-                if(iHit == 0)
-                {
-                    treeOutput->v_multiClus_clus_layer.push_back(layer);
-                }
-                
-                break;
-                
-                //bool isDetIdRecorded = false;
-                //
-                //for(int iDetId = 0; iDetId < (int) v_detId_temp.size(); iDetId++)
-                //{
-                //    if(hit.first == v_detId_temp.at(iDetId))
-                //    {
-                //        isDetIdRecorded = true;
-                //        break;
-                //    }
-                //}
-                //
-                //if(isDetIdRecorded)
-                //{
-                //    printf("[%llu] Hit recorded before: raw-detId %ud \n", eventNumber, hit.first.rawId());
-                //}
-                //
-                //else
-                //{
-                //    v_detId_temp.push_back(hit.first);
-                //}
-                
-                //if(v_multiClus_genElIndex.at(iTICLmultiCluster) >= 0)
-                //{
-                //    printf(
-                //        "[%llu] "
-                //        "multiCluster %d/%d: "
-                //        "cluster %d/%d: "
-                //        "hit %d/%d: "
-                //        "raw detId %ud, "
-                //        "layer %d, "
-                //        "zside %+d, "
-                //        "fraction %0.2f, "
-                //        "ele z %+0.2f, "
-                //        "\n",
-                //        eventNumber,
-                //        iTICLmultiCluster+1, nTICLmultiCluster,
-                //        iCluster+1, nCluster,
-                //        iHit+1, nHit,
-                //        hit.first.rawId(),
-                //        layer,
-                //        zside,
-                //        hit.second,
-                //        v_genEl_4mom.at(v_multiClus_genElIndex.at(iTICLmultiCluster)).pz()
-                //    );
-                //}
-                
-                
-                //if(detId.layer() < minLayer)
-                //{
-                //    minLayer = detId.layer();
-                //}
-                //
-                //if(detId.layer() > maxLayer)
-                //{
-                //    maxLayer = detId.layer();
-                //}
-            }
-        }
-    }
+    //int multiClus1_HGCalEEP_idx = -1;
+    //int multiClus1_HGCalEEM_idx = -1;
+    //
+    //double multiClus_HGCalEEP_meanX = 0;
+    //double multiClus_HGCalEEP_meanY = 0;
+    //double multiClus_HGCalEEP_meanZ = 0;
+    //double multiClus_HGCalEEP_meanEta = 0;
+    //double multiClus_HGCalEEP_meanPhi = 0;
+    //
+    //double multiClus_HGCalEEM_meanX = 0;
+    //double multiClus_HGCalEEM_meanY = 0;
+    //double multiClus_HGCalEEM_meanZ = 0;
+    //double multiClus_HGCalEEM_meanEta = 0;
+    //double multiClus_HGCalEEM_meanPhi = 0;
+    //
+    //double multiClus_HGCalEEP_totE = 0;
+    //double multiClus_HGCalEEP_totET = 0;
+    //
+    //double multiClus_HGCalEEM_totE = 0;
+    //double multiClus_HGCalEEM_totET = 0;
+    //
+    //std::vector <DetId> v_detId_temp;
+    //
+    //std::vector <std::vector <double> > v_clusterInfo_temp;
+    //
+    //// <pointer, count>
+    //std::map <const reco::CaloCluster*, int> m_TICLmultiClus_clus;
+    //
+    //int multiClust_clust_startIndex = 0;
+    //
+    //for(int iTICLmultiCluster = 0; iTICLmultiCluster < nTICLmultiCluster; iTICLmultiCluster++)
+    //{
+    //    reco::HGCalMultiCluster TICLmultiCluster = v_TICLmultiCluster->at(iTICLmultiCluster);
+    //    
+    //    ticl::Trackster TICLtrackster = v_TICLtrackster->at(iTICLmultiCluster);
+    //    
+    //    CLHEP::Hep3Vector TICLmultiCluster_3vec(
+    //        TICLmultiCluster.x(),
+    //        TICLmultiCluster.y(),
+    //        TICLmultiCluster.z()
+    //    );
+    //    
+    //    treeOutput->multiClus_n++;
+    //    
+    //    treeOutput->v_multiClus_genElIndex.push_back(v_multiClus_genElIndex.at(iTICLmultiCluster));
+    //    treeOutput->v_multiClus_E.push_back(TICLmultiCluster.energy());
+    //    treeOutput->v_multiClus_x.push_back(TICLmultiCluster.x());
+    //    treeOutput->v_multiClus_y.push_back(TICLmultiCluster.y());
+    //    treeOutput->v_multiClus_z.push_back(TICLmultiCluster.z());
+    //    treeOutput->v_multiClus_eta.push_back(TICLmultiCluster_3vec.eta());
+    //    treeOutput->v_multiClus_phi.push_back(TICLmultiCluster_3vec.phi());
+    //    treeOutput->v_multiClus_ET.push_back(TICLmultiCluster.energy() * sin(TICLmultiCluster_3vec.theta()));
+    //    
+    //    //treeOutput->v_multiClus_corrE.push_back(TICLtrackster.regressed_energy);
+    //    //treeOutput->v_multiClus_corrET.push_back(TICLtrackster.regressed_energy * sin(TICLmultiCluster_3vec.theta()));
+    //    
+    //    //auto tup_TICLmultiClus_PCAinfo = Common::getMultiClusterPCAinfo(
+    //    //    &TICLmultiCluster,
+    //    //    m_recHit,
+    //    //    &recHitTools,
+    //    //    debug
+    //    //);
+    //    
+    //    //if(iTICLmultiCluster < 2)
+    //    //{
+    //    //    printf(
+    //    //        "[%llu] "
+    //    //        "Multi-cluster %d/%d: \n",
+    //    //        eventNumber,
+    //    //        iTICLmultiCluster+1, nTICLmultiCluster
+    //    //    );
+    //    //    
+    //    //    std::get<0>(tup_TICLmultiClus_PCAinfo).Print();
+    //    //    std::get<1>(tup_TICLmultiClus_PCAinfo).Print();
+    //    //    std::get<2>(tup_TICLmultiClus_PCAinfo).Print();
+    //    //}
+    //    
+    //    //TMatrixD mat_TICLmultiClus_rEtaPhiCov = std::get<0>(tup_TICLmultiClus_PCAinfo);
+    //    //TVectorD v_multiClus_rEtaPhiCov_eigVal = std::get<2>(tup_TICLmultiClus_PCAinfo);
+    //    //
+    //    //treeOutput->v_multiClus_sigma2rr.push_back(    mat_TICLmultiClus_rEtaPhiCov(0, 0));
+    //    //treeOutput->v_multiClus_sigma2etaEta.push_back(mat_TICLmultiClus_rEtaPhiCov(1, 1));
+    //    //treeOutput->v_multiClus_sigma2phiPhi.push_back(mat_TICLmultiClus_rEtaPhiCov(2, 2));
+    //    //
+    //    //treeOutput->v_multiClus_sigma2rEta.push_back(  mat_TICLmultiClus_rEtaPhiCov(0, 1));
+    //    //treeOutput->v_multiClus_sigma2rPhi.push_back(  mat_TICLmultiClus_rEtaPhiCov(0, 2));
+    //    //treeOutput->v_multiClus_sigma2etaPhi.push_back(mat_TICLmultiClus_rEtaPhiCov(1, 2));
+    //    //
+    //    //treeOutput->v_multiClus_sigma2diag1.push_back(v_multiClus_rEtaPhiCov_eigVal(0));
+    //    //treeOutput->v_multiClus_sigma2diag2.push_back(v_multiClus_rEtaPhiCov_eigVal(1));
+    //    //treeOutput->v_multiClus_sigma2diag3.push_back(v_multiClus_rEtaPhiCov_eigVal(2));
+    //    
+    //    treeOutput->v_multiClus_EsortedIndex.push_back(iTICLmultiCluster);
+    //    
+    //    
+    //    if(TICLmultiCluster.z() > 0)
+    //    {
+    //        multiClus_HGCalEEP_meanX += TICLmultiCluster.energy() * TICLmultiCluster.x();
+    //        multiClus_HGCalEEP_meanY += TICLmultiCluster.energy() * TICLmultiCluster.y();
+    //        multiClus_HGCalEEP_meanZ += TICLmultiCluster.energy() * TICLmultiCluster.z();
+    //        
+    //        multiClus_HGCalEEP_meanEta += TICLmultiCluster.energy() * TICLmultiCluster_3vec.eta();
+    //        multiClus_HGCalEEP_meanPhi += TICLmultiCluster.energy() * TICLmultiCluster_3vec.phi();
+    //        
+    //        multiClus_HGCalEEP_totE += TICLmultiCluster.energy();
+    //        multiClus_HGCalEEP_totET += TICLmultiCluster.energy() * sin(TICLmultiCluster_3vec.theta());
+    //        
+    //        treeOutput->v_multiClus_HGCalEEP_EsortedIndex.push_back(iTICLmultiCluster);
+    //        
+    //        
+    //        if(multiClus1_HGCalEEP_idx < 0 || TICLmultiCluster.energy() > v_TICLmultiCluster->at(multiClus1_HGCalEEP_idx).energy())
+    //        {
+    //            multiClus1_HGCalEEP_idx = iTICLmultiCluster;
+    //        }
+    //    }
+    //    
+    //    else
+    //    {
+    //        multiClus_HGCalEEM_meanX += TICLmultiCluster.energy() * TICLmultiCluster.x();
+    //        multiClus_HGCalEEM_meanY += TICLmultiCluster.energy() * TICLmultiCluster.y();
+    //        multiClus_HGCalEEM_meanZ += TICLmultiCluster.energy() * TICLmultiCluster.z();
+    //        
+    //        multiClus_HGCalEEM_meanEta += TICLmultiCluster.energy() * TICLmultiCluster_3vec.eta();
+    //        multiClus_HGCalEEM_meanPhi += TICLmultiCluster.energy() * TICLmultiCluster_3vec.phi();
+    //        
+    //        multiClus_HGCalEEM_totE += TICLmultiCluster.energy();
+    //        multiClus_HGCalEEM_totET += TICLmultiCluster.energy() * sin(TICLmultiCluster_3vec.theta());
+    //        
+    //        treeOutput->v_multiClus_HGCalEEM_EsortedIndex.push_back(iTICLmultiCluster);
+    //        
+    //        
+    //        if(multiClus1_HGCalEEM_idx < 0 || TICLmultiCluster.energy() > v_TICLmultiCluster->at(multiClus1_HGCalEEM_idx).energy())
+    //        {
+    //            multiClus1_HGCalEEM_idx = iTICLmultiCluster;
+    //        }
+    //    }
+    //    
+    //    edm::PtrVector <reco::CaloCluster> v_cluster = TICLmultiCluster.clusters();
+    //    
+    //    int nCluster = v_cluster.size();
+    //    treeOutput->v_multiClus_clus_n.push_back(nCluster);
+    //    
+    //    treeOutput->v_multiClus_clus_startIndex.push_back(multiClust_clust_startIndex);
+    //    multiClust_clust_startIndex += nCluster;
+    //    
+    //    for(int iCluster = 0; iCluster < nCluster; iCluster++)
+    //    {
+    //        const reco::CaloCluster *cluster = v_cluster[iCluster].get();
+    //        std::vector <std::pair <DetId, float> > v_hit = cluster->hitsAndFractions();
+    //        
+    //        CLHEP::Hep3Vector cluster_3vec(
+    //            cluster->x(),
+    //            cluster->y(),
+    //            cluster->z()
+    //        );
+    //        
+    //        bool isClusterRecorded = false;
+    //        
+    //        treeOutput->v_multiClus_clus_E.push_back(cluster->energy());
+    //        treeOutput->v_multiClus_clus_x.push_back(cluster->x());
+    //        treeOutput->v_multiClus_clus_y.push_back(cluster->y());
+    //        treeOutput->v_multiClus_clus_z.push_back(cluster->z());
+    //        treeOutput->v_multiClus_clus_eta.push_back(cluster->eta());
+    //        treeOutput->v_multiClus_clus_phi.push_back(cluster->phi());
+    //        treeOutput->v_multiClus_clus_ET.push_back(cluster->energy() * sin(cluster_3vec.theta()));
+    //        
+    //        treeOutput->v_multiClus_clus_nHit.push_back(cluster->size());
+    //        
+    //        //for(int iRecordedClus = 0; iRecordedClus < (int) v_clusterInfo_temp.size(); iRecordedClus++)
+    //        //{
+    //        //    if(
+    //        //        v_clusterInfo_temp.at(iRecordedClus).at(0) == cluster->energy() &&
+    //        //        v_clusterInfo_temp.at(iRecordedClus).at(1) == cluster->x() &&
+    //        //        v_clusterInfo_temp.at(iRecordedClus).at(2) == cluster->y() &&
+    //        //        v_clusterInfo_temp.at(iRecordedClus).at(3) == cluster->z()
+    //        //    )
+    //        //    {
+    //        //        isClusterRecorded = true;
+    //        //        break;
+    //        //    }
+    //        //}
+    //        //
+    //        //if(isClusterRecorded)
+    //        //{
+    //        //    printf(
+    //        //        "[%llu] Cluster recorded before (%d): %0.2f, %0.2f, %0.2f, %0.2f \n",
+    //        //        eventNumber,
+    //        //        m_TICLmultiClus_clus.find(cluster) != m_TICLmultiClus_clus.end(),
+    //        //        cluster->energy(),
+    //        //        cluster->x(),
+    //        //        cluster->y(),
+    //        //        cluster->z()
+    //        //    );
+    //        //}
+    //        //
+    //        //else
+    //        //{
+    //        //    v_clusterInfo_temp.push_back({
+    //        //        cluster->energy(),
+    //        //        cluster->x(),
+    //        //        cluster->y(),
+    //        //        cluster->z()
+    //        //    });
+    //        //}
+    //        
+    //        if(m_TICLmultiClus_clus.find(cluster) == m_TICLmultiClus_clus.end())
+    //        {
+    //            m_TICLmultiClus_clus[cluster] = 1;
+    //        }
+    //        
+    //        else
+    //        {
+    //            m_TICLmultiClus_clus[cluster]++;
+    //        }
+    //        
+    //        int nHit = v_hit.size();
+    //        
+    //        for(int iHit = 0; iHit < nHit; iHit++)
+    //        {
+    //            std::pair <DetId, float> hit = v_hit.at(iHit);
+    //            
+    //            //HGCEEDetId detId(hit.first);
+    //            HGCalDetId detId(hit.first);
+    //            //HGCEEDetId detId(HGCalDetId(hit.first).rawId());
+    //            
+    //            //if(!detId.isHGCal())
+    //            //{
+    //            //    continue;
+    //            //}
+    //            
+    //            //if(!detId.isEE())
+    //            //{
+    //            //    continue;
+    //            //}
+    //            
+    //            // int layer = detId.layer();
+    //            int layer = recHitTools.getLayer(hit.first); // Start from 1
+    //            
+    //            //int zside = detId.zside();
+    //            int zside = recHitTools.zside(hit.first);
+    //            
+    //            if(iHit == 0)
+    //            {
+    //                treeOutput->v_multiClus_clus_layer.push_back(layer);
+    //            }
+    //            
+    //            break;
+    //            
+    //            //bool isDetIdRecorded = false;
+    //            //
+    //            //for(int iDetId = 0; iDetId < (int) v_detId_temp.size(); iDetId++)
+    //            //{
+    //            //    if(hit.first == v_detId_temp.at(iDetId))
+    //            //    {
+    //            //        isDetIdRecorded = true;
+    //            //        break;
+    //            //    }
+    //            //}
+    //            //
+    //            //if(isDetIdRecorded)
+    //            //{
+    //            //    printf("[%llu] Hit recorded before: raw-detId %ud \n", eventNumber, hit.first.rawId());
+    //            //}
+    //            //
+    //            //else
+    //            //{
+    //            //    v_detId_temp.push_back(hit.first);
+    //            //}
+    //            
+    //            //if(v_multiClus_genElIndex.at(iTICLmultiCluster) >= 0)
+    //            //{
+    //            //    printf(
+    //            //        "[%llu] "
+    //            //        "multiCluster %d/%d: "
+    //            //        "cluster %d/%d: "
+    //            //        "hit %d/%d: "
+    //            //        "raw detId %ud, "
+    //            //        "layer %d, "
+    //            //        "zside %+d, "
+    //            //        "fraction %0.2f, "
+    //            //        "ele z %+0.2f, "
+    //            //        "\n",
+    //            //        eventNumber,
+    //            //        iTICLmultiCluster+1, nTICLmultiCluster,
+    //            //        iCluster+1, nCluster,
+    //            //        iHit+1, nHit,
+    //            //        hit.first.rawId(),
+    //            //        layer,
+    //            //        zside,
+    //            //        hit.second,
+    //            //        v_genEl_4mom.at(v_multiClus_genElIndex.at(iTICLmultiCluster)).pz()
+    //            //    );
+    //            //}
+    //            
+    //            
+    //            //if(detId.layer() < minLayer)
+    //            //{
+    //            //    minLayer = detId.layer();
+    //            //}
+    //            //
+    //            //if(detId.layer() > maxLayer)
+    //            //{
+    //            //    maxLayer = detId.layer();
+    //            //}
+    //        }
+    //    }
+    //}
     
     //printf("TICL_EEP_totE %0.2f, TICL_EEM_totE %0.2f, \n", multiClus_HGCalEEP_totE, multiClus_HGCalEEM_totE);
     
     
-    // Sort the indices based on energy
-    std::sort(
-        treeOutput->v_multiClus_EsortedIndex.begin(), treeOutput->v_multiClus_EsortedIndex.end(),
-        [&](int iEle1, int iEle2)
-        {
-            return (treeOutput->v_multiClus_E[iEle1] > treeOutput->v_multiClus_E[iEle2]);
-        }
-    );
-    
-    std::sort(
-        treeOutput->v_multiClus_HGCalEEP_EsortedIndex.begin(), treeOutput->v_multiClus_HGCalEEP_EsortedIndex.end(),
-        [&](int iEle1, int iEle2)
-        {
-            return (treeOutput->v_multiClus_E[iEle1] > treeOutput->v_multiClus_E[iEle2]);
-        }
-    );
-    
-    std::sort(
-        treeOutput->v_multiClus_HGCalEEM_EsortedIndex.begin(), treeOutput->v_multiClus_HGCalEEM_EsortedIndex.end(),
-        [&](int iEle1, int iEle2)
-        {
-            return (treeOutput->v_multiClus_E[iEle1] > treeOutput->v_multiClus_E[iEle2]);
-        }
-    );
-    
-    
-    // Check if HGCAL layer clusters are used by TICL
-    for(int iLayerClus = 0; iLayerClus < nLayerClus; iLayerClus++)
-    {
-        const reco::CaloCluster *cluster = &(v_HGCALlayerCluster->at(iLayerClus));
-        
-        bool HGCALlayerClus_isInMultiClus = false;
-        
-        if(m_TICLmultiClus_clus.find(cluster) != m_TICLmultiClus_clus.end())
-        {
-            //printf(
-            //    "[%llu] HGCAL layer cluster %d used by TICL: "
-            //    "E %0.2e (%0.2e), "
-            //    "x %0.2e (%0.2e), "
-            //    "y %0.2e (%0.2e), "
-            //    "z %0.2e (%0.2e), "
-            //    "\n",
-            //    eventNumber,
-            //    iLayerClus+1,
-            //    cluster->energy(), m_TICLmultiClus_clus.find(cluster)->first->energy(),
-            //    cluster->x(), m_TICLmultiClus_clus.find(cluster)->first->x(),
-            //    cluster->y(), m_TICLmultiClus_clus.find(cluster)->first->y(),
-            //    cluster->z(), m_TICLmultiClus_clus.find(cluster)->first->z()
-            //);
-            
-            HGCALlayerClus_isInMultiClus = true;
-        }
-        
-        treeOutput->v_HGCALlayerClus_isInMultiClus.push_back(HGCALlayerClus_isInMultiClus);
-    }
+    //// Sort the indices based on energy
+    //std::sort(
+    //    treeOutput->v_multiClus_EsortedIndex.begin(), treeOutput->v_multiClus_EsortedIndex.end(),
+    //    [&](int iEle1, int iEle2)
+    //    {
+    //        return (treeOutput->v_multiClus_E[iEle1] > treeOutput->v_multiClus_E[iEle2]);
+    //    }
+    //);
+    //
+    //std::sort(
+    //    treeOutput->v_multiClus_HGCalEEP_EsortedIndex.begin(), treeOutput->v_multiClus_HGCalEEP_EsortedIndex.end(),
+    //    [&](int iEle1, int iEle2)
+    //    {
+    //        return (treeOutput->v_multiClus_E[iEle1] > treeOutput->v_multiClus_E[iEle2]);
+    //    }
+    //);
+    //
+    //std::sort(
+    //    treeOutput->v_multiClus_HGCalEEM_EsortedIndex.begin(), treeOutput->v_multiClus_HGCalEEM_EsortedIndex.end(),
+    //    [&](int iEle1, int iEle2)
+    //    {
+    //        return (treeOutput->v_multiClus_E[iEle1] > treeOutput->v_multiClus_E[iEle2]);
+    //    }
+    //);
+    //
+    //
+    //// Check if HGCAL layer clusters are used by TICL
+    //for(int iLayerClus = 0; iLayerClus < nLayerClus; iLayerClus++)
+    //{
+    //    const reco::CaloCluster *cluster = &(v_HGCALlayerCluster->at(iLayerClus));
+    //    
+    //    bool HGCALlayerClus_isInMultiClus = false;
+    //    
+    //    if(m_TICLmultiClus_clus.find(cluster) != m_TICLmultiClus_clus.end())
+    //    {
+    //        //printf(
+    //        //    "[%llu] HGCAL layer cluster %d used by TICL: "
+    //        //    "E %0.2e (%0.2e), "
+    //        //    "x %0.2e (%0.2e), "
+    //        //    "y %0.2e (%0.2e), "
+    //        //    "z %0.2e (%0.2e), "
+    //        //    "\n",
+    //        //    eventNumber,
+    //        //    iLayerClus+1,
+    //        //    cluster->energy(), m_TICLmultiClus_clus.find(cluster)->first->energy(),
+    //        //    cluster->x(), m_TICLmultiClus_clus.find(cluster)->first->x(),
+    //        //    cluster->y(), m_TICLmultiClus_clus.find(cluster)->first->y(),
+    //        //    cluster->z(), m_TICLmultiClus_clus.find(cluster)->first->z()
+    //        //);
+    //        
+    //        HGCALlayerClus_isInMultiClus = true;
+    //    }
+    //    
+    //    treeOutput->v_HGCALlayerClus_isInMultiClus.push_back(HGCALlayerClus_isInMultiClus);
+    //}
     
     
     std::map <DetId, float> m_multiClus_clus_recHit;
     
     int iCluster = 0;
     
-    // TICL multicluster clusters
-    for(std::map <const reco::CaloCluster*, int>::iterator iter = m_TICLmultiClus_clus.begin(); iter != m_TICLmultiClus_clus.end(); iter++, iCluster++)
-    {
-        auto cluster = iter->first;
-        
-        CLHEP::Hep3Vector cluster_3vec(
-            cluster->x(),
-            cluster->y(),
-            cluster->z()
-        );
-        
-        treeOutput->v_multiClus_uniqueClus_E.push_back(cluster->energy());
-        treeOutput->v_multiClus_uniqueClus_x.push_back(cluster->x());
-        treeOutput->v_multiClus_uniqueClus_y.push_back(cluster->y());
-        treeOutput->v_multiClus_uniqueClus_z.push_back(cluster->z());
-        treeOutput->v_multiClus_uniqueClus_eta.push_back(cluster->eta());
-        treeOutput->v_multiClus_uniqueClus_phi.push_back(cluster->phi());
-        treeOutput->v_multiClus_uniqueClus_ET.push_back(cluster->energy() * sin(cluster_3vec.theta()));
-        
-        treeOutput->v_multiClus_uniqueClus_multiplicity.push_back(iter->second);
-        treeOutput->v_multiClus_uniqueClus_nHit.push_back(cluster->size());
-        
-        std::vector <std::pair <DetId, float> > v_hit = cluster->hitsAndFractions();
-        
-        int nHit = v_hit.size();
-        
-        for(int iHit = 0; iHit < nHit; iHit++)
-        {
-            DetId detId = v_hit.at(iHit).first;
-            double fraction = v_hit.at(iHit).second;
-            
-            if(iHit == 0)
-            {
-                treeOutput->v_multiClus_uniqueClus_layer.push_back(recHitTools.getLayer(detId));
-            }
-            
-            double isRepeating = (m_multiClus_clus_recHit.find(detId) != m_multiClus_clus_recHit.end());
-            
-            std::string repeatStr = "";
-            
-            if(isRepeating)
-            {
-                repeatStr = " (repeating)";
-            }
-            
-            else
-            {
-                m_multiClus_clus_recHit[detId] = fraction;
-            }
-            
-            //printf(
-            //    "[%llu] "
-            //    "Cluster %d/%d: "
-            //    "Hit %d/%d%s: "
-            //    "raw detId %ud, "
-            //    "fraction %0.2f, "
-            //    "\n",
-            //    eventNumber,
-            //    iCluster+1, (int) m_TICLmultiClus_clus.size(),
-            //    iHit+1, nHit, repeatStr.c_str(),
-            //    detId.rawId(),
-            //    fraction
-            //);
-        }
-    }
+    //// TICL multicluster clusters
+    //for(std::map <const reco::CaloCluster*, int>::iterator iter = m_TICLmultiClus_clus.begin(); iter != m_TICLmultiClus_clus.end(); iter++, iCluster++)
+    //{
+    //    auto cluster = iter->first;
+    //    
+    //    CLHEP::Hep3Vector cluster_3vec(
+    //        cluster->x(),
+    //        cluster->y(),
+    //        cluster->z()
+    //    );
+    //    
+    //    treeOutput->v_multiClus_uniqueClus_E.push_back(cluster->energy());
+    //    treeOutput->v_multiClus_uniqueClus_x.push_back(cluster->x());
+    //    treeOutput->v_multiClus_uniqueClus_y.push_back(cluster->y());
+    //    treeOutput->v_multiClus_uniqueClus_z.push_back(cluster->z());
+    //    treeOutput->v_multiClus_uniqueClus_eta.push_back(cluster->eta());
+    //    treeOutput->v_multiClus_uniqueClus_phi.push_back(cluster->phi());
+    //    treeOutput->v_multiClus_uniqueClus_ET.push_back(cluster->energy() * sin(cluster_3vec.theta()));
+    //    
+    //    treeOutput->v_multiClus_uniqueClus_multiplicity.push_back(iter->second);
+    //    treeOutput->v_multiClus_uniqueClus_nHit.push_back(cluster->size());
+    //    
+    //    std::vector <std::pair <DetId, float> > v_hit = cluster->hitsAndFractions();
+    //    
+    //    int nHit = v_hit.size();
+    //    
+    //    for(int iHit = 0; iHit < nHit; iHit++)
+    //    {
+    //        DetId detId = v_hit.at(iHit).first;
+    //        double fraction = v_hit.at(iHit).second;
+    //        
+    //        if(iHit == 0)
+    //        {
+    //            treeOutput->v_multiClus_uniqueClus_layer.push_back(recHitTools.getLayer(detId));
+    //        }
+    //        
+    //        double isRepeating = (m_multiClus_clus_recHit.find(detId) != m_multiClus_clus_recHit.end());
+    //        
+    //        std::string repeatStr = "";
+    //        
+    //        if(isRepeating)
+    //        {
+    //            repeatStr = " (repeating)";
+    //        }
+    //        
+    //        else
+    //        {
+    //            m_multiClus_clus_recHit[detId] = fraction;
+    //        }
+    //        
+    //        //printf(
+    //        //    "[%llu] "
+    //        //    "Cluster %d/%d: "
+    //        //    "Hit %d/%d%s: "
+    //        //    "raw detId %ud, "
+    //        //    "fraction %0.2f, "
+    //        //    "\n",
+    //        //    eventNumber,
+    //        //    iCluster+1, (int) m_TICLmultiClus_clus.size(),
+    //        //    iHit+1, nHit, repeatStr.c_str(),
+    //        //    detId.rawId(),
+    //        //    fraction
+    //        //);
+    //    }
+    //}
+    //
+    //
+    //if(multiClus_HGCalEEP_totE > 0)
+    //{
+    //    multiClus_HGCalEEP_meanX /= multiClus_HGCalEEP_totE;
+    //    multiClus_HGCalEEP_meanY /= multiClus_HGCalEEP_totE;
+    //    multiClus_HGCalEEP_meanZ /= multiClus_HGCalEEP_totE;
+    //    
+    //    multiClus_HGCalEEP_meanEta /= multiClus_HGCalEEP_totE;
+    //    multiClus_HGCalEEP_meanPhi /= multiClus_HGCalEEP_totE;
+    //}
+    //
+    //if(multiClus_HGCalEEM_totE > 0)
+    //{
+    //    multiClus_HGCalEEM_meanX /= multiClus_HGCalEEM_totE;
+    //    multiClus_HGCalEEM_meanY /= multiClus_HGCalEEM_totE;
+    //    multiClus_HGCalEEM_meanZ /= multiClus_HGCalEEM_totE;
+    //    
+    //    multiClus_HGCalEEM_meanEta /= multiClus_HGCalEEM_totE;
+    //    multiClus_HGCalEEM_meanPhi /= multiClus_HGCalEEM_totE;
+    //}
+    //
+    //treeOutput->multiClus_HGCalEEP_meanX = multiClus_HGCalEEP_meanX;
+    //treeOutput->multiClus_HGCalEEP_meanY = multiClus_HGCalEEP_meanY;
+    //treeOutput->multiClus_HGCalEEP_meanZ = multiClus_HGCalEEP_meanZ;
+    //treeOutput->multiClus_HGCalEEP_totE = multiClus_HGCalEEP_totE;
+    //treeOutput->multiClus_HGCalEEP_totET = multiClus_HGCalEEP_totET;
+    //
+    //treeOutput->multiClus_HGCalEEM_meanX = multiClus_HGCalEEM_meanX;
+    //treeOutput->multiClus_HGCalEEM_meanY = multiClus_HGCalEEM_meanY;
+    //treeOutput->multiClus_HGCalEEM_meanZ = multiClus_HGCalEEM_meanZ;
+    //treeOutput->multiClus_HGCalEEM_totE = multiClus_HGCalEEM_totE;
+    //treeOutput->multiClus_HGCalEEM_totET = multiClus_HGCalEEM_totET;
+    //
+    //
+    //double multiClus_HGCalEEP_meanDx = 0;
+    //double multiClus_HGCalEEP_meanDy = 0;
+    //double multiClus_HGCalEEP_meanDz = 0;
+    //double multiClus_HGCalEEP_meanDetaSq = 0;
+    //double multiClus_HGCalEEP_meanDphiSq = 0;
+    //double multiClus_HGCalEEP_meanDetaDphi = 0;
+    //
+    //double multiClus_HGCalEEM_meanDx = 0;
+    //double multiClus_HGCalEEM_meanDy = 0;
+    //double multiClus_HGCalEEM_meanDz = 0;
+    //double multiClus_HGCalEEM_meanDetaSq = 0;
+    //double multiClus_HGCalEEM_meanDphiSq = 0;
+    //double multiClus_HGCalEEM_meanDetaDphi = 0;
+    //
+    //for(int iTICLmultiCluster = 0; iTICLmultiCluster < nTICLmultiCluster; iTICLmultiCluster++)
+    //{
+    //    reco::HGCalMultiCluster TICLmultiCluster = v_TICLmultiCluster->at(iTICLmultiCluster);
+    //    
+    //    CLHEP::Hep3Vector TICLmultiCluster_3vec(
+    //        TICLmultiCluster.x(),
+    //        TICLmultiCluster.y(),
+    //        TICLmultiCluster.z()
+    //    );
+    //    
+    //    double multiClus1_dX = -999;
+    //    double multiClus1_dY = -999;
+    //    double multiClus1_dZ = -999;
+    //    
+    //    double multiClus1_dEta = -999;
+    //    double multiClus1_dPhi = -999;
+    //    double multiClus1_dR   = -999;
+    //    
+    //    if(TICLmultiCluster.z() > 0)
+    //    {
+    //        double dX = fabs(TICLmultiCluster.x() - treeOutput->multiClus_HGCalEEP_meanX);
+    //        double dY = fabs(TICLmultiCluster.y() - treeOutput->multiClus_HGCalEEP_meanY);
+    //        double dZ = fabs(TICLmultiCluster.z() - treeOutput->multiClus_HGCalEEP_meanZ);
+    //        
+    //        double dEta = fabs(TICLmultiCluster_3vec.eta() - multiClus_HGCalEEP_meanEta);
+    //        double dPhi = fabs(TVector2::Phi_mpi_pi(TICLmultiCluster_3vec.phi() - multiClus_HGCalEEP_meanPhi));
+    //        
+    //        multiClus_HGCalEEP_meanDx += TICLmultiCluster.energy() * dX;
+    //        multiClus_HGCalEEP_meanDy += TICLmultiCluster.energy() * dY;
+    //        multiClus_HGCalEEP_meanDz += TICLmultiCluster.energy() * dZ;
+    //        
+    //        multiClus_HGCalEEP_meanDetaSq += TICLmultiCluster.energy() * dEta*dEta;
+    //        multiClus_HGCalEEP_meanDphiSq += TICLmultiCluster.energy() * dPhi*dPhi;
+    //        multiClus_HGCalEEP_meanDetaDphi += TICLmultiCluster.energy() * dEta*dPhi;
+    //        
+    //        treeOutput->v_multiClus_dX.push_back(dX);
+    //        treeOutput->v_multiClus_dY.push_back(dY);
+    //        treeOutput->v_multiClus_dZ.push_back(dZ);
+    //        
+    //        treeOutput->v_multiClus_dEta.push_back(dEta);
+    //        treeOutput->v_multiClus_dPhi.push_back(dPhi);
+    //        
+    //        
+    //        if(multiClus1_HGCalEEP_idx >= 0 && multiClus1_HGCalEEP_idx != iTICLmultiCluster)
+    //        {
+    //            multiClus1_dX = TICLmultiCluster.x() - v_TICLmultiCluster->at(multiClus1_HGCalEEP_idx).x();
+    //            multiClus1_dY = TICLmultiCluster.y() - v_TICLmultiCluster->at(multiClus1_HGCalEEP_idx).y();
+    //            multiClus1_dZ = TICLmultiCluster.z() - v_TICLmultiCluster->at(multiClus1_HGCalEEP_idx).z();
+    //            
+    //            multiClus1_dEta = fabs(TICLmultiCluster.eta()) - fabs(v_TICLmultiCluster->at(multiClus1_HGCalEEP_idx).eta());
+    //            multiClus1_dPhi = TVector2::Phi_mpi_pi(TICLmultiCluster.phi() - v_TICLmultiCluster->at(multiClus1_HGCalEEP_idx).phi());
+    //            multiClus1_dR   = std::sqrt(multiClus1_dX*multiClus1_dX + multiClus1_dY*multiClus1_dY + multiClus1_dZ*multiClus1_dZ);
+    //        }
+    //    }
+    //    
+    //    else
+    //    {
+    //        double dX = fabs(TICLmultiCluster.x() - treeOutput->multiClus_HGCalEEM_meanX);
+    //        double dY = fabs(TICLmultiCluster.y() - treeOutput->multiClus_HGCalEEM_meanY);
+    //        double dZ = fabs(TICLmultiCluster.z() - treeOutput->multiClus_HGCalEEM_meanZ);
+    //        
+    //        double dEta = fabs(TICLmultiCluster_3vec.eta() - multiClus_HGCalEEM_meanEta);
+    //        double dPhi = fabs(TVector2::Phi_mpi_pi(TICLmultiCluster_3vec.phi() - multiClus_HGCalEEM_meanPhi));
+    //        
+    //        multiClus_HGCalEEM_meanDx += TICLmultiCluster.energy() * dX;
+    //        multiClus_HGCalEEM_meanDy += TICLmultiCluster.energy() * dY;
+    //        multiClus_HGCalEEM_meanDz += TICLmultiCluster.energy() * dZ;
+    //        
+    //        multiClus_HGCalEEM_meanDetaSq += TICLmultiCluster.energy() * dEta*dEta;
+    //        multiClus_HGCalEEM_meanDphiSq += TICLmultiCluster.energy() * dPhi*dPhi;
+    //        multiClus_HGCalEEM_meanDetaDphi += TICLmultiCluster.energy() * dEta*dPhi;
+    //        
+    //        treeOutput->v_multiClus_dX.push_back(dX);
+    //        treeOutput->v_multiClus_dY.push_back(dY);
+    //        treeOutput->v_multiClus_dZ.push_back(dZ);
+    //        
+    //        treeOutput->v_multiClus_dEta.push_back(dEta);
+    //        treeOutput->v_multiClus_dPhi.push_back(dPhi);
+    //        
+    //        
+    //        if(multiClus1_HGCalEEM_idx >= 0 && multiClus1_HGCalEEM_idx != iTICLmultiCluster)
+    //        {
+    //            multiClus1_dX = TICLmultiCluster.x() - v_TICLmultiCluster->at(multiClus1_HGCalEEM_idx).x();
+    //            multiClus1_dY = TICLmultiCluster.y() - v_TICLmultiCluster->at(multiClus1_HGCalEEM_idx).y();
+    //            multiClus1_dZ = TICLmultiCluster.z() - v_TICLmultiCluster->at(multiClus1_HGCalEEM_idx).z();
+    //            
+    //            multiClus1_dEta = fabs(TICLmultiCluster.eta()) - fabs(v_TICLmultiCluster->at(multiClus1_HGCalEEM_idx).eta());
+    //            multiClus1_dPhi = TVector2::Phi_mpi_pi(TICLmultiCluster.phi() - v_TICLmultiCluster->at(multiClus1_HGCalEEM_idx).phi());
+    //            multiClus1_dR   = std::sqrt(multiClus1_dX*multiClus1_dX + multiClus1_dY*multiClus1_dY + multiClus1_dZ*multiClus1_dZ);
+    //        }
+    //    }
+    //    
+    //    treeOutput->v_multiClus_mc1_dX.push_back(multiClus1_dX);
+    //    treeOutput->v_multiClus_mc1_dY.push_back(multiClus1_dY);
+    //    treeOutput->v_multiClus_mc1_dZ.push_back(multiClus1_dZ);
+    //    
+    //    treeOutput->v_multiClus_mc1_dEta.push_back(multiClus1_dEta);
+    //    treeOutput->v_multiClus_mc1_dPhi.push_back(multiClus1_dPhi);
+    //    treeOutput->v_multiClus_mc1_dR.push_back(multiClus1_dR);
+    //    
+    //    
+    //    
+    //    // Photon multicluster sum
+    //    int nPhoton = v_genPh_4mom.size();
+    //    
+    //    int ph_index = -1;
+    //    double ph_deltaR_min = 9999;
+    //    
+    //    for(int iPhoton = 0; iPhoton < nPhoton; iPhoton++)
+    //    {
+    //        double deltaR = TICLmultiCluster_3vec.deltaR(v_genPh_4mom.at(iPhoton).v());
+    //        
+    //        if(deltaR < ph_deltaR_min)
+    //        {
+    //            ph_deltaR_min = deltaR;
+    //            ph_index = iPhoton;
+    //        }
+    //    }
+    //    
+    //    if(ph_index >= 0)
+    //    {
+    //        //printf("Adding multicluster %d to photon %d. \n", iTICLmultiCluster+1, ph_index+1);
+    //        
+    //        treeOutput->v_genPh_multiClus_totE.at(ph_index) += TICLmultiCluster.energy();
+    //    }
+    //    
+    //    //else
+    //    //{
+    //    //    printf("Not adding multicluster %d to any photon. \n", iTICLmultiCluster+1);
+    //    //}
+    //    
+    //    
+    //    // Electron multicluster sum
+    //    int nElectron = v_genEl_4mom.size();
+    //    
+    //    int el_index = -1;
+    //    double el_deltaR_min = 9999;
+    //    
+    //    for(int iElectron = 0; iElectron < nElectron; iElectron++)
+    //    {
+    //        double deltaR = TICLmultiCluster_3vec.deltaR(v_genEl_4mom.at(iElectron).v());
+    //        
+    //        if(deltaR < el_deltaR_min)
+    //        {
+    //            el_deltaR_min = deltaR;
+    //            el_index = iElectron;
+    //        }
+    //    }
+    //    
+    //    if(el_index >= 0)
+    //    {
+    //        //printf("Adding multicluster %d to electron %d. \n", iTICLmultiCluster+1, el_index+1);
+    //        
+    //        treeOutput->v_genEl_multiClus_totE.at(el_index) += TICLmultiCluster.energy();
+    //    }
+    //}
+    //
+    //if(multiClus_HGCalEEP_totE > 0)
+    //{
+    //    multiClus_HGCalEEP_meanDx /= multiClus_HGCalEEP_totE;
+    //    multiClus_HGCalEEP_meanDy /= multiClus_HGCalEEP_totE;
+    //    multiClus_HGCalEEP_meanDz /= multiClus_HGCalEEP_totE;
+    //    
+    //    multiClus_HGCalEEP_meanDetaSq /= multiClus_HGCalEEP_totE;
+    //    multiClus_HGCalEEP_meanDphiSq /= multiClus_HGCalEEP_totE;
+    //    multiClus_HGCalEEP_meanDetaDphi /= multiClus_HGCalEEP_totE;
+    //}
+    //
+    //if(multiClus_HGCalEEM_totE > 0)
+    //{
+    //    multiClus_HGCalEEM_meanDx /= multiClus_HGCalEEM_totE;
+    //    multiClus_HGCalEEM_meanDy /= multiClus_HGCalEEM_totE;
+    //    multiClus_HGCalEEM_meanDz /= multiClus_HGCalEEM_totE;
+    //    
+    //    multiClus_HGCalEEM_meanDetaSq /= multiClus_HGCalEEM_totE;
+    //    multiClus_HGCalEEM_meanDphiSq /= multiClus_HGCalEEM_totE;
+    //    multiClus_HGCalEEM_meanDetaDphi /= multiClus_HGCalEEM_totE;
+    //}
+    //
+    //treeOutput->multiClus_HGCalEEP_meanDx = multiClus_HGCalEEP_meanDx;
+    //treeOutput->multiClus_HGCalEEP_meanDy = multiClus_HGCalEEP_meanDy;
+    //treeOutput->multiClus_HGCalEEP_meanDz = multiClus_HGCalEEP_meanDz;
+    //
+    //treeOutput->multiClus_HGCalEEM_meanDx = multiClus_HGCalEEM_meanDx;
+    //treeOutput->multiClus_HGCalEEM_meanDy = multiClus_HGCalEEM_meanDy;
+    //treeOutput->multiClus_HGCalEEM_meanDz = multiClus_HGCalEEM_meanDz;
     
     
-    if(multiClus_HGCalEEP_totE > 0)
-    {
-        multiClus_HGCalEEP_meanX /= multiClus_HGCalEEP_totE;
-        multiClus_HGCalEEP_meanY /= multiClus_HGCalEEP_totE;
-        multiClus_HGCalEEP_meanZ /= multiClus_HGCalEEP_totE;
-        
-        multiClus_HGCalEEP_meanEta /= multiClus_HGCalEEP_totE;
-        multiClus_HGCalEEP_meanPhi /= multiClus_HGCalEEP_totE;
-    }
-    
-    if(multiClus_HGCalEEM_totE > 0)
-    {
-        multiClus_HGCalEEM_meanX /= multiClus_HGCalEEM_totE;
-        multiClus_HGCalEEM_meanY /= multiClus_HGCalEEM_totE;
-        multiClus_HGCalEEM_meanZ /= multiClus_HGCalEEM_totE;
-        
-        multiClus_HGCalEEM_meanEta /= multiClus_HGCalEEM_totE;
-        multiClus_HGCalEEM_meanPhi /= multiClus_HGCalEEM_totE;
-    }
-    
-    treeOutput->multiClus_HGCalEEP_meanX = multiClus_HGCalEEP_meanX;
-    treeOutput->multiClus_HGCalEEP_meanY = multiClus_HGCalEEP_meanY;
-    treeOutput->multiClus_HGCalEEP_meanZ = multiClus_HGCalEEP_meanZ;
-    treeOutput->multiClus_HGCalEEP_totE = multiClus_HGCalEEP_totE;
-    treeOutput->multiClus_HGCalEEP_totET = multiClus_HGCalEEP_totET;
-    
-    treeOutput->multiClus_HGCalEEM_meanX = multiClus_HGCalEEM_meanX;
-    treeOutput->multiClus_HGCalEEM_meanY = multiClus_HGCalEEM_meanY;
-    treeOutput->multiClus_HGCalEEM_meanZ = multiClus_HGCalEEM_meanZ;
-    treeOutput->multiClus_HGCalEEM_totE = multiClus_HGCalEEM_totE;
-    treeOutput->multiClus_HGCalEEM_totET = multiClus_HGCalEEM_totET;
-    
-    
-    double multiClus_HGCalEEP_meanDx = 0;
-    double multiClus_HGCalEEP_meanDy = 0;
-    double multiClus_HGCalEEP_meanDz = 0;
-    double multiClus_HGCalEEP_meanDetaSq = 0;
-    double multiClus_HGCalEEP_meanDphiSq = 0;
-    double multiClus_HGCalEEP_meanDetaDphi = 0;
-    
-    double multiClus_HGCalEEM_meanDx = 0;
-    double multiClus_HGCalEEM_meanDy = 0;
-    double multiClus_HGCalEEM_meanDz = 0;
-    double multiClus_HGCalEEM_meanDetaSq = 0;
-    double multiClus_HGCalEEM_meanDphiSq = 0;
-    double multiClus_HGCalEEM_meanDetaDphi = 0;
-    
-    for(int iTICLmultiCluster = 0; iTICLmultiCluster < nTICLmultiCluster; iTICLmultiCluster++)
-    {
-        reco::HGCalMultiCluster TICLmultiCluster = v_TICLmultiCluster->at(iTICLmultiCluster);
-        
-        CLHEP::Hep3Vector TICLmultiCluster_3vec(
-            TICLmultiCluster.x(),
-            TICLmultiCluster.y(),
-            TICLmultiCluster.z()
-        );
-        
-        double multiClus1_dX = -999;
-        double multiClus1_dY = -999;
-        double multiClus1_dZ = -999;
-        
-        double multiClus1_dEta = -999;
-        double multiClus1_dPhi = -999;
-        double multiClus1_dR   = -999;
-        
-        if(TICLmultiCluster.z() > 0)
-        {
-            double dX = fabs(TICLmultiCluster.x() - treeOutput->multiClus_HGCalEEP_meanX);
-            double dY = fabs(TICLmultiCluster.y() - treeOutput->multiClus_HGCalEEP_meanY);
-            double dZ = fabs(TICLmultiCluster.z() - treeOutput->multiClus_HGCalEEP_meanZ);
-            
-            double dEta = fabs(TICLmultiCluster_3vec.eta() - multiClus_HGCalEEP_meanEta);
-            double dPhi = fabs(TVector2::Phi_mpi_pi(TICLmultiCluster_3vec.phi() - multiClus_HGCalEEP_meanPhi));
-            
-            multiClus_HGCalEEP_meanDx += TICLmultiCluster.energy() * dX;
-            multiClus_HGCalEEP_meanDy += TICLmultiCluster.energy() * dY;
-            multiClus_HGCalEEP_meanDz += TICLmultiCluster.energy() * dZ;
-            
-            multiClus_HGCalEEP_meanDetaSq += TICLmultiCluster.energy() * dEta*dEta;
-            multiClus_HGCalEEP_meanDphiSq += TICLmultiCluster.energy() * dPhi*dPhi;
-            multiClus_HGCalEEP_meanDetaDphi += TICLmultiCluster.energy() * dEta*dPhi;
-            
-            treeOutput->v_multiClus_dX.push_back(dX);
-            treeOutput->v_multiClus_dY.push_back(dY);
-            treeOutput->v_multiClus_dZ.push_back(dZ);
-            
-            treeOutput->v_multiClus_dEta.push_back(dEta);
-            treeOutput->v_multiClus_dPhi.push_back(dPhi);
-            
-            
-            if(multiClus1_HGCalEEP_idx >= 0 && multiClus1_HGCalEEP_idx != iTICLmultiCluster)
-            {
-                multiClus1_dX = TICLmultiCluster.x() - v_TICLmultiCluster->at(multiClus1_HGCalEEP_idx).x();
-                multiClus1_dY = TICLmultiCluster.y() - v_TICLmultiCluster->at(multiClus1_HGCalEEP_idx).y();
-                multiClus1_dZ = TICLmultiCluster.z() - v_TICLmultiCluster->at(multiClus1_HGCalEEP_idx).z();
-                
-                multiClus1_dEta = fabs(TICLmultiCluster.eta()) - fabs(v_TICLmultiCluster->at(multiClus1_HGCalEEP_idx).eta());
-                multiClus1_dPhi = TVector2::Phi_mpi_pi(TICLmultiCluster.phi() - v_TICLmultiCluster->at(multiClus1_HGCalEEP_idx).phi());
-                multiClus1_dR   = std::sqrt(multiClus1_dX*multiClus1_dX + multiClus1_dY*multiClus1_dY + multiClus1_dZ*multiClus1_dZ);
-            }
-        }
-        
-        else
-        {
-            double dX = fabs(TICLmultiCluster.x() - treeOutput->multiClus_HGCalEEM_meanX);
-            double dY = fabs(TICLmultiCluster.y() - treeOutput->multiClus_HGCalEEM_meanY);
-            double dZ = fabs(TICLmultiCluster.z() - treeOutput->multiClus_HGCalEEM_meanZ);
-            
-            double dEta = fabs(TICLmultiCluster_3vec.eta() - multiClus_HGCalEEM_meanEta);
-            double dPhi = fabs(TVector2::Phi_mpi_pi(TICLmultiCluster_3vec.phi() - multiClus_HGCalEEM_meanPhi));
-            
-            multiClus_HGCalEEM_meanDx += TICLmultiCluster.energy() * dX;
-            multiClus_HGCalEEM_meanDy += TICLmultiCluster.energy() * dY;
-            multiClus_HGCalEEM_meanDz += TICLmultiCluster.energy() * dZ;
-            
-            multiClus_HGCalEEM_meanDetaSq += TICLmultiCluster.energy() * dEta*dEta;
-            multiClus_HGCalEEM_meanDphiSq += TICLmultiCluster.energy() * dPhi*dPhi;
-            multiClus_HGCalEEM_meanDetaDphi += TICLmultiCluster.energy() * dEta*dPhi;
-            
-            treeOutput->v_multiClus_dX.push_back(dX);
-            treeOutput->v_multiClus_dY.push_back(dY);
-            treeOutput->v_multiClus_dZ.push_back(dZ);
-            
-            treeOutput->v_multiClus_dEta.push_back(dEta);
-            treeOutput->v_multiClus_dPhi.push_back(dPhi);
-            
-            
-            if(multiClus1_HGCalEEM_idx >= 0 && multiClus1_HGCalEEM_idx != iTICLmultiCluster)
-            {
-                multiClus1_dX = TICLmultiCluster.x() - v_TICLmultiCluster->at(multiClus1_HGCalEEM_idx).x();
-                multiClus1_dY = TICLmultiCluster.y() - v_TICLmultiCluster->at(multiClus1_HGCalEEM_idx).y();
-                multiClus1_dZ = TICLmultiCluster.z() - v_TICLmultiCluster->at(multiClus1_HGCalEEM_idx).z();
-                
-                multiClus1_dEta = fabs(TICLmultiCluster.eta()) - fabs(v_TICLmultiCluster->at(multiClus1_HGCalEEM_idx).eta());
-                multiClus1_dPhi = TVector2::Phi_mpi_pi(TICLmultiCluster.phi() - v_TICLmultiCluster->at(multiClus1_HGCalEEM_idx).phi());
-                multiClus1_dR   = std::sqrt(multiClus1_dX*multiClus1_dX + multiClus1_dY*multiClus1_dY + multiClus1_dZ*multiClus1_dZ);
-            }
-        }
-        
-        treeOutput->v_multiClus_mc1_dX.push_back(multiClus1_dX);
-        treeOutput->v_multiClus_mc1_dY.push_back(multiClus1_dY);
-        treeOutput->v_multiClus_mc1_dZ.push_back(multiClus1_dZ);
-        
-        treeOutput->v_multiClus_mc1_dEta.push_back(multiClus1_dEta);
-        treeOutput->v_multiClus_mc1_dPhi.push_back(multiClus1_dPhi);
-        treeOutput->v_multiClus_mc1_dR.push_back(multiClus1_dR);
-        
-        
-        
-        // Photon multicluster sum
-        int nPhoton = v_genPh_4mom.size();
-        
-        int ph_index = -1;
-        double ph_deltaR_min = 9999;
-        
-        for(int iPhoton = 0; iPhoton < nPhoton; iPhoton++)
-        {
-            double deltaR = TICLmultiCluster_3vec.deltaR(v_genPh_4mom.at(iPhoton).v());
-            
-            if(deltaR < ph_deltaR_min)
-            {
-                ph_deltaR_min = deltaR;
-                ph_index = iPhoton;
-            }
-        }
-        
-        if(ph_index >= 0)
-        {
-            //printf("Adding multicluster %d to photon %d. \n", iTICLmultiCluster+1, ph_index+1);
-            
-            treeOutput->v_genPh_multiClus_totE.at(ph_index) += TICLmultiCluster.energy();
-        }
-        
-        //else
-        //{
-        //    printf("Not adding multicluster %d to any photon. \n", iTICLmultiCluster+1);
-        //}
-        
-        
-        // Electron multicluster sum
-        int nElectron = v_genEl_4mom.size();
-        
-        int el_index = -1;
-        double el_deltaR_min = 9999;
-        
-        for(int iElectron = 0; iElectron < nElectron; iElectron++)
-        {
-            double deltaR = TICLmultiCluster_3vec.deltaR(v_genEl_4mom.at(iElectron).v());
-            
-            if(deltaR < el_deltaR_min)
-            {
-                el_deltaR_min = deltaR;
-                el_index = iElectron;
-            }
-        }
-        
-        if(el_index >= 0)
-        {
-            //printf("Adding multicluster %d to electron %d. \n", iTICLmultiCluster+1, el_index+1);
-            
-            treeOutput->v_genEl_multiClus_totE.at(el_index) += TICLmultiCluster.energy();
-        }
-    }
-    
-    if(multiClus_HGCalEEP_totE > 0)
-    {
-        multiClus_HGCalEEP_meanDx /= multiClus_HGCalEEP_totE;
-        multiClus_HGCalEEP_meanDy /= multiClus_HGCalEEP_totE;
-        multiClus_HGCalEEP_meanDz /= multiClus_HGCalEEP_totE;
-        
-        multiClus_HGCalEEP_meanDetaSq /= multiClus_HGCalEEP_totE;
-        multiClus_HGCalEEP_meanDphiSq /= multiClus_HGCalEEP_totE;
-        multiClus_HGCalEEP_meanDetaDphi /= multiClus_HGCalEEP_totE;
-    }
-    
-    if(multiClus_HGCalEEM_totE > 0)
-    {
-        multiClus_HGCalEEM_meanDx /= multiClus_HGCalEEM_totE;
-        multiClus_HGCalEEM_meanDy /= multiClus_HGCalEEM_totE;
-        multiClus_HGCalEEM_meanDz /= multiClus_HGCalEEM_totE;
-        
-        multiClus_HGCalEEM_meanDetaSq /= multiClus_HGCalEEM_totE;
-        multiClus_HGCalEEM_meanDphiSq /= multiClus_HGCalEEM_totE;
-        multiClus_HGCalEEM_meanDetaDphi /= multiClus_HGCalEEM_totE;
-    }
-    
-    treeOutput->multiClus_HGCalEEP_meanDx = multiClus_HGCalEEP_meanDx;
-    treeOutput->multiClus_HGCalEEP_meanDy = multiClus_HGCalEEP_meanDy;
-    treeOutput->multiClus_HGCalEEP_meanDz = multiClus_HGCalEEP_meanDz;
-    
-    treeOutput->multiClus_HGCalEEM_meanDx = multiClus_HGCalEEM_meanDx;
-    treeOutput->multiClus_HGCalEEM_meanDy = multiClus_HGCalEEM_meanDy;
-    treeOutput->multiClus_HGCalEEM_meanDz = multiClus_HGCalEEM_meanDz;
     
     // Diagonalize (something like PCA)
     //TMatrixD matrix_HGCalEEP(2, 2);
@@ -1705,22 +1809,22 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     }
     
     // TDR-ele gen-matching
-    TMatrixD mat_gsfEleFromMultiClus_gelEl_deltaR;
+    TMatrixD mat_gsfEleFromMultiClus_genEl_deltaR;
     
-    std::vector <int> v_gsfEleFromMultiClus_matchedGenEl_index;
+    std::vector <int> v_gsfEleFromMultiClus_matchedGenEl_idx;
     
-    std::vector <double> v_gsfEleFromMultiClus_gelEl_minDeltaR = Common::getMinDeltaR(
+    std::vector <double> v_gsfEleFromMultiClus_genEl_minDeltaR = Common::getMinDeltaR(
         v_gsfEleFromMultiClus_4mom,
         v_genEl_4mom,
-        mat_gsfEleFromMultiClus_gelEl_deltaR,
-        v_gsfEleFromMultiClus_matchedGenEl_index
+        mat_gsfEleFromMultiClus_genEl_deltaR,
+        v_gsfEleFromMultiClus_matchedGenEl_idx
     );
     
-    for(int iEle = 0; iEle < (int) v_gsfEleFromMultiClus_gelEl_minDeltaR.size(); iEle++)
+    for(int iEle = 0; iEle < (int) v_gsfEleFromMultiClus_genEl_minDeltaR.size(); iEle++)
     {
-        treeOutput->v_gsfEleFromMultiClus_genEl_minDeltaR.push_back(v_gsfEleFromMultiClus_gelEl_minDeltaR.at(iEle));
+        treeOutput->v_gsfEleFromMultiClus_genEl_minDeltaR.push_back(v_gsfEleFromMultiClus_genEl_minDeltaR.at(iEle));
         
-        int index = v_gsfEleFromMultiClus_matchedGenEl_index.at(iEle);
+        int index = v_gsfEleFromMultiClus_matchedGenEl_idx.at(iEle);
         
         double energy = -1;
         
@@ -1760,51 +1864,98 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     
     
     // TICL-ele gen-matching
-    TMatrixD mat_gsfEleFromTICL_gelEl_deltaR;
+    TMatrixD mat_gsfEleFromTICL_genEl_deltaR;
     
-    std::vector <int> v_gsfEleFromTICL_matchedGenEl_index;
+    std::vector <int> v_gsfEleFromTICL_matchedGenEl_idx;
     
-    std::vector <double> v_gsfEleFromTICL_gelEl_minDeltaR = Common::getMinDeltaR(
+    std::vector <double> v_gsfEleFromTICL_genEl_minDeltaR = Common::getMinDeltaR(
         v_gsfEleFromTICL_4mom,
         v_genEl_4mom,
-        mat_gsfEleFromTICL_gelEl_deltaR,
-        v_gsfEleFromTICL_matchedGenEl_index
+        mat_gsfEleFromTICL_genEl_deltaR,
+        v_gsfEleFromTICL_matchedGenEl_idx
     );
     
-    for(int iEle = 0; iEle < (int) v_gsfEleFromTICL_gelEl_minDeltaR.size(); iEle++)
-    {
-        double deltaR = v_gsfEleFromTICL_gelEl_minDeltaR.at(iEle);
-        
-        if(deltaR > TICLeleGenMatchDR)
-        {
-            continue;
-        }
-        
-        treeOutput->v_gsfEleFromTICL_genEl_minDeltaR.push_back(deltaR);
-        
-        int index = v_gsfEleFromTICL_matchedGenEl_index.at(iEle);
-        
-        double energy = -1;
-        
-        if(index >= 0)
-        {
-            energy = v_genEl_4mom.at(index).e();
-        }
-        
-        treeOutput->v_gsfEleFromTICL_matchedGenEl_E.push_back(energy);
-    }
+    //for(int iEle = 0; iEle < (int) v_gsfEleFromTICL_genEl_minDeltaR.size(); iEle++)
+    //{
+    //    double matchedGenEl_deltaR = v_gsfEleFromTICL_genEl_minDeltaR.at(iEle);
+    //    
+    //    if(deltaR > TICLeleGenMatchDR)
+    //    {
+    //        continue;
+    //    }
+    //    
+    //    int matchedGenEl_idx = v_gsfEleFromTICL_matchedGenEl_idx.at(iEle);
+    //    
+    //    treeOutput->v_gsfEleFromTICL_genEl_minDeltaR.push_back(matchedGenEl_deltaR);
+    //    treeOutput->v_gsfEleFromTICL_nearestGenEl_idx.push_back(matchedGenEl_idx);
+    //    
+    //    double matchedGenEl_energy = -99;
+    //    double matchedGenEl_pT = -99;
+    //    double matchedGenEl_eta = -99;
+    //    double matchedGenEl_phi = -99;
+    //    
+    //    if(index >= 0)
+    //    {
+    //        matchedGenEl_energy = v_genEl_4mom.at(index).e();
+    //        matchedGenEl_pT = v_genEl_4mom.at(index).perp();
+    //        matchedGenEl_eta = v_genEl_4mom.at(index).eta();
+    //        matchedGenEl_phi = v_genEl_4mom.at(index).phi();
+    //    }
+    //    
+    //    treeOutput->v_gsfEleFromTICL_matchedGenEl_E.push_back(matchedGenEl_energy);
+    //    treeOutput->v_gsfEleFromTICL_matchedGenEl_pT.push_back(matchedGenEl_pT);
+    //    treeOutput->v_gsfEleFromTICL_matchedGenEl_eta.push_back(matchedGenEl_eta);
+    //    treeOutput->v_gsfEleFromTICL_matchedGenEl_phi.push_back(matchedGenEl_phi);
+    //}
     
     
     for(int iEle = 0; iEle < nEleFromTICL; iEle++)
     {
-        if(v_gsfEleFromTICL_gelEl_minDeltaR.at(iEle) > TICLeleGenMatchDR)
+        reco::GsfElectron gsfEle = v_gsfEleFromTICL->at(iEle);
+        CLHEP::HepLorentzVector gsfEleFromTICL_4mom = v_gsfEleFromTICL_4mom.at(iEle);
+        
+        
+        if(gsfEle.pt() < el_minPt || fabs(gsfEle.eta()) < HGCal_minEta || fabs(gsfEle.eta()) > HGCal_maxEta)
         {
             continue;
         }
         
-        reco::GsfElectron gsfEle = v_gsfEleFromTICL->at(iEle);
         
-        CLHEP::HepLorentzVector gsfEleFromTICL_4mom = v_gsfEleFromTICL_4mom.at(iEle);
+        //if(v_gsfEleFromTICL_genEl_minDeltaR.at(iEle) > TICLeleGenMatchDR)
+        //{
+        //    continue;
+        //}
+        
+        
+        double matchedGenEl_deltaR = v_gsfEleFromTICL_genEl_minDeltaR.at(iEle);
+        
+        if(matchedGenEl_deltaR > TICLeleGenMatchDR)
+        {
+            continue;
+        }
+        
+        int matchedGenEl_idx = v_gsfEleFromTICL_matchedGenEl_idx.at(iEle);
+        
+        treeOutput->v_gsfEleFromTICL_genEl_minDeltaR.push_back(matchedGenEl_deltaR);
+        treeOutput->v_gsfEleFromTICL_nearestGenEl_idx.push_back(matchedGenEl_idx);
+        
+        double matchedGenEl_energy = -99;
+        double matchedGenEl_pT = -99;
+        double matchedGenEl_eta = -99;
+        double matchedGenEl_phi = -99;
+        
+        if(matchedGenEl_idx >= 0)
+        {
+            matchedGenEl_energy = v_genEl_4mom.at(matchedGenEl_idx).e();
+            matchedGenEl_pT = v_genEl_4mom.at(matchedGenEl_idx).perp();
+            matchedGenEl_eta = v_genEl_4mom.at(matchedGenEl_idx).eta();
+            matchedGenEl_phi = v_genEl_4mom.at(matchedGenEl_idx).phi();
+        }
+        
+        treeOutput->v_gsfEleFromTICL_matchedGenEl_E.push_back(matchedGenEl_energy);
+        treeOutput->v_gsfEleFromTICL_matchedGenEl_pT.push_back(matchedGenEl_pT);
+        treeOutput->v_gsfEleFromTICL_matchedGenEl_eta.push_back(matchedGenEl_eta);
+        treeOutput->v_gsfEleFromTICL_matchedGenEl_phi.push_back(matchedGenEl_phi);
         
         
         treeOutput->v_gsfEleFromTICL_E.push_back(gsfEle.energy());
@@ -1939,16 +2090,17 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         HGCEEDetId centroid_HGCEEDetId(centroid_detId.rawId());
         //auto centroidCell_pos = recHitTools.getPosition(centroid_detId);
         
-        std::vector <DetId> v_neighbour7_detId = topo_HGCalEE.neighbors(centroid_detId);
-        v_neighbour7_detId.push_back(centroid_detId);
-        
-        std::vector <DetId> v_neighbour19_detId = Common::getNeighbor19(centroid_detId, topo_HGCalEE);
+        //std::vector <DetId> v_neighbour7_detId = topo_HGCalEE.neighbors(centroid_detId);
+        //v_neighbour7_detId.push_back(centroid_detId);
+        //
+        //std::vector <DetId> v_neighbour19_detId = Common::getNeighbor19(centroid_detId, topo_HGCalEE);
         
         printf(
             "[%llu] "
             
             "gsfEleFromTICL %d/%d: "
-            "E %0.2f, "
+            "E %0.4f, "
+            "pT %0.2f, "
             "eta %+0.2f, "
             //"ambiguous %d, "
             
@@ -1978,6 +2130,7 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             
             iEle+1, nEleFromTICL,
             gsfEle.energy(),
+            gsfEle.pt(),
             gsfEle.eta()
             //gsfEle.ambiguous(),
             
@@ -1999,6 +2152,29 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             //gsfEle.trackMomentumAtVtx().r(),// std::sqrt(gsfEle.trackMomentumAtVtx().mag2()),
             //gsfEle.trackMomentumAtVtx().rho()//, std::sqrt(gsfEle.trackMomentumAtVtx().perp2())
         );
+        
+        
+        fill_isoVar(
+            treeOutput->m_isoVarContent.at("gsfEleFromTICL_dR0p3"),
+            v_HGCALlayerCluster.product(),
+            &gsfEle,
+            0.3
+        );
+        
+        fill_isoVar(
+            treeOutput->m_isoVarContent.at("gsfEleFromTICL_dR0p4"),
+            v_HGCALlayerCluster.product(),
+            &gsfEle,
+            0.4
+        );
+        
+        fill_isoVar(
+            treeOutput->m_isoVarContent.at("gsfEleFromTICL_dR0p5"),
+            v_HGCALlayerCluster.product(),
+            &gsfEle,
+            0.5
+        );
+        
         
         //printf("\t Same-SC: ");
         //
@@ -2050,10 +2226,33 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         
         double energy7 = 0;
         double energy19 = 0;
+        
+        double energy2p4 = 0;
+        double energy2p6 = 0;
         double energy2p8 = 0;
+        double energy3p0 = 0;
+        double energy3p2 = 0;
         
         for(int iLayer = 0; iLayer < Constants::HGCalEE_nLayer; iLayer++)
         {
+            treeOutput->vv_gsfEleFromTICL_superClus_E_layer.at(iLayer).push_back(0);
+            
+            //treeOutput->vv_gsfEleFromTICL_E2p4_layer.at(iLayer).push_back(0);
+            //treeOutput->vv_gsfEleFromTICL_R2p4_layer.at(iLayer).push_back(0);
+            
+            treeOutput->vv_gsfEleFromTICL_E2p6_layer.at(iLayer).push_back(0);
+            treeOutput->vv_gsfEleFromTICL_R2p6_layer.at(iLayer).push_back(0);
+            
+            treeOutput->vv_gsfEleFromTICL_E2p8_layer.at(iLayer).push_back(0);
+            treeOutput->vv_gsfEleFromTICL_R2p8_layer.at(iLayer).push_back(0);
+            
+            treeOutput->vv_gsfEleFromTICL_E3p0_layer.at(iLayer).push_back(0);
+            treeOutput->vv_gsfEleFromTICL_R3p0_layer.at(iLayer).push_back(0);
+            
+            //treeOutput->vv_gsfEleFromTICL_E3p2_layer.at(iLayer).push_back(0);
+            //treeOutput->vv_gsfEleFromTICL_R3p2_layer.at(iLayer).push_back(0);
+            
+            
             if(!vv_superClus_layerHandF.at(iLayer).size())
             {
                 continue;
@@ -2067,7 +2266,9 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             );
             
             math::XYZPoint iLayer_centroid_xyz = p_iLayer_centroid_xyz_E.first;
+            double iLayer_energy = p_iLayer_centroid_xyz_E.second;
             
+            treeOutput->vv_gsfEleFromTICL_superClus_E_layer.at(iLayer).back() = iLayer_energy;
             
             // Get the rec-hit cell nearest to the centroid in the layer
             std::pair <DetId, double> p_iLayer_centroid_detId_dist = Common::getNearestCell(
@@ -2129,7 +2330,63 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             //energy19 += iLayer_energy19;
             
             
-            // R2p8 cells
+            //// R2p4
+            //std::vector <DetId> v_iLayer_neighbourR2p4_detId = Common::getNeighborR(
+            //    iLayer_centroid_detId,
+            //    vv_superClus_layerHandF.at(iLayer),
+            //    2.4,
+            //    topo_HGCalEE,
+            //    &recHitTools
+            //);
+            //
+            //double iLayer_energy2p4 = Common::getEnergySum(
+            //    v_iLayer_neighbourR2p4_detId,
+            //    vv_superClus_layerHandF.at(iLayer),
+            //    m_recHit
+            //);
+            //
+            //energy2p4 += iLayer_energy2p4;
+            //
+            //double iLayer_R2p4 = 0;
+            //
+            //if(iLayer_energy)
+            //{
+            //    iLayer_R2p4 = iLayer_energy2p4 / iLayer_energy;
+            //}
+            //
+            //treeOutput->vv_gsfEleFromTICL_E2p4_layer.at(iLayer).back() = iLayer_energy2p4;
+            //treeOutput->vv_gsfEleFromTICL_R2p4_layer.at(iLayer).back() = iLayer_R2p4;
+            
+            
+            // R2p6
+            std::vector <DetId> v_iLayer_neighbourR2p6_detId = Common::getNeighborR(
+                iLayer_centroid_detId,
+                vv_superClus_layerHandF.at(iLayer),
+                2.6,
+                topo_HGCalEE,
+                &recHitTools
+            );
+            
+            double iLayer_energy2p6 = Common::getEnergySum(
+                v_iLayer_neighbourR2p6_detId,
+                vv_superClus_layerHandF.at(iLayer),
+                m_recHit
+            );
+            
+            energy2p6 += iLayer_energy2p6;
+            
+            double iLayer_R2p6 = 0;
+            
+            if(iLayer_energy)
+            {
+                iLayer_R2p6 = iLayer_energy2p6 / iLayer_energy;
+            }
+            
+            treeOutput->vv_gsfEleFromTICL_E2p6_layer.at(iLayer).back() = iLayer_energy2p6;
+            treeOutput->vv_gsfEleFromTICL_R2p6_layer.at(iLayer).back() = iLayer_R2p6;
+            
+            
+            // R2p8
             std::vector <DetId> v_iLayer_neighbourR2p8_detId = Common::getNeighborR(
                 iLayer_centroid_detId,
                 vv_superClus_layerHandF.at(iLayer),
@@ -2145,6 +2402,72 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             );
             
             energy2p8 += iLayer_energy2p8;
+            
+            double iLayer_R2p8 = 0;
+            
+            if(iLayer_energy)
+            {
+                iLayer_R2p8 = iLayer_energy2p8 / iLayer_energy;
+            }
+            
+            treeOutput->vv_gsfEleFromTICL_E2p8_layer.at(iLayer).back() = iLayer_energy2p8;
+            treeOutput->vv_gsfEleFromTICL_R2p8_layer.at(iLayer).back() = iLayer_R2p8;
+            
+            
+            // R3p0
+            std::vector <DetId> v_iLayer_neighbourR3p0_detId = Common::getNeighborR(
+                iLayer_centroid_detId,
+                vv_superClus_layerHandF.at(iLayer),
+                3.0,
+                topo_HGCalEE,
+                &recHitTools
+            );
+            
+            double iLayer_energy3p0 = Common::getEnergySum(
+                v_iLayer_neighbourR3p0_detId,
+                vv_superClus_layerHandF.at(iLayer),
+                m_recHit
+            );
+            
+            energy3p0 += iLayer_energy3p0;
+            
+            double iLayer_R3p0 = 0;
+            
+            if(iLayer_energy)
+            {
+                iLayer_R3p0 = iLayer_energy3p0 / iLayer_energy;
+            }
+            
+            treeOutput->vv_gsfEleFromTICL_E3p0_layer.at(iLayer).back() = iLayer_energy3p0;
+            treeOutput->vv_gsfEleFromTICL_R3p0_layer.at(iLayer).back() = iLayer_R3p0;
+            
+            
+            //// R3p2
+            //std::vector <DetId> v_iLayer_neighbourR3p2_detId = Common::getNeighborR(
+            //    iLayer_centroid_detId,
+            //    vv_superClus_layerHandF.at(iLayer),
+            //    3.2,
+            //    topo_HGCalEE,
+            //    &recHitTools
+            //);
+            //
+            //double iLayer_energy3p2 = Common::getEnergySum(
+            //    v_iLayer_neighbourR3p2_detId,
+            //    vv_superClus_layerHandF.at(iLayer),
+            //    m_recHit
+            //);
+            //
+            //energy3p2 += iLayer_energy3p2;
+            //
+            //double iLayer_R3p2 = 0;
+            //
+            //if(iLayer_energy)
+            //{
+            //    iLayer_R3p2 = iLayer_energy3p2 / iLayer_energy;
+            //}
+            //
+            //treeOutput->vv_gsfEleFromTICL_E3p2_layer.at(iLayer).back() = iLayer_energy3p2;
+            //treeOutput->vv_gsfEleFromTICL_R3p2_layer.at(iLayer).back() = iLayer_R3p2;
             
             
             //printf(
@@ -2166,21 +2489,38 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             //    iLayer_energy19, iLayer_energy19/p_iLayer_centroid_xyz_E.second
             //);
             
-            totalE += p_iLayer_centroid_xyz_E.second;
+            totalE += iLayer_energy;
         }
         
         double R7 = energy7/gsfEle.energy();
         double R19 = energy19/gsfEle.energy();
+        
+        //treeOutput->v_gsfEleFromTICL_E7.push_back(energy7);
+        //treeOutput->v_gsfEleFromTICL_R7.push_back(R7);
+        //
+        //treeOutput->v_gsfEleFromTICL_E19.push_back(energy19);
+        //treeOutput->v_gsfEleFromTICL_R19.push_back(R19);
+        
+        
+        //double R2p4 = energy2p4/gsfEle.energy();
+        //treeOutput->v_gsfEleFromTICL_E2p4.push_back(energy2p4);
+        //treeOutput->v_gsfEleFromTICL_R2p4.push_back(R2p4);
+        
+        double R2p6 = energy2p6/gsfEle.energy();
+        treeOutput->v_gsfEleFromTICL_E2p6.push_back(energy2p6);
+        treeOutput->v_gsfEleFromTICL_R2p6.push_back(R2p6);
+        
         double R2p8 = energy2p8/gsfEle.energy();
-        
-        treeOutput->v_gsfEleFromTICL_E7.push_back(energy7);
-        treeOutput->v_gsfEleFromTICL_R7.push_back(R7);
-        
-        treeOutput->v_gsfEleFromTICL_E19.push_back(energy19);
-        treeOutput->v_gsfEleFromTICL_R19.push_back(R19);
-        
         treeOutput->v_gsfEleFromTICL_E2p8.push_back(energy2p8);
         treeOutput->v_gsfEleFromTICL_R2p8.push_back(R2p8);
+        
+        double R3p0 = energy3p0/gsfEle.energy();
+        treeOutput->v_gsfEleFromTICL_E3p0.push_back(energy3p0);
+        treeOutput->v_gsfEleFromTICL_R3p0.push_back(R3p0);
+        
+        //double R3p2 = energy3p2/gsfEle.energy();
+        //treeOutput->v_gsfEleFromTICL_E3p2.push_back(energy3p2);
+        //treeOutput->v_gsfEleFromTICL_R3p2.push_back(R3p2);
         
         //printf("Sum[layer]: E %0.2f \n", totalE);
         //
@@ -2196,8 +2536,8 @@ TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         //);
         
         
-        treeOutput->v_gsfEleFromTICL_superClus_cellNeighbour1ringWindow_n.push_back(v_neighbour7_detId.size());
-        treeOutput->v_gsfEleFromTICL_superClus_cellNeighbour2ringWindow_n.push_back(v_neighbour19_detId.size());
+        //treeOutput->v_gsfEleFromTICL_superClus_cellNeighbour1ringWindow_n.push_back(v_neighbour7_detId.size());
+        //treeOutput->v_gsfEleFromTICL_superClus_cellNeighbour2ringWindow_n.push_back(v_neighbour19_detId.size());
         
         //for(int iCell = 0; iCell < (int) v_neighbour19_detId.size(); iCell++)
         //{

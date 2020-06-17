@@ -91,8 +91,13 @@ class GenParticleFilter : public edm::stream::EDFilter<>
     
     
     // My stuff //
+    bool _isGunSample;
+    
     int _atLeastN;
-    int _pdgId;
+    std::vector <int> _v_pdgId;
+    
+    double _minPt;
+    double _maxPt;
     
     double _minEta;
     double _maxEta;
@@ -120,8 +125,13 @@ GenParticleFilter::GenParticleFilter(const edm::ParameterSet& iConfig)
     //now do what ever initialization is needed
     
     
+    _isGunSample = iConfig.getParameter <bool>("isGunSample");
+    
     _atLeastN = iConfig.getParameter <int>("atLeastN");
-    _pdgId = iConfig.getParameter <int>("pdgId");
+    _v_pdgId = iConfig.getParameter <std::vector <int> >("pdgIds");
+    
+    _minPt = iConfig.getParameter <double>("minPt");
+    _maxPt = iConfig.getParameter <double>("maxPt");
     
     _minEta = iConfig.getParameter <double>("minEta");
     _maxEta = iConfig.getParameter <double>("maxEta");
@@ -165,22 +175,40 @@ bool GenParticleFilter::filter(edm::Event& iEvent, const edm::EventSetup& iSetup
     {
         reco::GenParticle part = v_genParticle->at(iPart);
         
-        int pdgId = part.pdgId();
+        int pdgId = abs(part.pdgId());
         int status = part.status();
+        
+        bool idMatched = (std::find(_v_pdgId.begin(), _v_pdgId.end(), pdgId) != _v_pdgId.end());
         
         // Gen ele
         //if(abs(pdgId) == 11 && status == 1)
-        if(abs(pdgId) == _pdgId && (part.isHardProcess() || status == 1))
+        //if(abs(pdgId) == _pdgId && (part.isHardProcess() || status == 1))
+        if(
+            //abs(pdgId) == _pdgId && (
+            idMatched && (
+                (_isGunSample && status == 1) ||
+                (!_isGunSample && part.isHardProcess())
+            )
+        )
         {
             if(_debug)
             {
                 printf("[%llu] In GenParticleFilter: PDG-ID %+d, E %0.2f, pT %0.2f, eta %+0.2f \n", eventNumber, pdgId, part.energy(), part.pt(), part.eta());
             }
             
-            if(fabs(part.eta()) > _minEta && fabs(part.eta()) < _maxEta)
+            if(
+                (fabs(part.eta()) > _minEta && fabs(part.eta()) < _maxEta) &&
+                (part.pt() > _minPt && part.pt() < _maxPt)
+            )
             {
                 genPart_n++;
             }
+        }
+        
+        
+        if(genPart_n == _atLeastN)
+        {
+            break;
         }
     }
     

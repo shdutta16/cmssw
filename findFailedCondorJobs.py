@@ -149,7 +149,7 @@ for iDir in range(0, len(l_directory)) :
                 
                 isRemoved = False
                 hasCompleted = False
-                                                                                                     
+                
         
         
         if (not hasCompleted) :

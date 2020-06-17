@@ -31,7 +31,6 @@
 <use name="PhysicsTools/PatAlgos"/>
 <use name="RecoJets/JetAssociationProducers"/>
 <use name="RecoLocalCalo/HGCalRecAlgos"/>
-<use name="RecoTauTag/Configuration"/>
 <use name="SimDataFormats/CaloAnalysis"/>
 <use name="SimDataFormats/GeneratorProducts"/>
 <use name="SimDataFormats/Track"/>

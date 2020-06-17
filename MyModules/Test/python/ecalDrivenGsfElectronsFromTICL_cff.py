@@ -63,6 +63,13 @@ def ecalDrivenGsfElectronsFromTICL_customizeProcess(process, onReco = False, out
     #####process.ecalDrivenGsfElectronsFromTICL.ecalDrivenEcalErrorFromClassBasedParameterization = cms.bool(False)
     
     
+    
+    process.ecalDrivenGsfElectronsFromTICL.useGsfPfRecTracks = cms.bool(False)
+    process.ecalDrivenGsfElectronsFromTICL.ambClustersOverlapStrategy = cms.uint32(0)
+    #process.ecalDrivenGsfElectronsFromTICL.endcapRecHitCollectionTag = cms.InputTag("HGCalRecHit", "HGCEERecHits")
+    process.ecalDrivenGsfElectronsFromTICL.applyAmbResolution = cms.bool(True)
+    
+    
     # Thresholds
     #process.particleFlowSuperClusterHGCalFromTICL.thresh_SCEt = cms.double(5.0)
     #process.particleFlowSuperClusterHGCalFromTICL.seedThresholdIsET = cms.bool(True) # True is the default

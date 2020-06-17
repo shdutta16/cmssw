@@ -154,7 +154,28 @@ options.register("TICLeleGenMatchDR",
     99999, # Default value
     VarParsing.VarParsing.multiplicity.singleton, # singleton or list
     VarParsing.VarParsing.varType.float, # string, int, or float
-    "DeltaR to use for TICL-ele ctron gen-matching (will store only the gen-matched ones)" # Description
+    "DeltaR to use for TICL-electron gen-matching (will store only the gen-matched ones)" # Description
+)
+
+options.register("isGunSample",
+    0, # Default value
+    VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+    VarParsing.VarParsing.varType.int, # string, int, or float
+    "Is it a particle gun sample" # Description
+)
+
+options.register("genEleFilter",
+    0, # Default value
+    VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+    VarParsing.VarParsing.varType.int, # string, int, or float
+    "Apply gen-electron filter" # Description
+)
+
+options.register("genPartonFilter",
+    0, # Default value
+    VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+    VarParsing.VarParsing.varType.int, # string, int, or float
+    "Apply gen-parton filter" # Description
 )
 
 options.register("trace",
@@ -418,6 +439,12 @@ distanceType = "3Ddist"
 #process.EnergySharedTICLmultiClusters.distTypeStr = distanceType
 
 
+# TICL-electron ambiguity resolver
+#import EDProducers.HGCalElectronAmbiguityResolver.HGCalElectronAmbiguityResolver_cfi
+
+#process.ambiguityResolvedTICLelectrons = HGCalElectronAmbiguityResolver_cfi.AmbiguityResolvedElectrons
+
+
 # Rerun TICL
 label_TICLtrackster = cms.untracked.InputTag("trackstersEM", "", "RECO")
 label_TICLmultiCluster = cms.untracked.InputTag("multiClustersFromTrackstersEM", "MultiClustersFromTracksterByCA", "RECO")
@@ -433,6 +460,8 @@ label_gsfEleFromTICL = cms.untracked.InputTag("ecalDrivenGsfElectronsFromTICL", 
 
 if (options.modTICLele) :
     
+    #process.ambiguityResolvedTICLelectrons.
+    
     label_gsfEleFromTICL = cms.untracked.InputTag("ecalDrivenGsfElectronsFromTICL", "", "Demo")
 
 
@@ -441,6 +470,8 @@ process.treeMaker = cms.EDAnalyzer(
     
     ############################## My stuff ##############################
     debug = cms.bool(False),
+    
+    isGunSample = cms.bool(bool(options.isGunSample)),
     
     storeSimHit = cms.bool(bool(options.storeSimHit)),
     storeRecHit = cms.bool(bool(options.storeRecHit)),
@@ -521,15 +552,42 @@ if (options.modTICLele) :
 from EDFilters.MyFilters.GenParticleFilter_cfi import *
 
 process.GenParticleFilter_ele = GenParticleFilter.clone()
-process.GenParticleFilter_ele.atLeastN = cms.int32(2)
-process.GenParticleFilter_ele.pdgId = cms.int32(11)
+process.GenParticleFilter_ele.atLeastN = cms.int32(1)
+process.GenParticleFilter_ele.pdgIds = cms.vint32(11)
+process.GenParticleFilter_ele.minPt = cms.double(10)
 process.GenParticleFilter_ele.minEta = cms.double(1.479)
-process.GenParticleFilter_ele.maxEta = cms.double(3.0)
+process.GenParticleFilter_ele.maxEta = cms.double(3.1)
+process.GenParticleFilter_ele.isGunSample = cms.bool(bool(options.isGunSample))
+#process.GenParticleFilter_ele.debug = cms.bool(True)
+
+process.filter_seq_genEle = cms.Sequence()
+
+if (options.genEleFilter) :
+
+    process.filter_seq_genEle = cms.Sequence(process.GenParticleFilter_ele)
 
 
-process.filter_seq = cms.Sequence(
-    process.GenParticleFilter_ele
-)
+process.GenParticleFilter_part = GenParticleFilter.clone()
+process.GenParticleFilter_part.atLeastN = cms.int32(1)
+process.GenParticleFilter_part.pdgIds = cms.vint32(1, 2, 3, 4, 5, 21)
+process.GenParticleFilter_part.minPt = cms.double(10)
+process.GenParticleFilter_part.minEta = cms.double(1.479)
+process.GenParticleFilter_part.maxEta = cms.double(3.1)
+process.GenParticleFilter_part.isGunSample = cms.bool(bool(options.isGunSample))
+process.GenParticleFilter_part.debug = cms.bool(True)
+
+process.filter_seq_genPart = cms.Sequence()
+
+if (options.genPartonFilter) :
+
+    process.filter_seq_genPart = cms.Sequence(process.GenParticleFilter_part)
+
+
+
+#process.filter_path = cms.Path(
+#    process.filter_seq_genEle *
+#    process.filter_seq_genPart
+#)
 
 
 # Output file name modification
@@ -593,7 +651,11 @@ process.PixelCPEGenericESProducer.Upgrade = cms.bool(True)
 
 
 process.p = cms.Path(
-    process.filter_seq *
+    #process.filter_seq *
+    
+    process.filter_seq_genEle *
+    process.filter_seq_genPart *
+    
     process.reco_seq *
     process.TICLele_seq *
     process.treeMaker
