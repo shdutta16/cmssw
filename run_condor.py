@@ -73,6 +73,13 @@ parser.add_argument(
     default = -1,
 )
 
+parser.add_argument(
+    "--test",
+    help = "Only create job files (do not submit)",
+    default = False,
+    action = "store_true",
+)
+
 
 # Parse arguments
 args = parser.parse_args()
@@ -248,10 +255,12 @@ if (__name__ == "__main__") :
         
         commandReturn = 1
         
-        # Repeat until job is submission is successful (returns 0)
-        while (commandReturn) :
+        if (not args.test) :
             
-            commandReturn = os.system(command)
+            # Repeat until job is submission is successful (returns 0)
+            while (commandReturn) :
+                
+                commandReturn = os.system(command)
         
         
         print "\n"

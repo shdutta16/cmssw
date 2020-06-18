@@ -192,6 +192,13 @@ options.register("memoryCheck",
     "Check memory usage" # Description
 )
 
+options.register("printTime",
+    0, # Default value
+    VarParsing.VarParsing.multiplicity.singleton, # singleton or list
+    VarParsing.VarParsing.varType.int, # string, int, or float
+    "Print timing information" # Description
+)
+
 options.register("depGraph",
     0, # Default value
     VarParsing.VarParsing.multiplicity.singleton, # singleton or list
@@ -574,7 +581,7 @@ process.GenParticleFilter_part.minPt = cms.double(10)
 process.GenParticleFilter_part.minEta = cms.double(1.479)
 process.GenParticleFilter_part.maxEta = cms.double(3.1)
 process.GenParticleFilter_part.isGunSample = cms.bool(bool(options.isGunSample))
-process.GenParticleFilter_part.debug = cms.bool(True)
+#process.GenParticleFilter_part.debug = cms.bool(True)
 
 process.filter_seq_genPart = cms.Sequence()
 
@@ -588,6 +595,10 @@ if (options.genPartonFilter) :
 #    process.filter_seq_genEle *
 #    process.filter_seq_genPart
 #)
+
+
+print "Deleting existing output file."
+os.system("rm %s" %(outFile))
 
 
 # Output file name modification
@@ -683,6 +694,15 @@ if (options.memoryCheck) :
     process.SimpleMemoryCheck = cms.Service(
         "SimpleMemoryCheck",
         moduleMemorySummary = cms.untracked.bool(True),
+    )
+
+
+#Timing
+if (options.printTime) :
+
+    process.Timing = cms.Service("Timing",
+        summaryOnly = cms.untracked.bool(False),
+        useJobReport = cms.untracked.bool(True)
     )
 
 

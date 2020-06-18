@@ -11,4 +11,6 @@ sourceFiles/QCD_Pt-15to3000_TuneCP5_Flat_14TeV-pythia8_Phase2HLTTDRWinter20DIGI-
     modTICLeleWithRerunTICL=1 \
     rerunTICL=1 \
     onRaw=1 \
-    maxEvents=10 \
+    printTime=1 \
+    eventRange="1:4538-1:4538" \
+    maxEvents=1 \
