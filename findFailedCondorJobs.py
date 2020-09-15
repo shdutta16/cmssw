@@ -71,6 +71,7 @@ retValStr_end = ")"
 
 jobSubStr = "Job submitted"
 jobRmvStr = "Job removed"
+jobAbortStr = "Job was aborted"
 
 condorConfig_nameTemplate = "condor_config_%s.sub"
 command_template = "condor_submit %s"
@@ -80,6 +81,7 @@ nJob_total = 0
 nJob_succ = 0
 nJob_fail = 0
 nJob_rmvd = 0
+nJob_abrt = 0
 
 # Check if all the directories exist
 for iDir in range(0, len(l_directory)) :
@@ -127,6 +129,8 @@ for iDir in range(0, len(l_directory)) :
         isRemoved = False
         rmvLine = ""
         
+        isAborted = False
+        
         
         # N.B. Log files are appended to (not overwritten) on resubmitting the job
         # Hence use the last occurence of the job summary
@@ -144,33 +148,44 @@ for iDir in range(0, len(l_directory)) :
                 isRemoved = True
                 rmvLine = line.strip()
             
-           # The job must not have been resubmitted
+            # Check for aborted jobs
+            if (jobAbortStr in line) :
+                
+                hasCompleted = True
+                isRemoved = False
+                isAborted = True
+            
+            # The job must not have been resubmitted
             if (jobSubStr in line) :
                 
-                isRemoved = False
                 hasCompleted = False
+                isRemoved = False
+                isAborted = False
                 
         
         
         if (not hasCompleted) :
             
+            #print "#"*10, fileName
+            #exit(0)
+            
             continue
         
         
-        if (not isRemoved) :
+        if (not isRemoved and not isAborted) :
             
             retValStr = retValStr[retValStr.find(retValStr_start) + len(retValStr_start):]
             retValStr = retValStr[: retValStr.find(retValStr_end)]
             
             retVal = int(retValStr)
         
-        hasError = bool(retVal) or isRemoved
+        hasError = bool(retVal) or isRemoved or isAborted
         
         
         nJob_succ += int(not hasError)
-        nJob_fail += int(hasError and not isRemoved)
+        nJob_fail += int(hasError and not isRemoved and not isAborted)
         nJob_rmvd += int(isRemoved)
-        
+        nJob_abrt += int(isAborted)
         
         hasPrinted = False
         
@@ -185,13 +200,17 @@ for iDir in range(0, len(l_directory)) :
             command = command_template %(condorConfig_name)
             
             print "Count:", count
-            print "Total count:", nJob_fail+nJob_rmvd
+            print "Total count:", nJob_fail+nJob_rmvd+nJob_abrt
             print "File:", fileName
             
             if (isRemoved) :
                 
                 print rmvLine
+            
+            elif (isAborted) :
                 
+                print "Job aborted."
+            
             else :
                 
                 print "Return value: %d" %(retVal)
@@ -227,4 +246,5 @@ print "\n"
 print "Total number of succeeded jobs: %0*d/%d" %(nDigit, nJob_succ, nJob_total)
 print "Total number of failed jobs   : %0*d/%d" %(nDigit, nJob_fail, nJob_total)
 print "Total number of removed jobs  : %0*d/%d" %(nDigit, nJob_rmvd, nJob_total)
+print "Total number of aborted jobs  : %0*d/%d" %(nDigit, nJob_abrt, nJob_total)
 print "\n"

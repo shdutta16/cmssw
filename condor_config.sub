@@ -26,4 +26,7 @@ request_memory = 6GB
 #+MaxRuntime = 172800
 +MaxRuntime = 259200
 
+# High priority Condor
++AccountingGroup = "group_u_CMS.u_zh.priority"
+
 queue

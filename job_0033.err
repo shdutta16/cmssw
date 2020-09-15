@@ -1,0 +1,157 @@
+Could not find platform independent libraries <prefix>
+Could not find platform dependent libraries <exec_prefix>
+Consider setting $PYTHONHOME to <prefix>[:<exec_prefix>]
+ImportError: No module named site
+19-Jun-2020 06:53:59 CEST  Initiating request to open file root://se01.indiacms.res.in//store/mc/Phase2HLTTDRWinter20DIGI/TTToSemiLepton_TuneCP5_14TeV-powheg-pythia8/GEN-SIM-DIGI-RAW/PU200_110X_mcRun4_realistic_v3-v2/50000/D0E94641-81BD-DB4A-9993-AE62150B3CF8.root
+19-Jun-2020 06:54:13 CEST  Successfully opened file root://se01.indiacms.res.in//store/mc/Phase2HLTTDRWinter20DIGI/TTToSemiLepton_TuneCP5_14TeV-powheg-pythia8/GEN-SIM-DIGI-RAW/PU200_110X_mcRun4_realistic_v3-v2/50000/D0E94641-81BD-DB4A-9993-AE62150B3CF8.root
+2020-06-19 06:55:21.590783: I tensorflow/core/platform/cpu_feature_guard.cc:140] Your CPU supports instructions that this TensorFlow binary was not compiled to use: SSE4.1 SSE4.2 AVX AVX2 AVX512F FMA
+Begin processing the 1st record. Run 1, Event 185816, LumiSection 1177 on stream 0 at 19-Jun-2020 06:56:32.482 CEST
+%MSG-e TooManyClusters:   PhotonConversionTrajectorySeedProducerFromSingleLeg:photonConvTrajSeedFromSingleLeg  19-Jun-2020 06:57:58 CEST Run: 1 Event: 185816
+Found too many clusters (167965), bailing out.
+
+%MSG
+Begin processing the 2nd record. Run 1, Event 185810, LumiSection 1177 on stream 0 at 19-Jun-2020 06:59:16.705 CEST
+%MSG-e TooManyClusters:   PhotonConversionTrajectorySeedProducerFromSingleLeg:photonConvTrajSeedFromSingleLeg  19-Jun-2020 07:00:42 CEST Run: 1 Event: 185810
+Found too many clusters (177032), bailing out.
+
+%MSG
+Begin processing the 3rd record. Run 1, Event 185817, LumiSection 1177 on stream 0 at 19-Jun-2020 07:02:05.500 CEST
+%MSG-e TooManyClusters:   PhotonConversionTrajectorySeedProducerFromSingleLeg:photonConvTrajSeedFromSingleLeg  19-Jun-2020 07:03:32 CEST Run: 1 Event: 185817
+Found too many clusters (173257), bailing out.
+
+%MSG
+Begin processing the 4th record. Run 1, Event 185811, LumiSection 1177 on stream 0 at 19-Jun-2020 07:04:54.193 CEST
+%MSG-e TooManyClusters:   PhotonConversionTrajectorySeedProducerFromSingleLeg:photonConvTrajSeedFromSingleLeg  19-Jun-2020 07:07:13 CEST Run: 1 Event: 185811
+Found too many clusters (210759), bailing out.
+
+%MSG
+Begin processing the 5th record. Run 1, Event 185812, LumiSection 1177 on stream 0 at 19-Jun-2020 07:09:34.651 CEST
+%MSG-e TooManyClusters:   PhotonConversionTrajectorySeedProducerFromSingleLeg:photonConvTrajSeedFromSingleLeg  19-Jun-2020 07:11:04 CEST Run: 1 Event: 185812
+Found too many clusters (170070), bailing out.
+
+%MSG
+Begin processing the 6th record. Run 1, Event 185814, LumiSection 1177 on stream 0 at 19-Jun-2020 07:12:25.902 CEST
+[2020-06-19 07:14:02.310986 +0200][Error  ][PostMaster        ] [eoscms.cern.ch:1094 #0] Forcing error on disconnect: [ERROR] Operation interrupted.
+%MSG-w TooManyPFDVCandidates:   PFDisplacedVertexProducer:particleFlowDisplacedVertex  19-Jun-2020 07:14:22 CEST Run: 1 Event: 185814
+gave up vertex reco for 1010 tracks
+%MSG
+%MSG-e TooManyClusters:   PhotonConversionTrajectorySeedProducerFromSingleLeg:photonConvTrajSeedFromSingleLeg  19-Jun-2020 07:15:13 CEST Run: 1 Event: 185814
+Found too many clusters (205307), bailing out.
+
+%MSG
+[2020-06-19 07:17:24.249156 +0200][Error  ][PostMaster        ] [cmsxrootd-1.gridka.de:2094 #0] Forcing error on disconnect: [ERROR] Operation interrupted.
+[2020-06-19 07:17:24.249321 +0200][Error  ][PostMaster        ] [cmsxrootd-kit.gridka.de:1094 #0] Forcing error on disconnect: [ERROR] Operation interrupted.
+Begin processing the 7th record. Run 1, Event 185815, LumiSection 1177 on stream 0 at 19-Jun-2020 07:17:56.031 CEST
+Begin processing the 8th record. Run 1, Event 185809, LumiSection 1177 on stream 0 at 19-Jun-2020 07:17:58.827 CEST
+%MSG-e TooManyClusters:   PhotonConversionTrajectorySeedProducerFromSingleLeg:photonConvTrajSeedFromSingleLeg  19-Jun-2020 07:19:21 CEST Run: 1 Event: 185809
+Found too many clusters (165328), bailing out.
+
+%MSG
+Begin processing the 9th record. Run 1, Event 185821, LumiSection 1177 on stream 0 at 19-Jun-2020 07:20:27.432 CEST
+%MSG-e TooManyClusters:   PhotonConversionTrajectorySeedProducerFromSingleLeg:photonConvTrajSeedFromSingleLeg  19-Jun-2020 07:22:00 CEST Run: 1 Event: 185821
+Found too many clusters (175733), bailing out.
+
+%MSG
+Begin processing the 10th record. Run 1, Event 185813, LumiSection 1177 on stream 0 at 19-Jun-2020 07:23:20.927 CEST
+%MSG-e TooManyClusters:   PhotonConversionTrajectorySeedProducerFromSingleLeg:photonConvTrajSeedFromSingleLeg  19-Jun-2020 07:25:50 CEST Run: 1 Event: 185813
+Found too many clusters (200796), bailing out.
+
+%MSG
+Begin processing the 11th record. Run 1, Event 185819, LumiSection 1177 on stream 0 at 19-Jun-2020 07:27:58.700 CEST
+Begin processing the 12th record. Run 1, Event 185820, LumiSection 1177 on stream 0 at 19-Jun-2020 07:28:01.413 CEST
+%MSG-e TooManyClusters:   PhotonConversionTrajectorySeedProducerFromSingleLeg:photonConvTrajSeedFromSingleLeg  19-Jun-2020 07:29:02 CEST Run: 1 Event: 185820
+Found too many clusters (142335), bailing out.
+
+%MSG
+Begin processing the 13th record. Run 1, Event 185825, LumiSection 1177 on stream 0 at 19-Jun-2020 07:30:01.805 CEST
+%MSG-e TooManyClusters:   PhotonConversionTrajectorySeedProducerFromSingleLeg:photonConvTrajSeedFromSingleLeg  19-Jun-2020 07:33:16 CEST Run: 1 Event: 185825
+Found too many clusters (218657), bailing out.
+
+%MSG
+%MSG-w MakeMuonWithTEV:  MuonIdProducer:muons1stStep 19-Jun-2020 07:35:04 CEST  Run: 1 Event: 185825
+Failed to get  TEV refits, fall back to sigma switch.
+%MSG
+[2020-06-19 07:35:13.176314 +0200][Error  ][PostMaster        ] [cmsxrootd-1.gridka.de:2094 #0] Forcing error on disconnect: [ERROR] Operation interrupted.
+[2020-06-19 07:35:13.176501 +0200][Error  ][PostMaster        ] [cmsxrootd-kit.gridka.de:1094 #0] Forcing error on disconnect: [ERROR] Operation interrupted.
+Begin processing the 14th record. Run 1, Event 185823, LumiSection 1177 on stream 0 at 19-Jun-2020 07:36:06.540 CEST
+[2020-06-19 07:41:05.785788 +0200][Error  ][PostMaster        ] [cmsxrootd-1.gridka.de:2094 #0] Forcing error on disconnect: [ERROR] Operation interrupted.
+[2020-06-19 07:41:20.850172 +0200][Error  ][PostMaster        ] [cmsxrootd-kit.gridka.de:1094 #0] Forcing error on disconnect: [ERROR] Operation interrupted.
+[2020-06-19 07:56:00.717332 +0200][Error  ][PostMaster        ] [se01.indiacms.res.in:1094 #0] Forcing error on disconnect: [ERROR] Operation interrupted.
+[2020-06-19 07:56:00.717680 +0200][Error  ][PostMaster        ] [se01.indiacms.res.in:11011 #0] Forcing error on disconnect: [ERROR] Operation interrupted.
+[2020-06-19 07:56:00.717825 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1094 #0] Forcing error on disconnect: [ERROR] Operation interrupted.
+[2020-06-19 07:56:06.742319 +0200][Error  ][PostMaster        ] [cmsxrootd-1.gridka.de:1094 #0] Forcing error on disconnect: [ERROR] Operation interrupted.
+%MSG-w TooManyPFDVCandidates:   PFDisplacedVertexProducer:particleFlowDisplacedVertex  19-Jun-2020 08:52:14 CEST Run: 1 Event: 185823
+gave up vertex reco for 1202 tracks
+%MSG
+%MSG-e TooManyClusters:   PhotonConversionTrajectorySeedProducerFromSingleLeg:photonConvTrajSeedFromSingleLeg  19-Jun-2020 08:53:11 CEST Run: 1 Event: 185823
+Found too many clusters (252944), bailing out.
+
+%MSG
+[2020-06-19 08:59:58.520253 +0200][Error  ][XRootD            ] [dpms22.indiacms.res.in:1095] Unable to get the response to request kXR_readv (handle: 0x00000000, chunks: 52, total size: 23082464)
+[2020-06-19 08:59:59.763885 +0200][Error  ][XRootDTransport   ] [dpms22.indiacms.res.in:1095 #0.0] Got error response to kXR_endsess: not session owner
+[2020-06-19 08:59:59.764009 +0200][Error  ][AsyncSock         ] [dpms22.indiacms.res.in:1095 #0.0] Socket error while handshaking: [FATAL] Hand shake failed
+[2020-06-19 08:59:59.764132 +0200][Error  ][PostMaster        ] [dpms22.indiacms.res.in:1095 #0] elapsed = 1, pConnectionWindow = 31 seconds.
+[2020-06-19 09:00:02.776116 +0200][Error  ][File              ] [0xe0181d80@root://se01.indiacms.res.in:1094//store/mc/Phase2HLTTDRWinter20DIGI/TTToSemiLepton_TuneCP5_14TeV-powheg-pythia8/GEN-SIM-DIGI-RAW/PU200_110X_mcRun4_realistic_v3-v2/50000/D0E94641-81BD-DB4A-9993-AE62150B3CF8.root] Fatal file state error. Message kXR_readv (handle: 0x00000000, chunks: 52, total size: 23082464) returned with [ERROR] Operation expired
+%MSG-w XrdAdaptorInternal:  (NoModuleName) 19-Jun-2020 09:00:02 CEST pre-events
+XrdRequestManager::handle(name='root://se01.indiacms.res.in//store/mc/Phase2HLTTDRWinter20DIGI/TTToSemiLepton_TuneCP5_14TeV-powheg-pythia8/GEN-SIM-DIGI-RAW/PU200_110X_mcRun4_realistic_v3-v2/50000/D0E94641-81BD-DB4A-9993-AE62150B3CF8.root) failure when reading from dpms22.indiacms.res.in:1095 (unknown site); failed with error '[ERROR] Operation expired' (errno=0, code=206).
+%MSG
+%MSG-w XrdAdaptorInternal:  (NoModuleName) 19-Jun-2020 09:00:02 CEST pre-events
+Request failure when reading from dpms22.indiacms.res.in:1095 (unknown site)
+%MSG
+%MSG-w XrdAdaptor:  (NoModuleName) 19-Jun-2020 09:00:02 CEST pre-events
+Data is now served from  instead of previous indiacms.res.in
+%MSG
+%MSG-w XrdAdaptorInternal:  (NoModuleName) 19-Jun-2020 09:00:08 CEST pre-events
+Caught a CMSSW exception when running connection recovery.
+%MSG
+----- Begin Fatal Exception 19-Jun-2020 09:00:08 CEST-----------------------
+An exception of category 'FileReadError' occurred while
+   [0] Calling InputSource::readEvent_
+   [1] Reading branch EventSelections
+   [2] Calling XrdFile::readv()
+   [3] XrdAdaptor::ClientRequest::HandleResponse() failure while running connection recovery
+   [4] Handling XrdAdaptor::RequestManager::requestFailure()
+   [5] In XrdAdaptor::RequestManager::OpenHandler::HandleResponseWithHosts()
+Exception Message:
+XrdCl::File::Open(name='root://se01.indiacms.res.in//store/mc/Phase2HLTTDRWinter20DIGI/TTToSemiLepton_TuneCP5_14TeV-powheg-pythia8/GEN-SIM-DIGI-RAW/PU200_110X_mcRun4_realistic_v3-v2/50000/D0E94641-81BD-DB4A-9993-AE62150B3CF8.root', flags=0x10, permissions=0660) => error '[ERROR] Server responded with an error: [3006] Invalid opaque data: Bad user name.
+' (errno=3006, code=400)
+   Additional Info:
+      [a] Original error: '[ERROR] Operation expired' (errno=0, code=206, source=dpms22.indiacms.res.in:1095 (unknown site)).
+      [b] Original failed source is dpms22.indiacms.res.in:1095 (unknown site)
+      [c] Disabled source: dpms22.indiacms.res.in:1095
+----- End Fatal Exception -------------------------------------------------
+19-Jun-2020 09:00:09 CEST  Closed file root://se01.indiacms.res.in//store/mc/Phase2HLTTDRWinter20DIGI/TTToSemiLepton_TuneCP5_14TeV-powheg-pythia8/GEN-SIM-DIGI-RAW/PU200_110X_mcRun4_realistic_v3-v2/50000/D0E94641-81BD-DB4A-9993-AE62150B3CF8.root
+
+=============================================
+
+MessageLogger Summary
+
+ type     category        sev    module        subroutine        count    total
+ ---- -------------------- -- ---------------- ----------------  -----    -----
+    1 MakeMuonWithTEV      -w MuonIdProducer:m                       1        1
+    2 TooManyPFDVCandidate -w PFDisplacedVerte                       2        2
+    3 XrdAdaptor           -w (NoModuleName)                         1        1
+    4 XrdAdaptorInternal   -w (NoModuleName)                         3        3
+    5 TooManyClusters      -e PhotonConversion                      12       12
+    6 Fatal Exception      -s source                                 1        1
+    7 fileAction           -s file_close                             1        1
+    8 fileAction           -s file_open                              2        2
+
+ type    category    Examples: run/evt        run/evt          run/evt
+ ---- -------------------- ---------------- ---------------- ----------------
+    1 MakeMuonWithTEV      1/185825                          
+    2 TooManyPFDVCandidates 1/185814         1/185823         
+    3 XrdAdaptor           pre-events                        
+    4 XrdAdaptorInternal   pre-events       pre-events       pre-events
+    5 TooManyClusters      1/185816         1/185810         1/185823
+    6 Fatal Exception      PostProcessEvent                  
+    7 fileAction           PostGlobalEndRun                  
+    8 fileAction           pre-events       pre-events       
+
+Severity    # Occurrences   Total Occurrences
+--------    -------------   -----------------
+Warning                 7                   7
+Error                  12                  12
+System                  4                   4
+
+dropped waiting message count 0

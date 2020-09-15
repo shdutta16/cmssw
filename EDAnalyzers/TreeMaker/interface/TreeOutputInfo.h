@@ -432,6 +432,8 @@ namespace TreeOutputInfo
             std::vector <double> v_iso_sumETratio_ecal;
             std::vector <double> v_iso_sumETratio_hcal;
             
+            std::vector <double> v_iso_trackSumPt;
+            
             std::vector <double> v_HoverE;
             
             //std::vector <double> v_iso_pfCand1_PV_dtSigni;
@@ -452,6 +454,8 @@ namespace TreeOutputInfo
                 v_iso_sumETratio_neutral.clear();
                 v_iso_sumETratio_ecal.clear();
                 v_iso_sumETratio_hcal.clear();
+                
+                v_iso_trackSumPt.clear();
                 
                 v_HoverE.clear();
                 
@@ -1500,6 +1504,10 @@ namespace TreeOutputInfo
             //
             //sprintf(name, "%s_iso_sumETratio_hcal_%s"objName.c_str(), suffix.c_str());
             //tree->Branch(name, &isoVarContent->v_iso_sumETratio_hcal);
+            
+            
+            sprintf(name, "%s_iso_trackSumPt_%s", objName.c_str(), suffix.c_str());
+            tree->Branch(name, &isoVarContent->v_iso_trackSumPt);
             
             
             //

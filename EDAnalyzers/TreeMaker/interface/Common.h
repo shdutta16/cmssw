@@ -140,10 +140,13 @@ namespace Common
         std::vector <DetId> v_hit_detId,
         std::vector <std::pair <DetId, float> > v_HandF,
         std::map <DetId, const HGCRecHit*> m_hit,
+        hgcal::RecHitTools *recHitTools,
+        bool normCellSize,
         bool useHandF = false
     )
     {
         double totalE = 0;
+        double totalW = 0;
         
         for(int iHit = 0; iHit < (int) v_hit_detId.size(); iHit++)
         {
@@ -177,6 +180,17 @@ namespace Common
             //
             //totalE += energy;
             
+            double w = 1.0;
+            
+            if(normCellSize)
+            {
+                double cellSize = recHitTools->getRadiusToSide(v_hit_detId.at(iHit));
+                
+                w = 1.0 / (cellSize*cellSize);
+            }
+            
+            totalW += w;
+            
             for(int iHandF = 0; iHandF < (int) v_HandF.size(); iHandF++)
             {
                 std::pair <DetId, float> HandF = v_HandF.at(iHandF);
@@ -185,7 +199,9 @@ namespace Common
                 {
                     double energy = m_hit.at(iHit_detId)->energy() * HandF.second;
                     
-                    totalE += energy;
+                    totalE += w * energy;
+                    
+                    break;
                 }
             }
             
@@ -220,6 +236,11 @@ namespace Common
         //
         //printf("totalE %0.2f, totalE_test %0.2f \n", totalE, totalE_test);
         
+        if(totalW)
+        {
+            totalE = totalE / totalW * (double) v_hit_detId.size();
+        }
+        
         return totalE;
     }
     
@@ -228,6 +249,8 @@ namespace Common
         std::vector <std::pair <DetId, float> > v_hit_HandF,
         std::vector <std::pair <DetId, float> > v_HandF,
         std::map <DetId, const HGCRecHit*> m_hit,
+        hgcal::RecHitTools *recHitTools,
+        bool normCellSize,
         bool useHandF = false
     )
     {
@@ -242,6 +265,8 @@ namespace Common
             v_hit_detId,
             v_HandF,
             m_hit,
+            recHitTools,
+            normCellSize,
             useHandF
         );
     }

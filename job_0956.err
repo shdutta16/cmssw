@@ -1,0 +1,350 @@
+Could not find platform independent libraries <prefix>
+Could not find platform dependent libraries <exec_prefix>
+Consider setting $PYTHONHOME to <prefix>[:<exec_prefix>]
+ImportError: No module named site
+rm: cannot remove '/eos/cms/store/group/phys_egamma/sobhatta/HGCal_TreeMaker/TreeMaker_TTToSemiLepton_TuneCP5_14TeV-powheg-pythia8_Phase2HLTTDRWinter20DIGI-PU200_110X_mcRun4_realistic_v3-v2_GEN-SIM-DIGI-RAW/ntupleTree_rerunTICL_modTICLeleWithRerunTICL_onRaw_956.root': No such file or directory
+19-Jun-2020 01:42:12 CEST  Initiating request to open file root://cms-xrd-global.cern.ch//store/mc/Phase2HLTTDRWinter20DIGI/TTToSemiLepton_TuneCP5_14TeV-powheg-pythia8/GEN-SIM-DIGI-RAW/PU200_110X_mcRun4_realistic_v3-v2/50001/3E939472-C6FA-0F43-B950-CCEC73DC20DA.root
+%MSG-w XrdAdaptor:  file_open 19-Jun-2020 01:42:14 CEST pre-events
+Data is served from [2a00 instead of original site CERN-CMSGLOBAL-02
+%MSG
+19-Jun-2020 01:42:23 CEST  Successfully opened file root://cms-xrd-global.cern.ch//store/mc/Phase2HLTTDRWinter20DIGI/TTToSemiLepton_TuneCP5_14TeV-powheg-pythia8/GEN-SIM-DIGI-RAW/PU200_110X_mcRun4_realistic_v3-v2/50001/3E939472-C6FA-0F43-B950-CCEC73DC20DA.root
+[2020-06-19 01:42:23.890199 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:42:23.890338 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:42:23.908601 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:42:23.908699 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:42:23.949997 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:42:23.950090 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:42:23.977783 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:42:23.977896 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:42:24.015893 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:42:24.015990 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 1, pConnectionWindow = 31 seconds.
+[2020-06-19 01:42:24.064583 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:42:24.064685 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:42:24.113486 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:42:24.113603 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:42:55.743593 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:42:56.051599 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 1, pConnectionWindow = 31 seconds.
+[2020-06-19 01:42:56.079708 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:42:56.079826 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:42:56.113351 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:42:56.113589 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:42:56.150725 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:42:56.150832 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:42:56.180356 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:42:56.180458 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:42:56.205830 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:42:56.205954 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:42:56.247191 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:42:56.247295 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:42:56.247365 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] Unable to recover: [ERROR] Socket error: Connection reset by peer.
+[2020-06-19 01:42:56.247392 +0200][Error  ][XRootD            ] [xrootd-cms.infn.it:1213] Impossible to send message kXR_open (file: /store/mc/Phase2HLTTDRWinter20DIGI/TTToSemiLepton_TuneCP5_14TeV-powheg-pythia8/GEN-SIM-DIGI-RAW/PU200_110X_mcRun4_realistic_v3-v2/50001/3E939472-C6FA-0F43-B950-CCEC73DC20DA.root?tried=+1213cmsxrootd-11213cmsxrootd-2.gridka.de,cmsxrootd-1.gridka.de, mode: 0660, flags: kXR_open_read kXR_async kXR_retstat ). Trying to recover.
+%MSG-w XrdAdaptor:  (NoModuleName) 19-Jun-2020 01:43:00 CEST pre-events
+Data is now served from [2a00, indiacms.res.in instead of previous [2a00
+%MSG
+2020-06-19 01:44:23.099636: I tensorflow/core/platform/cpu_feature_guard.cc:140] Your CPU supports instructions that this TensorFlow binary was not compiled to use: SSE4.1 SSE4.2 AVX AVX2 FMA
+Begin processing the 1st record. Run 1, Event 99699, LumiSection 632 on stream 0 at 19-Jun-2020 01:46:16.556 CEST
+%MSG-w XrdAdaptor:  PostModuleEvent 19-Jun-2020 01:46:17 CEST PostProcessEvent
+Data is now served from [2a00 instead of previous [2a00, indiacms.res.in
+%MSG
+Begin processing the 2nd record. Run 1, Event 99704, LumiSection 632 on stream 0 at 19-Jun-2020 01:46:22.489 CEST
+[2020-06-19 01:47:28.942166 +0200][Error  ][PostMaster        ] [cmsxrootd-1.gridka.de:2094 #0] Forcing error on disconnect: [ERROR] Operation interrupted.
+[2020-06-19 01:47:29.947556 +0200][Error  ][PostMaster        ] [cmsxrootd-kit.gridka.de:1094 #0] Forcing error on disconnect: [ERROR] Operation interrupted.
+%MSG-e TooManyClusters:   PhotonConversionTrajectorySeedProducerFromSingleLeg:photonConvTrajSeedFromSingleLeg  19-Jun-2020 01:48:39 CEST Run: 1 Event: 99704
+Found too many clusters (177602), bailing out.
+
+%MSG
+Begin processing the 3rd record. Run 1, Event 99701, LumiSection 632 on stream 0 at 19-Jun-2020 01:49:50.030 CEST
+[2020-06-19 01:49:50.152503 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:49:50.152652 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:49:50.170230 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:49:50.170360 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:49:50.199198 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:49:50.199318 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:49:50.237597 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:49:50.237749 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:49:50.258588 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:49:50.258698 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:49:50.276533 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:49:50.276622 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:49:50.305649 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:49:50.305761 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+%MSG-e AnalyticalPropagator:  TrackProducer:lowPtQuadStepTracks  19-Jun-2020 01:50:20 CEST Run: 1 Event: 99701
+LOGIC ERROR: I should not have entered here!
+
+%MSG
+[2020-06-19 01:50:21.878817 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:50:21.878964 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:50:21.896838 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:50:21.896945 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:50:21.926349 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:50:21.926470 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:50:21.946707 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:50:21.946809 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:50:21.984165 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:50:21.984270 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:50:22.009769 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:50:22.009852 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 1, pConnectionWindow = 31 seconds.
+[2020-06-19 01:50:22.039046 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:50:22.039153 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:50:22.039175 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] Unable to recover: [ERROR] Socket error: Connection reset by peer.
+[2020-06-19 01:50:22.039190 +0200][Error  ][XRootD            ] [xrootd-cms.infn.it:1213] Impossible to send message kXR_open (file: /store/mc/Phase2HLTTDRWinter20DIGI/TTToSemiLepton_TuneCP5_14TeV-powheg-pythia8/GEN-SIM-DIGI-RAW/PU200_110X_mcRun4_realistic_v3-v2/50001/3E939472-C6FA-0F43-B950-CCEC73DC20DA.root?tried=+1213cmsxrootd-11213cmsxrootd-2.gridka.de,cmsxrootd-1.gridka.de,dpms29.indiacms.res.in, mode: 0660, flags: kXR_open_read kXR_async kXR_retstat ). Trying to recover.
+%MSG-e TooManyClusters:   PhotonConversionTrajectorySeedProducerFromSingleLeg:photonConvTrajSeedFromSingleLeg  19-Jun-2020 01:51:02 CEST Run: 1 Event: 99701
+Found too many clusters (171555), bailing out.
+
+%MSG
+Begin processing the 4th record. Run 1, Event 99703, LumiSection 632 on stream 0 at 19-Jun-2020 01:51:59.549 CEST
+Begin processing the 5th record. Run 1, Event 99702, LumiSection 632 on stream 0 at 19-Jun-2020 01:51:59.555 CEST
+Begin processing the 6th record. Run 1, Event 99705, LumiSection 632 on stream 0 at 19-Jun-2020 01:51:59.562 CEST
+%MSG-e TooManyClusters:   PhotonConversionTrajectorySeedProducerFromSingleLeg:photonConvTrajSeedFromSingleLeg  19-Jun-2020 01:53:08 CEST Run: 1 Event: 99705
+Found too many clusters (168087), bailing out.
+
+%MSG
+Begin processing the 7th record. Run 1, Event 99708, LumiSection 632 on stream 0 at 19-Jun-2020 01:54:05.173 CEST
+[2020-06-19 01:54:10.983740 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:54:10.983862 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:54:11.004056 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:54:11.004164 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 1, pConnectionWindow = 31 seconds.
+[2020-06-19 01:54:11.032848 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:54:11.032950 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:54:11.072153 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:54:11.072286 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:54:11.096199 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:54:11.096331 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:54:11.124959 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:54:11.125068 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:54:11.145342 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:54:11.145450 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:54:42.983305 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:54:42.983437 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:54:50.029668 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:54:50.029779 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 8, pConnectionWindow = 31 seconds.
+[2020-06-19 01:54:50.050016 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:54:50.050135 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:54:50.087409 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:54:50.087490 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:54:50.111644 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:54:50.111758 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:54:50.131824 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:54:50.131910 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:54:50.161100 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 01:54:50.161208 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 01:54:50.161233 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] Unable to recover: [ERROR] Socket error: Connection reset by peer.
+[2020-06-19 01:54:50.161262 +0200][Error  ][XRootD            ] [xrootd-cms.infn.it:1213] Impossible to send message kXR_open (file: /store/mc/Phase2HLTTDRWinter20DIGI/TTToSemiLepton_TuneCP5_14TeV-powheg-pythia8/GEN-SIM-DIGI-RAW/PU200_110X_mcRun4_realistic_v3-v2/50001/3E939472-C6FA-0F43-B950-CCEC73DC20DA.root?tried=+1213cmsxrootd-11213cmsxrootd-2.gridka.de,cmsxrootd-1.gridka.de,dpms29.indiacms.res.in, mode: 0460, flags: kXR_open_read kXR_async kXR_retstat ). Trying to recover.
+%MSG-e TooManyClusters:   PhotonConversionTrajectorySeedProducerFromSingleLeg:photonConvTrajSeedFromSingleLeg  19-Jun-2020 01:55:36 CEST Run: 1 Event: 99708
+Found too many clusters (191077), bailing out.
+
+%MSG
+Begin processing the 8th record. Run 1, Event 99707, LumiSection 632 on stream 0 at 19-Jun-2020 01:56:52.242 CEST
+%MSG-e TooManyClusters:   PhotonConversionTrajectorySeedProducerFromSingleLeg:photonConvTrajSeedFromSingleLeg  19-Jun-2020 01:59:55 CEST Run: 1 Event: 99707
+Found too many clusters (196817), bailing out.
+
+%MSG
+Begin processing the 9th record. Run 1, Event 99713, LumiSection 632 on stream 0 at 19-Jun-2020 02:01:34.149 CEST
+[2020-06-19 02:01:44.088210 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:01:44.088312 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:01:44.117218 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:01:44.117338 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:01:44.137476 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:01:44.137578 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:01:44.157610 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:01:44.157689 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:01:44.186497 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:01:44.186610 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:01:44.204378 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:01:44.204457 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:01:44.241696 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:01:44.241811 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:02:00.312176 +0200][Error  ][PostMaster        ] [eoscms.cern.ch:1094 #0] Forcing error on disconnect: [ERROR] Operation interrupted.
+[2020-06-19 02:02:15.078925 +0200][Error  ][PostMaster        ] [cmsxrootd-1.gridka.de:1094 #0] Forcing error on disconnect: [ERROR] Operation interrupted.
+[2020-06-19 02:02:15.093674 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:02:15.093787 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:02:15.113972 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:02:15.114069 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:02:15.131648 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:02:15.131758 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:02:15.169138 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:02:15.169282 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:02:15.198494 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:02:15.198634 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:02:15.219646 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:02:15.219747 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:02:15.237827 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:02:15.237929 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:02:15.237952 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] Unable to recover: [ERROR] Socket error: Connection reset by peer.
+[2020-06-19 02:02:15.237968 +0200][Error  ][XRootD            ] [xrootd-cms.infn.it:1213] Impossible to send message kXR_open (file: /store/mc/Phase2HLTTDRWinter20DIGI/TTToSemiLepton_TuneCP5_14TeV-powheg-pythia8/GEN-SIM-DIGI-RAW/PU200_110X_mcRun4_realistic_v3-v2/50001/3E939472-C6FA-0F43-B950-CCEC73DC20DA.root?tried=+1213cmsxrootd-11213cmsxrootd-2.gridka.de,cmsxrootd-1.gridka.de,dpms29.indiacms.res.in,se01.indiacms.res.in,xrootd.ba.infn.it&triedrc=enoent, mode: 0460, flags: kXR_open_read kXR_async kXR_retstat ). Trying to recover.
+%MSG-e TooManyClusters:   PhotonConversionTrajectorySeedProducerFromSingleLeg:photonConvTrajSeedFromSingleLeg  19-Jun-2020 02:02:39 CEST Run: 1 Event: 99713
+Found too many clusters (171564), bailing out.
+
+%MSG
+Begin processing the 10th record. Run 1, Event 99718, LumiSection 632 on stream 0 at 19-Jun-2020 02:03:36.524 CEST
+%MSG-e AnalyticalPropagator:  TrackProducer:lowPtQuadStepTracks  19-Jun-2020 02:04:08 CEST Run: 1 Event: 99718
+LOGIC ERROR: I should not have entered here!
+
+%MSG
+%MSG-e TooManyClusters:   PhotonConversionTrajectorySeedProducerFromSingleLeg:photonConvTrajSeedFromSingleLeg  19-Jun-2020 02:04:55 CEST Run: 1 Event: 99718
+Found too many clusters (186936), bailing out.
+
+%MSG
+Begin processing the 11th record. Run 1, Event 99714, LumiSection 632 on stream 0 at 19-Jun-2020 02:06:15.541 CEST
+[2020-06-19 02:06:20.156119 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:06:20.156226 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:06:20.176426 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:06:20.176541 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:06:20.205609 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:06:20.205758 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:06:20.234491 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:06:20.234617 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:06:20.272783 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:06:20.272908 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:06:20.291038 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:06:20.291149 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:06:20.311425 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:06:20.311524 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:06:51.161932 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:06:51.162032 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:06:51.182192 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:06:51.182302 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:06:51.201495 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:06:51.201605 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:06:51.221730 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:06:51.221836 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:06:51.251034 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:06:51.251123 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:06:51.273834 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:06:51.273923 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:06:51.311123 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:06:51.311219 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:06:51.311248 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] Unable to recover: [ERROR] Socket error: Connection reset by peer.
+[2020-06-19 02:06:51.311259 +0200][Error  ][XRootD            ] [xrootd-cms.infn.it:1213] Impossible to send message kXR_open (file: /store/mc/Phase2HLTTDRWinter20DIGI/TTToSemiLepton_TuneCP5_14TeV-powheg-pythia8/GEN-SIM-DIGI-RAW/PU200_110X_mcRun4_realistic_v3-v2/50001/3E939472-C6FA-0F43-B950-CCEC73DC20DA.root?tried=+1213cmsxrootd-11213cmsxrootd-2.gridka.de,cmsxrootd-1.gridka.de,dpms29.indiacms.res.in,se01.indiacms.res.in,xrootd-cms-redir-01.cr.cnaf.infn.it&triedrc=enoent, mode: 0460, flags: kXR_open_read kXR_async kXR_retstat ). Trying to recover.
+%MSG-e TooManyClusters:   PhotonConversionTrajectorySeedProducerFromSingleLeg:photonConvTrajSeedFromSingleLeg  19-Jun-2020 02:07:34 CEST Run: 1 Event: 99714
+Found too many clusters (190334), bailing out.
+
+%MSG
+Begin processing the 12th record. Run 1, Event 99711, LumiSection 632 on stream 0 at 19-Jun-2020 02:08:44.832 CEST
+%MSG-w OutOfBounds:  TrackProducer:highPtTripletStepTracks  19-Jun-2020 02:16:12 CEST Run: 1 Event: 99711
+Prob Q outside the bounds of the quality word. Defaulting to Prob=0. Prob = 1 QualityWord = 12
+%MSG
+%MSG-e TooManyClusters:   PhotonConversionTrajectorySeedProducerFromSingleLeg:photonConvTrajSeedFromSingleLeg  19-Jun-2020 02:17:35 CEST Run: 1 Event: 99711
+Found too many clusters (226209), bailing out.
+
+%MSG
+Begin processing the 13th record. Run 1, Event 99712, LumiSection 632 on stream 0 at 19-Jun-2020 02:19:45.797 CEST
+[2020-06-19 02:19:46.079882 +0200][Error  ][XRootD            ] [[2a00:139c:5:215:0:41:7c:7e]:23814] Impossible to send message kXR_read (handle: 0x00000000, offset: 448885832, size: 120). Trying to recover.
+[2020-06-19 02:19:46.079922 +0200][Error  ][XRootD            ] [[2a00:139c:5:215:0:41:7c:7e]:23814] Unable to get the response to request kXR_read (handle: 0x00000000, offset: 448885832, size: 120)
+[2020-06-19 02:19:48.130435 +0200][Error  ][AsyncSock         ] [[2a00:139c:5:215:0:41:7c:7e]:23814 #0.0] Socket error encountered: [ERROR] Socket error
+[2020-06-19 02:19:48.130589 +0200][Error  ][XRootD            ] [[2a00:139c:5:215:0:41:7c:7e]:23814] Impossible to send message kXR_read (handle: 0x00000000, offset: 448885832, size: 120). Trying to recover.
+[2020-06-19 02:19:48.130612 +0200][Error  ][XRootD            ] [[2a00:139c:5:215:0:41:7c:7e]:23814] Unable to get the response to request kXR_read (handle: 0x00000000, offset: 448885832, size: 120)
+[2020-06-19 02:19:48.240139 +0200][Error  ][AsyncSock         ] [[2a00:139c:5:215:0:41:7c:7e]:23814 #0.0] Socket error encountered: [ERROR] Socket error
+[2020-06-19 02:19:48.240252 +0200][Error  ][XRootD            ] [[2a00:139c:5:215:0:41:7c:7e]:23814] Impossible to send message kXR_read (handle: 0x00000000, offset: 448885832, size: 120). Trying to recover.
+[2020-06-19 02:19:48.240272 +0200][Error  ][XRootD            ] [[2a00:139c:5:215:0:41:7c:7e]:23814] Unable to get the response to request kXR_read (handle: 0x00000000, offset: 448885832, size: 120)
+[2020-06-19 02:19:48.350480 +0200][Error  ][AsyncSock         ] [[2a00:139c:5:215:0:41:7c:7e]:23814 #0.0] Socket error encountered: [ERROR] Socket error
+[2020-06-19 02:19:48.350595 +0200][Error  ][XRootD            ] [[2a00:139c:5:215:0:41:7c:7e]:23814] Impossible to send message kXR_read (handle: 0x00000000, offset: 448885832, size: 120). Trying to recover.
+[2020-06-19 02:19:48.350616 +0200][Error  ][XRootD            ] [[2a00:139c:5:215:0:41:7c:7e]:23814] Unable to get the response to request kXR_read (handle: 0x00000000, offset: 448885832, size: 120)
+[2020-06-19 02:19:48.459280 +0200][Error  ][AsyncSock         ] [[2a00:139c:5:215:0:41:7c:7e]:23814 #0.0] Socket error encountered: [ERROR] Socket error
+[2020-06-19 02:19:48.459388 +0200][Error  ][XRootD            ] [[2a00:139c:5:215:0:41:7c:7e]:23814] Impossible to send message kXR_read (handle: 0x00000000, offset: 448885832, size: 120). Trying to recover.
+[2020-06-19 02:19:48.459403 +0200][Error  ][XRootD            ] [[2a00:139c:5:215:0:41:7c:7e]:23814] Unable to get the response to request kXR_read (handle: 0x00000000, offset: 448885832, size: 120)
+[2020-06-19 02:19:48.459457 +0200][Warning][Poller            ] <x><--><x> Socket is not registered
+[2020-06-19 02:19:48.579224 +0200][Error  ][AsyncSock         ] [[2a00:139c:5:215:0:41:7c:7e]:23814 #0.0] Socket error encountered: [ERROR] Socket error
+[2020-06-19 02:19:48.579400 +0200][Error  ][XRootD            ] [[2a00:139c:5:215:0:41:7c:7e]:23814] Unable to send the message kXR_read (handle: 0x00000000, offset: 448885832, size: 120): [ERROR] Invalid session
+%MSG-w XrdAdaptorInternal:  (NoModuleName) 19-Jun-2020 02:19:48 CEST pre-events
+XrdRequestManager::handle(name='root://cms-xrd-global.cern.ch//store/mc/Phase2HLTTDRWinter20DIGI/TTToSemiLepton_TuneCP5_14TeV-powheg-pythia8/GEN-SIM-DIGI-RAW/PU200_110X_mcRun4_realistic_v3-v2/50001/3E939472-C6FA-0F43-B950-CCEC73DC20DA.root) failure when reading from [2a00:139c:5:215:0:41:7c:7e]:23814 (unknown site); failed with error '[ERROR] Invalid session' (errno=0, code=109).
+%MSG
+%MSG-w XrdAdaptorInternal:  (NoModuleName) 19-Jun-2020 02:19:48 CEST pre-events
+Request failure when reading from [2a00:139c:5:215:0:41:7c:7e]:23814 (unknown site)
+%MSG
+%MSG-w XrdAdaptor:  (NoModuleName) 19-Jun-2020 02:19:48 CEST pre-events
+Data is now served from  instead of previous [2a00
+%MSG
+[2020-06-19 02:19:51.512114 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:19:51.512238 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:19:52.756118 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:19:52.756235 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 1, pConnectionWindow = 31 seconds.
+[2020-06-19 02:19:52.776368 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:19:52.776469 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:19:52.805795 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:19:52.805911 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:19:52.827264 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:19:52.827380 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:19:52.864544 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:19:52.864675 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:19:52.884827 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:19:52.884952 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:20:23.319173 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:20:23.319291 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:20:23.336768 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:20:23.336847 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:20:23.365810 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:20:23.365894 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:20:23.395103 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:20:23.395187 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:20:23.413189 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:20:23.413300 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:20:23.433358 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:20:23.433451 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:20:23.470639 +0200][Error  ][AsyncSock         ] [xrootd-cms.infn.it:1213 #0.0] Socket error while handshaking: [ERROR] Socket error: Connection reset by peer
+[2020-06-19 02:20:23.470739 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] elapsed = 0, pConnectionWindow = 31 seconds.
+[2020-06-19 02:20:23.470769 +0200][Error  ][PostMaster        ] [xrootd-cms.infn.it:1213 #0] Unable to recover: [ERROR] Socket error: Connection reset by peer.
+[2020-06-19 02:20:23.470785 +0200][Error  ][XRootD            ] [xrootd-cms.infn.it:1213] Impossible to send message kXR_open (file: /store/mc/Phase2HLTTDRWinter20DIGI/TTToSemiLepton_TuneCP5_14TeV-powheg-pythia8/GEN-SIM-DIGI-RAW/PU200_110X_mcRun4_realistic_v3-v2/50001/3E939472-C6FA-0F43-B950-CCEC73DC20DA.root?tried=+1213cmsxrootd-11213cmsxrootd-2.gridka.de,cmsxrootd-1.gridka.de,dpms29.indiacms.res.in,se01.indiacms.res.in,xrootd.ba.infn.it&triedrc=enoent, mode: 0660, flags: kXR_open_read kXR_async kXR_retstat ). Trying to recover.
+%MSG-w XrdAdaptorInternal:  (NoModuleName) 19-Jun-2020 02:22:45 CEST pre-events
+Caught a CMSSW exception when running connection recovery.
+%MSG
+----- Begin Fatal Exception 19-Jun-2020 02:22:49 CEST-----------------------
+An exception of category 'FileReadError' occurred while
+   [0] Rethrowing an exception that happened on a different thread.
+   [1] Reading branch FEDRawDataCollection_rawDataCollector__HLT.
+   [2] XrdAdaptor::ClientRequest::HandleResponse() failure while running connection recovery
+   [3] Handling XrdAdaptor::RequestManager::requestFailure()
+   [4] In XrdAdaptor::RequestManager::OpenHandler::HandleResponseWithHosts()
+Exception Message:
+XrdCl::File::Open(name='root://cms-xrd-global.cern.ch//store/mc/Phase2HLTTDRWinter20DIGI/TTToSemiLepton_TuneCP5_14TeV-powheg-pythia8/GEN-SIM-DIGI-RAW/PU200_110X_mcRun4_realistic_v3-v2/50001/3E939472-C6FA-0F43-B950-CCEC73DC20DA.root', flags=0x10, permissions=0660) => error '[ERROR] Operation expired' (errno=0, code=206)
+   Additional Info:
+      [a] Original error: '[ERROR] Invalid session' (errno=0, code=109, source=[2a00:139c:5:215:0:41:7c:7e]:23814 (unknown site)).
+      [b] Original failed source is [2a00:139c:5:215:0:41:7c:7e]:23814 (unknown site)
+      [c] Disabled source: [2a00:139c:5:215:0:41:7c:7e]:23814
+----- End Fatal Exception -------------------------------------------------
+[2020-06-19 02:23:50.074669 +0200][Error  ][XRootD            ] [[2a00:139c:5:215:0:41:7c:7e]:23814] Unable to send the message kXR_close (handle: 0x00000000): [ERROR] Invalid session
+19-Jun-2020 02:23:50 CEST  Closed file root://cms-xrd-global.cern.ch//store/mc/Phase2HLTTDRWinter20DIGI/TTToSemiLepton_TuneCP5_14TeV-powheg-pythia8/GEN-SIM-DIGI-RAW/PU200_110X_mcRun4_realistic_v3-v2/50001/3E939472-C6FA-0F43-B950-CCEC73DC20DA.root
+
+=============================================
+
+MessageLogger Summary
+
+ type     category        sev    module        subroutine        count    total
+ ---- -------------------- -- ---------------- ----------------  -----    -----
+    1 OutOfBounds          -w TrackProducer:hi                       1        1
+    2 XrdAdaptor           -w (NoModuleName)                         2        2
+    3 XrdAdaptor           -w PostModuleEvent                        1        1
+    4 XrdAdaptor           -w file_open                              1        1
+    5 XrdAdaptorInternal   -w (NoModuleName)                         3        3
+    6 AnalyticalPropagator -e TrackProducer:lo                       2        2
+    7 TooManyClusters      -e PhotonConversion                       9        9
+    8 Fatal Exception      -s PostModuleEvent                        1        1
+    9 fileAction           -s file_close                             1        1
+   10 fileAction           -s file_open                              2        2
+
+ type    category    Examples: run/evt        run/evt          run/evt
+ ---- -------------------- ---------------- ---------------- ----------------
+    1 OutOfBounds          1/99711                           
+    2 XrdAdaptor           pre-events       pre-events       
+    3 XrdAdaptor           PostProcessEvent                  
+    4 XrdAdaptor           pre-events                        
+    5 XrdAdaptorInternal   pre-events       pre-events       pre-events
+    6 AnalyticalPropagator 1/99701          1/99718          
+    7 TooManyClusters      1/99704          1/99701          1/99711
+    8 Fatal Exception      1/99712                           
+    9 fileAction           PostGlobalEndRun                  
+   10 fileAction           pre-events       pre-events       
+
+Severity    # Occurrences   Total Occurrences
+--------    -------------   -----------------
+Warning                 8                   8
+Error                  11                  11
+System                  4                   4
+
+dropped waiting message count 0
+[2020-06-19 02:25:03.359820 +0200][Error  ][PostMaster        ] [cmsxrootd-1.gridka.de:2094 #0] Forcing error on disconnect: [ERROR] Operation interrupted.
+[2020-06-19 02:25:03.359948 +0200][Error  ][PostMaster        ] [cmsxrootd-kit.gridka.de:1094 #0] Forcing error on disconnect: [ERROR] Operation interrupted.
+[2020-06-19 02:26:58.358056 +0200][Error  ][XRootD            ] [dpms29.indiacms.res.in:1095] Unable to get the response to request kXR_close (handle: 0x00000000)
+%MSG-w XrdFileWarning: 
+Source delayed close failed with error '[ERROR] Operation expired' (errno=0, code=206, server=dpms29.indiacms.res.in:1095, site=indiacms.res.in)
+%MSG

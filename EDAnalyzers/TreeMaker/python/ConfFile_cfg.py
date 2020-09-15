@@ -524,6 +524,8 @@ process.treeMaker = cms.EDAnalyzer(
     
     label_gsfEleFromTICL = label_gsfEleFromTICL,
     
+    label_generalTrack = cms.untracked.InputTag("generalTracks"),
+    
     ########## AK4 jet ##########
     
     #label_ak4PFjet = cms.untracked.InputTag("ak4PFJets"),
