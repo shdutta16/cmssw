@@ -11,7 +11,7 @@ sourceFiles/SingleElectron_PT2to200_Phase2HLTTDRWinter20DIGI-PU200_110X_mcRun4_r
     modTICLeleWithRerunTICL=1 \
     rerunTICL=1 \
     onRaw=0 \
-    maxEvents=200 \
+    maxEvents=50 \
 
 
 
