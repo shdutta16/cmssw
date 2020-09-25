@@ -2,13 +2,15 @@ import os
 
 import FWCore.ParameterSet.Config as cms
 
+processName = "Demo"
+
 from Configuration.StandardSequences.Eras import eras
 #process = cms.Process("RECO", eras.Run2_2017)
 #process = cms.Process("RECO", eras.Run2_2018)
 
-#process = cms.Process("Demo", eras.phase2_hgcal)
-#process = cms.Process("Demo", eras.Phase2C8_timing_layer_bar)
-process = cms.Process("Demo", eras.Phase2C9)
+#process = cms.Process(processName, eras.phase2_hgcal)
+#process = cms.Process(processName, eras.Phase2C8_timing_layer_bar)
+process = cms.Process(processName, eras.Phase2C9)
 
 #process = cms.Process("RECO", eras.Phase2C8_timing_layer_bar)
 
@@ -453,23 +455,156 @@ distanceType = "3Ddist"
 
 
 # Rerun TICL
-label_TICLtrackster = cms.untracked.InputTag("trackstersEM", "", "RECO")
-label_TICLmultiCluster = cms.untracked.InputTag("multiClustersFromTrackstersEM", "MultiClustersFromTracksterByCA", "RECO")
+label_TICLtrackster = cms.InputTag("trackstersEM", "", "RECO")
+label_TICLmultiCluster = cms.InputTag("multiClustersFromTrackstersEM", "MultiClustersFromTracksterByCA", "RECO")
 
 if (options.rerunTICL) :
     
-    label_TICLtrackster = cms.untracked.InputTag("trackstersEM", "", "Demo")
-    label_TICLmultiCluster = cms.untracked.InputTag("multiClustersFromTrackstersEM", "MultiClustersFromTracksterByCA", "Demo")
+    label_TICLtrackster = cms.InputTag("trackstersEM", "", processName)
+    label_TICLmultiCluster = cms.InputTag("multiClustersFromTrackstersEM", "MultiClustersFromTracksterByCA", processName)
+    #label_TICLmultiCluster = cms.InputTag("hgcalMultiClusters", "", processName)
 
 
 # Mod TICL-ele
-label_gsfEleFromTICL = cms.untracked.InputTag("ecalDrivenGsfElectronsFromTICL", "", "RECO")
+label_gsfEleFromTICL = cms.InputTag("ecalDrivenGsfElectronsFromTICL", "", "RECO")
 
 if (options.modTICLele) :
     
-    #process.ambiguityResolvedTICLelectrons.
+    label_gsfEleFromTICL = cms.InputTag("ecalDrivenGsfElectronsFromTICL", "", processName)
+
+
+# TICL-ele variables
+from MyTools.EDProducers.producers_cfi import *
+
+l_mapProdVars = []
+TICLeleVar_task = cms.Task()
+
+l_rad = [2.0, 2.8, 3.5]
+l_isoCone = [0.15, 0.2, 0.3]
+
+
+for iCone, cone in enumerate(l_isoCone) :
     
-    label_gsfEleFromTICL = cms.untracked.InputTag("ecalDrivenGsfElectronsFromTICL", "", "Demo")
+    radStr = "R%s" %(str(cone).replace(".", "p"))
+    
+    
+    # H/E
+    prodLabel = "TICLeleHoverEProducer%s" %(radStr)
+    
+    setattr(
+        process,
+        prodLabel,
+        HGCalElectronHoverEProducer.clone(
+            electrons = label_gsfEleFromTICL,
+            coneDR = cone,
+            #debug = cms.bool(True),
+        )
+    )
+    
+    TICLeleVar_task.add(getattr(process, prodLabel))
+    
+    l_mapProdVars.append(
+        cms.InputTag(prodLabel, getattr(process, prodLabel).instanceName.value(), processName)
+    )
+    
+    
+    # Track-iso
+    prodLabel = "TICLeleTrackIsoProducer%s" %(radStr)
+    
+    setattr(
+        process,
+        prodLabel,
+        HGCalElectronTrackIsoProducer.clone(
+            electrons = label_gsfEleFromTICL,
+            isoConeDR = cone,
+            minTrackPt = 0.0,
+            maxTrackEleDz = 99999.0,
+            #debug = cms.bool(True),
+        )
+    )
+    
+    TICLeleVar_task.add(getattr(process, prodLabel))
+    
+    l_mapProdVars.append(
+        cms.InputTag(prodLabel, getattr(process, prodLabel).instanceName.value(), processName)
+    )
+    
+    
+    prodLabel = "TICLeleTrackIsoProducer%sTrkDz0p15TrkPt1" %(radStr)
+    
+    setattr(
+        process,
+        prodLabel,
+        HGCalElectronTrackIsoProducer.clone(
+            electrons = label_gsfEleFromTICL,
+            isoConeDR = cone,
+            #debug = cms.bool(True),
+        )
+    )
+    
+    TICLeleVar_task.add(getattr(process, prodLabel))
+    
+    l_mapProdVars.append(
+        cms.InputTag(prodLabel, getattr(process, prodLabel).instanceName.value(), processName)
+    )
+
+
+for iRad, rad in enumerate(l_rad) :
+    
+    radStr = "R%s" %(str(rad).replace(".", "p"))
+    
+    
+    # Rvar
+    prodLabel = "TICLeleRvarProducer%s" %(radStr)
+    
+    setattr(
+        process,
+        prodLabel,
+        HGCalElectronRvarProducer.clone(
+            electrons = label_gsfEleFromTICL,
+            cylinderR = rad,
+            #debug = cms.bool(True),
+        )
+    )
+    
+    TICLeleVar_task.add(getattr(process, prodLabel))
+    
+    l_mapProdVars.append(
+        cms.InputTag(prodLabel, getattr(process, prodLabel).instanceName.value(), processName)
+    )
+    
+    
+    # PCA
+    prodLabel = "TICLelePCAProducer%s" %(radStr)
+    
+    setattr(
+        process,
+        prodLabel,
+        HGCalElectronPCAProducer.clone(
+            electrons = label_gsfEleFromTICL,
+            cylinderR = rad,
+            #debug = cms.bool(True),
+        )
+    )
+    
+    TICLeleVar_task.add(getattr(process, prodLabel))
+    
+    l_mapProdVars.append(cms.InputTag(prodLabel, getattr(process, prodLabel).instanceName.value()+"Sigma2UU", processName))
+    l_mapProdVars.append(cms.InputTag(prodLabel, getattr(process, prodLabel).instanceName.value()+"Sigma2VV", processName))
+    l_mapProdVars.append(cms.InputTag(prodLabel, getattr(process, prodLabel).instanceName.value()+"Sigma2WW", processName))
+
+
+process.HGCalElectronVarMap = mapProducer.clone(
+    collections = cms.VInputTag(l_mapProdVars),
+    
+    #debug = cms.bool(True),
+)
+
+process.HGCalVar_seq = cms.Sequence(
+    process.HGCalElectronVarMap
+)
+
+process.HGCalVar_seq.associate(TICLeleVar_task)
 
 
 process.treeMaker = cms.EDAnalyzer(
@@ -490,45 +625,46 @@ process.treeMaker = cms.EDAnalyzer(
     
     ############################## GEN ##############################
     
-    label_generator = cms.untracked.InputTag("generator"),
-    label_genParticle = cms.untracked.InputTag("genParticles"),
+    label_generator = cms.InputTag("generator"),
+    label_genParticle = cms.InputTag("genParticles"),
     
     
     ############################## RECO ##############################
     
-    label_pileup = cms.untracked.InputTag("addPileupInfo"),
-    label_rho = cms.untracked.InputTag("fixedGridRhoFastjetAll"),
+    label_pileup = cms.InputTag("addPileupInfo"),
+    label_rho = cms.InputTag("fixedGridRhoFastjetAll"),
     
-    label_HGCEESimHit = cms.untracked.InputTag("g4SimHits", "HGCHitsEE"),
-    #label_HGCEESimHit = cms.untracked.InputTag("g4SimHits", "HGCHitsEE", "SIM"),
+    label_HGCEESimHit = cms.InputTag("g4SimHits", "HGCHitsEE"),
+    #label_HGCEESimHit = cms.InputTag("g4SimHits", "HGCHitsEE", "SIM"),
     
-    label_HGCEERecHit = cms.untracked.InputTag("HGCalRecHit", "HGCEERecHits"),
-    label_HGCHEFRecHit = cms.untracked.InputTag("HGCalRecHit", "HGCHEFRecHits"),
-    label_HGCHEBRecHit = cms.untracked.InputTag("HGCalRecHit", "HGCHEBRecHits"),
+    label_HGCEERecHit = cms.InputTag("HGCalRecHit", "HGCEERecHits"),
+    label_HGCHEFRecHit = cms.InputTag("HGCalRecHit", "HGCHEFRecHits"),
+    label_HGCHEBRecHit = cms.InputTag("HGCalRecHit", "HGCHEBRecHits"),
     
-    label_HGCALlayerCluster = cms.untracked.InputTag("hgcalLayerClusters"),
+    label_HGCALlayerCluster = cms.InputTag("hgcalLayerClusters"),
     
-    #label_TICLmultiCluster = cms.untracked.InputTag("MultiClustersFromTracksters", "MultiClustersFromTracksterByCA", "RECO"),
-    #label_TICLmultiCluster = cms.untracked.InputTag("EnergySharedTICLmultiClusters", "EnergySharedTICLmultiClusters%s%s" %(energySharingAlgo, distanceType)),
+    #label_TICLmultiCluster = cms.InputTag("MultiClustersFromTracksters", "MultiClustersFromTracksterByCA", "RECO"),
+    #label_TICLmultiCluster = cms.InputTag("EnergySharedTICLmultiClusters", "EnergySharedTICLmultiClusters%s%s" %(energySharingAlgo, distanceType)),
     
     label_TICLtrackster = label_TICLtrackster,
     label_TICLmultiCluster = label_TICLmultiCluster,
     
-    label_TICLmultiClusterMIP = cms.untracked.InputTag("MultiClustersFromTrackstersMIP", "MIPMultiClustersFromTracksterByCA"),
+    label_TICLmultiClusterMIP = cms.InputTag("MultiClustersFromTrackstersMIP", "MIPMultiClustersFromTracksterByCA"),
     
-    label_PFRecHit = cms.untracked.InputTag("particleFlowRecHitHGC", "Cleaned"),
+    label_PFRecHit = cms.InputTag("particleFlowRecHitHGC", "Cleaned"),
     
-    label_caloParticle = cms.untracked.InputTag("mix", "MergedCaloTruth"),
+    label_caloParticle = cms.InputTag("mix", "MergedCaloTruth"),
     
-    label_gsfEleFromMultiClus = cms.untracked.InputTag("ecalDrivenGsfElectronsFromMultiCl", ""),
+    label_gsfEleFromMultiClus = cms.InputTag("ecalDrivenGsfElectronsFromMultiCl", ""),
     
     label_gsfEleFromTICL = label_gsfEleFromTICL,
+    label_gsfEleFromTICLvarMap = cms.InputTag("HGCalElectronVarMap", process.HGCalElectronVarMap.instanceName.value(), processName),
     
-    label_generalTrack = cms.untracked.InputTag("generalTracks"),
+    label_generalTrack = cms.InputTag("generalTracks"),
     
     ########## AK4 jet ##########
     
-    #label_ak4PFjet = cms.untracked.InputTag("ak4PFJets"),
+    #label_ak4PFjet = cms.InputTag("ak4PFJets"),
     
     
 )
@@ -671,6 +807,7 @@ process.p = cms.Path(
     
     process.reco_seq *
     process.TICLele_seq *
+    process.HGCalVar_seq *
     process.treeMaker
 )
 

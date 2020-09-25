@@ -323,6 +323,9 @@ namespace TreeOutputInfo
         std::vector <double> v_gsfEleFromTICL_superClus_recHit1_E;
         std::vector <double> v_gsfEleFromTICL_superClus_recHit2_E;
         
+        std::vector <double> v_gsfEleFromTICL_superClus_sigma2etaEtaLW;
+        std::vector <double> v_gsfEleFromTICL_superClus_sigma2phiPhiLW;
+        
         std::vector <double> v_gsfEleFromTICL_superClus_sigma2rr;
         std::vector <double> v_gsfEleFromTICL_superClus_sigma2etaEta;
         std::vector <double> v_gsfEleFromTICL_superClus_sigma2phiPhi;
@@ -342,6 +345,8 @@ namespace TreeOutputInfo
         
         std::vector <double> v_gsfEleFromTICL_E19;
         std::vector <double> v_gsfEleFromTICL_R19;
+        
+        std::vector <double> v_gsfEleFromTICL_R2p0;
         
         std::vector <double> v_gsfEleFromTICL_E2p4;
         std::vector <double> v_gsfEleFromTICL_R2p4;
@@ -363,10 +368,10 @@ namespace TreeOutputInfo
         std::vector <std::vector <double> > vv_gsfEleFromTICL_E3p0_layer;
         std::vector <std::vector <double> > vv_gsfEleFromTICL_R3p0_layer;
         
-        std::vector <double> v_gsfEleFromTICL_E3p2;
-        std::vector <double> v_gsfEleFromTICL_R3p2;
-        std::vector <std::vector <double> > vv_gsfEleFromTICL_E3p2_layer;
-        std::vector <std::vector <double> > vv_gsfEleFromTICL_R3p2_layer;
+        std::vector <double> v_gsfEleFromTICL_E3p5;
+        std::vector <double> v_gsfEleFromTICL_R3p5;
+        std::vector <std::vector <double> > vv_gsfEleFromTICL_E3p5_layer;
+        std::vector <std::vector <double> > vv_gsfEleFromTICL_R3p5_layer;
         
         std::vector <double> v_gsfEleFromTICL_superClusSeed_E;
         std::vector <double> v_gsfEleFromTICL_superClusSeed_ET;
@@ -390,38 +395,36 @@ namespace TreeOutputInfo
         std::vector <std::vector<double> > vv_gsfEleFromTICL_superClusSeed_TICLclus_dR;
         
         
-        //struct SigVarContent
-        //{
-        //    std::vector <double> v_sig_pfCand_n;
-        //    
-        //    std::vector <double> v_sig_pfCand1_PV_dtSigni;
-        //    std::vector <double> v_sig_pfCand2_PV_dtSigni;
-        //    
-        //    std::vector <double> v_sig_pfCand_PV_dtSigniMean;
-        //    
-        //    std::vector <double> v_sig_pfCand1_PV_dz;
-        //    std::vector <double> v_sig_pfCand2_PV_dz;
-        //    
-        //    std::vector <double> v_sig_pfCand_PV_dzMean;
-        //    
-        //    
-        //    void clear()
-        //    {
-        //        v_sig_pfCand_n.clear();
-        //        
-        //        v_sig_pfCand1_PV_dtSigni.clear();
-        //        v_sig_pfCand2_PV_dtSigni.clear();
-        //        
-        //        v_sig_pfCand_PV_dtSigniMean.clear();
-        //        
-        //        v_sig_pfCand1_PV_dz.clear();
-        //        v_sig_pfCand2_PV_dz.clear();
-        //        
-        //        v_sig_pfCand_PV_dzMean.clear();
-        //    }
-        //};
-        //
-        //std::map <std::string, SigVarContent*> m_sigVarContent;
+        struct RvarContent
+        {
+            std::vector <double> v_Rvar;
+            
+            
+            void clear()
+            {
+                v_Rvar.clear();
+            }
+        };
+        
+        std::map <std::string, RvarContent*> m_RvarContent;
+        
+        
+        struct PCAvarContent
+        {
+            std::vector <double> v_sigma2uu;
+            std::vector <double> v_sigma2vv;
+            std::vector <double> v_sigma2ww;
+            
+            
+            void clear()
+            {
+                v_sigma2uu.clear();
+                v_sigma2vv.clear();
+                v_sigma2ww.clear();
+            }
+        };
+        
+        std::map <std::string, PCAvarContent*> m_PCAvarContent;
         
         
         struct IsoVarContent
@@ -429,45 +432,20 @@ namespace TreeOutputInfo
             std::vector <double> v_iso_sumETratio;
             std::vector <double> v_iso_sumETratio_charged;
             std::vector <double> v_iso_sumETratio_neutral;
-            std::vector <double> v_iso_sumETratio_ecal;
-            std::vector <double> v_iso_sumETratio_hcal;
             
             std::vector <double> v_iso_trackSumPt;
             
             std::vector <double> v_HoverE;
-            
-            //std::vector <double> v_iso_pfCand1_PV_dtSigni;
-            //std::vector <double> v_iso_pfCand2_PV_dtSigni;
-            //
-            //std::vector <double> v_iso_pfCand_PV_dtSigniMean;
-            //
-            //std::vector <double> v_iso_pfCand1_PV_dz;
-            //std::vector <double> v_iso_pfCand2_PV_dz;
-            //
-            //std::vector <double> v_iso_pfCand_PV_dzMean;
-            
             
             void clear()
             {
                 v_iso_sumETratio.clear();
                 v_iso_sumETratio_charged.clear();
                 v_iso_sumETratio_neutral.clear();
-                v_iso_sumETratio_ecal.clear();
-                v_iso_sumETratio_hcal.clear();
                 
                 v_iso_trackSumPt.clear();
                 
                 v_HoverE.clear();
-                
-                //v_iso_pfCand1_PV_dtSigni.clear();
-                //v_iso_pfCand2_PV_dtSigni.clear();
-                //
-                //v_iso_pfCand_PV_dtSigniMean.clear();
-                //
-                //v_iso_pfCand1_PV_dz.clear();
-                //v_iso_pfCand2_PV_dz.clear();
-                //
-                //v_iso_pfCand_PV_dzMean.clear();
             }
         };
         
@@ -1200,6 +1178,13 @@ namespace TreeOutputInfo
             tree->Branch(name, &v_gsfEleFromTICL_superClus_recHit2_E);
             
             
+            sprintf(name, "gsfEleFromTICL_superClus_sigma2etaEtaLW");
+            tree->Branch(name, &v_gsfEleFromTICL_superClus_sigma2etaEtaLW);
+            
+            sprintf(name, "gsfEleFromTICL_superClus_sigma2phiPhiLW");
+            tree->Branch(name, &v_gsfEleFromTICL_superClus_sigma2phiPhiLW);
+            
+            
             sprintf(name, "gsfEleFromTICL_superClus_sigma2rr");
             tree->Branch(name, &v_gsfEleFromTICL_superClus_sigma2rr);
             
@@ -1241,6 +1226,10 @@ namespace TreeOutputInfo
             tree->Branch(name, &v_gsfEleFromTICL_R19);
             
             //
+            sprintf(name, "gsfEleFromTICL_R2p0");
+            tree->Branch(name, &v_gsfEleFromTICL_R2p0);
+            
+            //
             sprintf(name, "gsfEleFromTICL_E2p4");
             tree->Branch(name, &v_gsfEleFromTICL_E2p4);
             
@@ -1269,11 +1258,11 @@ namespace TreeOutputInfo
             tree->Branch(name, &v_gsfEleFromTICL_R3p0);
             
             //
-            sprintf(name, "gsfEleFromTICL_E3p2");
-            tree->Branch(name, &v_gsfEleFromTICL_E3p2);
+            sprintf(name, "gsfEleFromTICL_E3p5");
+            tree->Branch(name, &v_gsfEleFromTICL_E3p5);
             
-            sprintf(name, "gsfEleFromTICL_R3p2");
-            tree->Branch(name, &v_gsfEleFromTICL_R3p2);
+            sprintf(name, "gsfEleFromTICL_R3p5");
+            tree->Branch(name, &v_gsfEleFromTICL_R3p5);
             
             //
             sprintf(name, "gsfEleFromTICL_superClusSeed_E");
@@ -1339,8 +1328,8 @@ namespace TreeOutputInfo
             vv_gsfEleFromTICL_E3p0_layer.resize(Constants::HGCalEE_nLayer, {});
             vv_gsfEleFromTICL_R3p0_layer.resize(Constants::HGCalEE_nLayer, {});
             
-            vv_gsfEleFromTICL_E3p2_layer.resize(Constants::HGCalEE_nLayer, {});
-            vv_gsfEleFromTICL_R3p2_layer.resize(Constants::HGCalEE_nLayer, {});
+            vv_gsfEleFromTICL_E3p5_layer.resize(Constants::HGCalEE_nLayer, {});
+            vv_gsfEleFromTICL_R3p5_layer.resize(Constants::HGCalEE_nLayer, {});
             
             for(int iLayer = 0; iLayer < Constants::HGCalEE_nLayer; iLayer++)
             {
@@ -1377,11 +1366,11 @@ namespace TreeOutputInfo
                 tree->Branch(name, &vv_gsfEleFromTICL_R3p0_layer.at(iLayer));
                 
                 //
-                sprintf(name, "gsfEleFromTICL_E3p2_layer%d", iLayer+1);
-                tree->Branch(name, &vv_gsfEleFromTICL_E3p2_layer.at(iLayer));
+                sprintf(name, "gsfEleFromTICL_E3p5_layer%d", iLayer+1);
+                tree->Branch(name, &vv_gsfEleFromTICL_E3p5_layer.at(iLayer));
                 
-                sprintf(name, "gsfEleFromTICL_R3p2_layer%d", iLayer+1);
-                tree->Branch(name, &vv_gsfEleFromTICL_R3p2_layer.at(iLayer));
+                sprintf(name, "gsfEleFromTICL_R3p5_layer%d", iLayer+1);
+                tree->Branch(name, &vv_gsfEleFromTICL_R3p5_layer.at(iLayer));
             }
             
             
@@ -1415,54 +1404,78 @@ namespace TreeOutputInfo
         }
         
         
-        //void init_sigVarContent(std::string objName, std::string suffix)
-        //{
-        //    if(!objName.length())
-        //    {
-        //        printf("Error in TreeOutput::init_sigVarContent(...): Argument \"objName\" cannot be empty. \n");
-        //        printf("Exiting... \n");
-        //        
-        //        exit(EXIT_FAILURE);
-        //    }
-        //    
-        //    if(!suffix.length())
-        //    {
-        //        printf("Error in TreeOutput::init_sigVarContent(...): Argument \"suffix\" cannot be empty. \n");
-        //        printf("Exiting... \n");
-        //        
-        //        exit(EXIT_FAILURE);
-        //    }
-        //    
-        //    SigVarContent *sigVarContent = new SigVarContent();
-        //    
-        //    
-        //    sprintf(name, "%s_sig_pfCand_n_%s"objName.c_str(), suffix.c_str());
-        //    tree->Branch(name, &sigVarContent->v_sig_pfCand_n);
-        //    
-        //    //
-        //    sprintf(name, "%s_sig_pfCand1_PV_dtSigni_%s"objName.c_str(), suffix.c_str());
-        //    tree->Branch(name, &sigVarContent->v_sig_pfCand1_PV_dtSigni);
-        //    
-        //    sprintf(name, "%s_sig_pfCand2_PV_dtSigni_%s"objName.c_str(), suffix.c_str());
-        //    tree->Branch(name, &sigVarContent->v_sig_pfCand2_PV_dtSigni);
-        //    
-        //    sprintf(name, "%s_sig_pfCand_PV_dtSigniMean_%s"objName.c_str(), suffix.c_str());
-        //    tree->Branch(name, &sigVarContent->v_sig_pfCand_PV_dtSigniMean);
-        //    
-        //    //
-        //    sprintf(name, "%s_sig_pfCand1_PV_dz_%s"objName.c_str(), suffix.c_str());
-        //    tree->Branch(name, &sigVarContent->v_sig_pfCand1_PV_dz);
-        //    
-        //    sprintf(name, "%s_sig_pfCand2_PV_dz_%s"objName.c_str(), suffix.c_str());
-        //    tree->Branch(name, &sigVarContent->v_sig_pfCand2_PV_dz);
-        //    
-        //    sprintf(name, "%s_sig_pfCand_PV_dzMean_%s"objName.c_str(), suffix.c_str());
-        //    tree->Branch(name, &sigVarContent->v_sig_pfCand_PV_dzMean);
-        //    
-        //    
-        //    // Add to the map
-        //    m_sigVarContent[key] = sigVarContent;
-        //}
+        void init_RvarContent(std::string objName, std::string suffix)
+        {
+            if(!objName.length())
+            {
+                printf("Error in TreeOutput::init_RvarContent(...): Argument \"objName\" cannot be empty. \n");
+                printf("Exiting... \n");
+                
+                exit(EXIT_FAILURE);
+            }
+            
+            if(!suffix.length())
+            {
+                printf("Error in TreeOutput::init_RvarContent(...): Argument \"suffix\" cannot be empty. \n");
+                printf("Exiting... \n");
+                
+                exit(EXIT_FAILURE);
+            }
+            
+            RvarContent *rVarContent = new RvarContent();
+            
+            
+            std::string key = objName + "_" + suffix;
+            
+            
+            //
+            sprintf(name, "%s_Rvar_%s", objName.c_str(), suffix.c_str());
+            tree->Branch(name, &rVarContent->v_Rvar);
+            
+            
+            // Add to the map
+            m_RvarContent[key] = rVarContent;
+        }
+        
+        
+        void init_PCAvarContent(std::string objName, std::string suffix)
+        {
+            if(!objName.length())
+            {
+                printf("Error in TreeOutput::init_PCAvarContent(...): Argument \"objName\" cannot be empty. \n");
+                printf("Exiting... \n");
+                
+                exit(EXIT_FAILURE);
+            }
+            
+            if(!suffix.length())
+            {
+                printf("Error in TreeOutput::init_PCAvarContent(...): Argument \"suffix\" cannot be empty. \n");
+                printf("Exiting... \n");
+                
+                exit(EXIT_FAILURE);
+            }
+            
+            PCAvarContent *pcaVarContent = new PCAvarContent();
+            
+            
+            std::string key = objName + "_" + suffix;
+            
+            
+            //
+            sprintf(name, "%s_sigma2uu_%s", objName.c_str(), suffix.c_str());
+            tree->Branch(name, &pcaVarContent->v_sigma2uu);
+            
+            sprintf(name, "%s_sigma2vv_%s", objName.c_str(), suffix.c_str());
+            tree->Branch(name, &pcaVarContent->v_sigma2vv);
+            
+            sprintf(name, "%s_sigma2ww_%s", objName.c_str(), suffix.c_str());
+            tree->Branch(name, &pcaVarContent->v_sigma2ww);
+            
+            
+            // Add to the map
+            m_PCAvarContent[key] = pcaVarContent;
+        }
         
         
         void init_isoVarContent(std::string objName, std::string suffix)
@@ -1493,18 +1506,6 @@ namespace TreeOutputInfo
             sprintf(name, "%s_iso_sumETratio_%s", objName.c_str(), suffix.c_str());
             tree->Branch(name, &isoVarContent->v_iso_sumETratio);
             
-            //sprintf(name, "%s_iso_sumETratio_charged_%s"objName.c_str(), suffix.c_str());
-            //tree->Branch(name, &isoVarContent->v_iso_sumETratio_charged);
-            //
-            //sprintf(name, "%s_iso_sumETratio_neutral_%s"objName.c_str(), suffix.c_str());
-            //tree->Branch(name, &isoVarContent->v_iso_sumETratio_neutral);
-            //
-            //sprintf(name, "%s_iso_sumETratio_ecal_%s"objName.c_str(), suffix.c_str());
-            //tree->Branch(name, &isoVarContent->v_iso_sumETratio_ecal);
-            //
-            //sprintf(name, "%s_iso_sumETratio_hcal_%s"objName.c_str(), suffix.c_str());
-            //tree->Branch(name, &isoVarContent->v_iso_sumETratio_hcal);
-            
             
             sprintf(name, "%s_iso_trackSumPt_%s", objName.c_str(), suffix.c_str());
             tree->Branch(name, &isoVarContent->v_iso_trackSumPt);
@@ -1513,27 +1514,6 @@ namespace TreeOutputInfo
             //
             sprintf(name, "%s_HoverE_%s", objName.c_str(), suffix.c_str());
             tree->Branch(name, &isoVarContent->v_HoverE);
-            
-            
-            //
-            //sprintf(name, "%s_iso_pfCand1_PV_dtSigni_%s"objName.c_str(), suffix.c_str());
-            //tree->Branch(name, &isoVarContent->v_iso_pfCand1_PV_dtSigni);
-            //
-            //sprintf(name, "%s_iso_pfCand2_PV_dtSigni_%s"objName.c_str(), suffix.c_str());
-            //tree->Branch(name, &isoVarContent->v_iso_pfCand2_PV_dtSigni);
-            //
-            //sprintf(name, "%s_iso_pfCand_PV_dtSigniMean_%s"objName.c_str(), suffix.c_str());
-            //tree->Branch(name, &isoVarContent->v_iso_pfCand_PV_dtSigniMean);
-            //
-            ////
-            //sprintf(name, "%s_iso_pfCand1_PV_dz_%s"objName.c_str(), suffix.c_str());
-            //tree->Branch(name, &isoVarContent->v_iso_pfCand1_PV_dz);
-            //
-            //sprintf(name, "%s_iso_pfCand2_PV_dz_%s"objName.c_str(), suffix.c_str());
-            //tree->Branch(name, &isoVarContent->v_iso_pfCand2_PV_dz);
-            //
-            //sprintf(name, "%s_iso_pfCand_PV_dzMean_%s"objName.c_str(), suffix.c_str());
-            //tree->Branch(name, &isoVarContent->v_iso_pfCand_PV_dzMean);
             
             
             // Add to the map
@@ -1829,6 +1809,9 @@ namespace TreeOutputInfo
             v_gsfEleFromTICL_superClus_recHit1_E.clear();
             v_gsfEleFromTICL_superClus_recHit2_E.clear();
             
+            v_gsfEleFromTICL_superClus_sigma2etaEtaLW.clear();
+            v_gsfEleFromTICL_superClus_sigma2phiPhiLW.clear();
+            
             v_gsfEleFromTICL_superClus_sigma2rr.clear();
             v_gsfEleFromTICL_superClus_sigma2etaEta.clear();
             v_gsfEleFromTICL_superClus_sigma2phiPhi.clear();
@@ -1859,8 +1842,8 @@ namespace TreeOutputInfo
             v_gsfEleFromTICL_E3p0.clear();
             v_gsfEleFromTICL_R3p0.clear();
             
-            v_gsfEleFromTICL_E3p2.clear();
-            v_gsfEleFromTICL_R3p2.clear();
+            v_gsfEleFromTICL_E3p5.clear();
+            v_gsfEleFromTICL_R3p5.clear();
             
             v_gsfEleFromTICL_superClusSeed_E.clear();
             v_gsfEleFromTICL_superClusSeed_ET.clear();
@@ -1901,15 +1884,20 @@ namespace TreeOutputInfo
                 vv_gsfEleFromTICL_E3p0_layer.at(iLayer).clear();
                 vv_gsfEleFromTICL_R3p0_layer.at(iLayer).clear();
                 
-                vv_gsfEleFromTICL_E3p2_layer.at(iLayer).clear();
-                vv_gsfEleFromTICL_R3p2_layer.at(iLayer).clear();
+                vv_gsfEleFromTICL_E3p5_layer.at(iLayer).clear();
+                vv_gsfEleFromTICL_R3p5_layer.at(iLayer).clear();
             }
             
             
-            //for(auto iter = m_sigVarContent.begin(); iter != m_sigVarContent.end(); iter++)
-            //{
-            //    iter->second->clear();
-            //}
+            for(auto iter = m_RvarContent.begin(); iter != m_RvarContent.end(); iter++)
+            {
+                iter->second->clear();
+            }
+            
+            for(auto iter = m_PCAvarContent.begin(); iter != m_PCAvarContent.end(); iter++)
+            {
+                iter->second->clear();
+            }
             
             for(auto iter = m_isoVarContent.begin(); iter != m_isoVarContent.end(); iter++)
             {

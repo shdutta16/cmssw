@@ -14,8 +14,10 @@
 # include <TH1F.h>
 # include <TH2F.h>
 # include <TMatrixD.h>
-# include <TTree.h> 
-# include <TVectorD.h> 
+# include <TTree.h>
+# include <TVectorD.h>
+# include <Math/Point3D.h>
+# include <Math/Point3Dfwd.h>
 
 # include "Constants.h"
 
@@ -43,6 +45,20 @@ namespace Common
         }
         
         return pileup_n;
+    }
+    
+    
+    double getDeltaPhi(double phi1, double phi2)
+    {
+        double deltaPhi = phi1 - phi2;
+        
+        deltaPhi = (deltaPhi > +M_PI)? (deltaPhi - 2*M_PI): deltaPhi;
+        deltaPhi = (deltaPhi < -M_PI)? (deltaPhi + 2*M_PI): deltaPhi;
+        
+        //deltaPhi = (deltaPhi > +M_PI)? (2*M_PI - deltaPhi): deltaPhi;
+        //deltaPhi = (deltaPhi < -M_PI)? (2*M_PI + deltaPhi): deltaPhi;
+        
+        return deltaPhi;
     }
     
     
@@ -269,6 +285,68 @@ namespace Common
             normCellSize,
             useHandF
         );
+    }
+    
+    
+    std::vector <double> getVariances(
+        DetId refHit_detId,
+        std::vector <std::pair <DetId, float> > v_HandF,
+        std::map <DetId, const HGCRecHit*> m_hit,
+        hgcal::RecHitTools *recHitTools,
+        double R
+    )
+    {
+        double varEtaEta = 0;
+        double varPhiPhi = 0;
+        double varEtaPhi = 0;
+        
+        auto center_pos = recHitTools->getPosition(refHit_detId);
+        
+        for(int iHit = 0; iHit < (int) v_HandF.size(); iHit++)
+        {
+            DetId iHit_detId = v_HandF.at(iHit).first;
+            double frac = v_HandF.at(iHit).second;
+            
+            auto iHit_pos = recHitTools->getPosition(iHit_detId);
+            
+            double dX = iHit_pos.x() - center_pos.x();
+            double dY = iHit_pos.y() - center_pos.y();
+            
+            double dist = sqrt(dX*dX + dY*dY);
+            
+            double cellSize = getCellSize(iHit_detId, recHitTools);
+            
+            double Rmax = R + cellSize;
+            
+            if(dist > Rmax)
+            {
+                continue;
+            }
+            
+            double energy = 0;
+            
+            if(m_hit.find(iHit_detId) != m_hit.end())
+            {
+                energy = m_hit.at(iHit_detId)->energy() * frac;
+            }
+            
+            double dEta = iHit_pos.eta() - center_pos.eta();
+            double dPhi = getDeltaPhi(iHit_pos.phi(), center_pos.phi());
+            
+            varEtaEta += energy * dEta * dEta;
+            varPhiPhi += energy * dPhi * dPhi;
+            varEtaPhi += energy * dEta * dPhi;
+        }
+        
+        //printf("varEtaEta %0.4f, varPhiPhi %0.4f \n", varEtaEta, varPhiPhi);
+        
+        std::vector <double> v_variance = {
+            varEtaEta,
+            varPhiPhi,
+            varEtaPhi,
+        };
+        
+        return v_variance;
     }
     
     
@@ -689,6 +767,225 @@ namespace Common
     
     
     // PCA
+    std::vector <std::vector <double> > getSuperClusPCAwidths(
+        reco::SuperClusterRef superClus,
+        std::map <DetId, const HGCRecHit*> m_recHit,
+        hgcal::RecHitTools *recHitTools,
+        double cylinderR = 99999.0,
+        bool debug = false
+    )
+    {
+        std::vector <double> v_eigenVal = {0, 0, 0};
+        std::vector <double> v_PCAwidth = {0, 0, 0};
+        
+        std::vector <std::pair <DetId, float> > v_superClus_HandF = superClus->hitsAndFractions();
+        
+        int dimension = 3;
+        
+        ROOT::Math::XYZVector centroid_xyz(0, 0, 0);
+        
+        double weightTot = 0;
+        
+        int nHit = v_superClus_HandF.size();
+        int nValidHit = 0;
+        
+        std::vector <bool> v_isHitValid;
+        
+        // Compute the centroid
+        for(int iHit = 0; iHit < nHit; iHit++)
+        {
+            if(m_recHit.find(v_superClus_HandF.at(iHit).first) == m_recHit.end())
+            {
+                printf("Warning in Common::getSuperClusPCAinfo(...): Cluster-hit not in rec-hit map. \n");
+                //exit(EXIT_FAILURE);
+                
+                v_isHitValid.push_back(false);
+                
+                continue;
+            }
+            
+            const HGCRecHit *recHit = m_recHit[v_superClus_HandF.at(iHit).first];
+            
+            auto recHit_pos = recHitTools->getPosition(recHit->id());
+            ROOT::Math::XYZVector recHit_xyz(recHit_pos.x(), recHit_pos.y(), recHit_pos.z());
+            
+            double recHit_E = recHit->energy() * v_superClus_HandF.at(iHit).second;
+            
+            double weight = recHit_E;
+            weightTot += weight;
+            
+            centroid_xyz += (weight * recHit_xyz);
+            
+            
+            v_isHitValid.push_back(true);
+            nValidHit++;
+        }
+        
+        if(!weightTot)
+        {
+            return {v_eigenVal, v_PCAwidth};
+        }
+        
+        centroid_xyz /= weightTot;
+        
+        TMatrixD mat_cov(dimension, dimension);
+        TMatrixD mat_dist(dimension, nValidHit);
+        
+        double dxdx = 0;
+        double dydy = 0;
+        double dzdz = 0;
+
+        double dxdy = 0;
+        double dydz = 0;
+        double dzdx = 0;
+        
+        weightTot = 0;
+        
+        for(int iHit = 0, hitCount = 0; iHit < nHit; iHit++)
+        {
+            if(!v_isHitValid.at(iHit))
+            {
+                continue;
+            }
+            
+            const HGCRecHit *recHit = m_recHit[v_superClus_HandF.at(iHit).first];
+            
+            auto recHit_pos = recHitTools->getPosition(recHit->id());
+            ROOT::Math::XYZVector recHit_xyz(recHit_pos.x(), recHit_pos.y(), recHit_pos.z());
+            
+            ROOT::Math::XYZVector dist_xyz = recHit_xyz - centroid_xyz;
+            
+            double r = std::sqrt(dist_xyz.x()*dist_xyz.x() + dist_xyz.y()*dist_xyz.y());
+            
+            // Compute in a cylinder
+            if(r > cylinderR)
+            {
+                v_isHitValid.at(iHit) = false;
+                
+                continue;
+            }
+            
+            double recHit_E = recHit->energy() * v_superClus_HandF.at(iHit).second;
+            
+            double weight = recHit_E;
+            weightTot += weight;
+            
+            dxdx += weight * dist_xyz.x() * dist_xyz.x();
+            dydy += weight * dist_xyz.y() * dist_xyz.y();
+            dzdz += weight * dist_xyz.z() * dist_xyz.z();
+            
+            dxdy += weight * dist_xyz.x() * dist_xyz.y();
+            dydz += weight * dist_xyz.y() * dist_xyz.z();
+            dzdx += weight * dist_xyz.z() * dist_xyz.x();
+            
+            
+            mat_dist(0, hitCount) = dist_xyz.x();
+            mat_dist(1, hitCount) = dist_xyz.y();
+            mat_dist(2, hitCount) = dist_xyz.z();
+            
+            
+            hitCount++;
+        }
+        
+        dxdx /= weightTot;
+        dydy /= weightTot;
+        dzdz /= weightTot;
+        
+        dxdy /= weightTot;
+        dydz /= weightTot;
+        dzdx /= weightTot;
+        
+        mat_cov(0, 0) = dxdx;
+        mat_cov(1, 1) = dydy;
+        mat_cov(2, 2) = dzdz;
+        
+        mat_cov(0, 1) = mat_cov(1, 0) = dxdy;
+        mat_cov(0, 2) = mat_cov(2, 0) = dzdx;
+        mat_cov(1, 2) = mat_cov(2, 1) = dydz;
+        
+        // Get eigen values and vectors
+        TVectorD v_eigVal(dimension);
+        TMatrixD mat_eigVec(dimension, dimension);
+        
+        if(weightTot > 0 && superClus->energy() > 0)
+        {
+            try
+            {
+                mat_eigVec = mat_cov.EigenVectors(v_eigVal);
+            }
+            
+            catch(...)
+            {
+                printf("Warning in Common::getSuperClusPCAinfo(...): Cannot get eigen values and vectors. \n");
+                
+                //printf(
+                //    "Multicluster: "
+                //    "E %0.2e, "
+                //    "x %0.2e, y %0.2e, z %0.2e \n",
+                //    superClus->energy(),
+                //    superClus_3mom.x(), superClus_3mom.y(), superClus_3mom.z()
+                //);
+                
+                printf("Cov. matrix: \n");
+                mat_cov.Print();
+                
+                fflush(stdout);
+                fflush(stderr);
+            }
+        }
+        
+        v_eigenVal.at(0) = v_eigVal(0);
+        v_eigenVal.at(1) = v_eigVal(1);
+        v_eigenVal.at(2) = v_eigVal(2);
+        
+        
+        // Transformed coordinates
+        TMatrixD mat_dist_trans = mat_eigVec * mat_dist;
+        
+        double sigma2uu = 0;
+        double sigma2vv = 0;
+        double sigma2ww = 0;
+        
+        weightTot = 0;
+        
+        // Sigma of transformed coordinates
+        for(int iHit = 0, hitCount = 0; iHit < nHit; iHit++)
+        {
+            if(!v_isHitValid.at(iHit))
+            {
+                continue;
+            }
+            
+            const HGCRecHit *recHit = m_recHit[v_superClus_HandF.at(iHit).first];
+            
+            double recHit_E = recHit->energy() * v_superClus_HandF.at(iHit).second;
+            
+            double weight = recHit_E;
+            weightTot += weight;
+            
+            sigma2uu += weight * mat_dist_trans(0, hitCount) * mat_dist_trans(0, hitCount);
+            sigma2vv += weight * mat_dist_trans(1, hitCount) * mat_dist_trans(1, hitCount);
+            sigma2ww += weight * mat_dist_trans(2, hitCount) * mat_dist_trans(2, hitCount);
+            
+            
+            hitCount++;
+        }
+        
+        sigma2uu /= weightTot;
+        sigma2vv /= weightTot;
+        sigma2ww /= weightTot;
+        
+        
+        v_PCAwidth.at(0) = sigma2uu;
+        v_PCAwidth.at(1) = sigma2vv;
+        v_PCAwidth.at(2) = sigma2ww;
+        
+        
+        return {v_eigenVal, v_PCAwidth};
+    }
+    
+    
+    // PCA
     // Returns <(r, eta, phi) cov matrix, eigen vector matrix, eigen values>
     std::tuple <TMatrixD, TMatrixD, TVectorD> getSuperClusPCAinfo(
         reco::SuperClusterRef superClus,
@@ -709,7 +1006,7 @@ namespace Common
         double totE = 0;
         
         std::vector <std::pair <DetId, float> > v_superClus_HandF = superClus->hitsAndFractions();
-        math::XYZPoint superClus_xyz = superClus->position();
+        ROOT::Math::XYZPoint superClus_xyz = superClus->position();
         
         CLHEP::Hep3Vector superClus_3mom(
             superClus_xyz.x(),
@@ -738,11 +1035,16 @@ namespace Common
                 position.z()
             );
             
-            //double dX = superClus_3mom.x() - recHit_3mom.x();
-            //double dY = superClus_3mom.y() - recHit_3mom.y();
+            double dX = superClus_3mom.x() - recHit_3mom.x();
+            double dY = superClus_3mom.y() - recHit_3mom.y();
             //double dZ = superClus_3mom.z() - recHit_3mom.z();
             //
             //double dR = sqrt(dX*dX + dY*dY + dZ*dZ);
+            
+            if(sqrt(dX*dX + dY*dY) > 2.8)
+            {
+                continue;
+            }
             
             // Note that we're calculating sigma^2(rr) here.
             // So the dR is is simply the difference, and not the 3D difference

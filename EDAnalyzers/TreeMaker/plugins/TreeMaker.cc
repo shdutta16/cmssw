@@ -26,6 +26,7 @@
 
 # include "CommonTools/UtilAlgos/interface/TFileService.h"
 # include "DataFormats/CaloTowers/interface/CaloTowerDefs.h"
+# include "DataFormats/Common/interface/MapOfVectors.h"
 # include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 # include "DataFormats/ForwardDetId/interface/HGCEEDetId.h"
 # include "DataFormats/ForwardDetId/interface/HGCalDetId.h"
@@ -51,6 +52,7 @@
 # include "FWCore/ServiceRegistry/interface/Service.h"
 # include "FWCore/Utilities/interface/InputTag.h"
 # include "Geometry/CaloTopology/interface/HGCalTopology.h"
+# include "Geometry/Records/interface/CaloGeometryRecord.h"
 # include "Geometry/Records/interface/IdealGeometryRecord.h"
 # include "RecoLocalCalo/HGCalRecAlgos/interface/RecHitTools.h"
 # include "SimDataFormats/CaloAnalysis/interface/CaloParticle.h"
@@ -110,8 +112,6 @@ class TreeMaker : public edm::one::EDAnalyzer<edm::one::SharedResources>
     virtual void beginJob() override;
     virtual void analyze(const edm::Event&, const edm::EventSetup&) override;
     virtual void endJob() override;
-    
-    double getDeltaPhi(double phi1, double phi2);
     
     std::tuple <TMatrixD, TMatrixD, TVectorD> getMultiClusterPC(
         reco::HGCalMultiCluster *multiCluster,
@@ -195,6 +195,7 @@ class TreeMaker : public edm::one::EDAnalyzer<edm::one::SharedResources>
     
     // Gsf electrons from TICL //
     edm::EDGetTokenT <std::vector <reco::GsfElectron> > tok_gsfEleFromTICL;
+    edm::EDGetTokenT <edm::MapOfVectors <std::string, double> > tok_gsfEleFromTICLvarMap;
     
     
     // General tracks //
@@ -230,14 +231,30 @@ TreeMaker::TreeMaker(const edm::ParameterSet& iConfig)
     
     treeOutput = new TreeOutputInfo::TreeOutput("tree", fs);
     
+    treeOutput->init_RvarContent("gsfEleFromTICL", "cylR2p0");
+    treeOutput->init_RvarContent("gsfEleFromTICL", "cylR2p8");
+    treeOutput->init_RvarContent("gsfEleFromTICL", "cylR3p5");
+    
+    treeOutput->init_PCAvarContent("gsfEleFromTICL", "cylR2p0");
+    treeOutput->init_PCAvarContent("gsfEleFromTICL", "cylR2p8");
+    treeOutput->init_PCAvarContent("gsfEleFromTICL", "cylR3p5");
+    
     treeOutput->init_isoVarContent("gsfEleFromTICL", "dR0p15");
-    treeOutput->init_isoVarContent("gsfEleFromTICL", "dR0p15_clusET1_trkDz0p15_trkPt1");
-    
+    treeOutput->init_isoVarContent("gsfEleFromTICL", "dR0p2");
     treeOutput->init_isoVarContent("gsfEleFromTICL", "dR0p3");
-    treeOutput->init_isoVarContent("gsfEleFromTICL", "dR0p3_clusET1_trkDz0p15_trkPt1");
     
-    treeOutput->init_isoVarContent("gsfEleFromTICL", "dR0p4");
-    treeOutput->init_isoVarContent("gsfEleFromTICL", "dR0p4_clusET1_trkDz0p15_trkPt1");
+    treeOutput->init_isoVarContent("gsfEleFromTICL", "dR0p15_trkDz0p15_trkPt1");
+    treeOutput->init_isoVarContent("gsfEleFromTICL", "dR0p2_trkDz0p15_trkPt1");
+    treeOutput->init_isoVarContent("gsfEleFromTICL", "dR0p3_trkDz0p15_trkPt1");
+    
+    //treeOutput->init_isoVarContent("gsfEleFromTICL", "dR0p15");
+    //treeOutput->init_isoVarContent("gsfEleFromTICL", "dR0p15_clusET1_trkDz0p15_trkPt1");
+    //
+    //treeOutput->init_isoVarContent("gsfEleFromTICL", "dR0p3");
+    //treeOutput->init_isoVarContent("gsfEleFromTICL", "dR0p3_clusET1_trkDz0p15_trkPt1");
+    //
+    //treeOutput->init_isoVarContent("gsfEleFromTICL", "dR0p4");
+    //treeOutput->init_isoVarContent("gsfEleFromTICL", "dR0p4_clusET1_trkDz0p15_trkPt1");
     
     //treeOutput->init_isoVarContent("gsfEleFromTICL", "dR0p5");
     
@@ -255,53 +272,54 @@ TreeMaker::TreeMaker(const edm::ParameterSet& iConfig)
     
     
     // Gen particles //
-    tok_genParticle = consumes <std::vector <reco::GenParticle> >(iConfig.getUntrackedParameter <edm::InputTag>("label_genParticle"));
+    tok_genParticle = consumes <std::vector <reco::GenParticle> >(iConfig.getParameter <edm::InputTag>("label_genParticle"));
     
     
     // Pileup //
-    tok_pileup = consumes <std::vector <PileupSummaryInfo> >(iConfig.getUntrackedParameter <edm::InputTag>("label_pileup"));
+    tok_pileup = consumes <std::vector <PileupSummaryInfo> >(iConfig.getParameter <edm::InputTag>("label_pileup"));
     
     
     // Rho //
-    tok_rho = consumes <double>(iConfig.getUntrackedParameter <edm::InputTag>("label_rho"));
+    tok_rho = consumes <double>(iConfig.getParameter <edm::InputTag>("label_rho"));
     
     
     // SimHits //
-    tok_HGCEESimHit = consumes <std::vector <PCaloHit> >(iConfig.getUntrackedParameter <edm::InputTag>("label_HGCEESimHit"));
+    tok_HGCEESimHit = consumes <std::vector <PCaloHit> >(iConfig.getParameter <edm::InputTag>("label_HGCEESimHit"));
     
     
     // RecHits //
-    tok_PFRecHit = consumes <std::vector <reco::PFRecHit> >(iConfig.getUntrackedParameter <edm::InputTag>("label_PFRecHit"));
+    tok_PFRecHit = consumes <std::vector <reco::PFRecHit> >(iConfig.getParameter <edm::InputTag>("label_PFRecHit"));
     
-    tok_HGCEERecHit = consumes <edm::SortedCollection <HGCRecHit,edm::StrictWeakOrdering <HGCRecHit> > >(iConfig.getUntrackedParameter <edm::InputTag>("label_HGCEERecHit"));
-    tok_HGCHEFRecHit = consumes <edm::SortedCollection <HGCRecHit,edm::StrictWeakOrdering <HGCRecHit> > >(iConfig.getUntrackedParameter <edm::InputTag>("label_HGCHEFRecHit"));
-    tok_HGCHEBRecHit = consumes <edm::SortedCollection <HGCRecHit,edm::StrictWeakOrdering <HGCRecHit> > >(iConfig.getUntrackedParameter <edm::InputTag>("label_HGCHEBRecHit"));
+    tok_HGCEERecHit = consumes <edm::SortedCollection <HGCRecHit,edm::StrictWeakOrdering <HGCRecHit> > >(iConfig.getParameter <edm::InputTag>("label_HGCEERecHit"));
+    tok_HGCHEFRecHit = consumes <edm::SortedCollection <HGCRecHit,edm::StrictWeakOrdering <HGCRecHit> > >(iConfig.getParameter <edm::InputTag>("label_HGCHEFRecHit"));
+    tok_HGCHEBRecHit = consumes <edm::SortedCollection <HGCRecHit,edm::StrictWeakOrdering <HGCRecHit> > >(iConfig.getParameter <edm::InputTag>("label_HGCHEBRecHit"));
     
     
     // HGCAL layer clusters //
-    tok_HGCALlayerCluster = consumes <std::vector <reco::CaloCluster> >(iConfig.getUntrackedParameter <edm::InputTag>("label_HGCALlayerCluster"));
+    tok_HGCALlayerCluster = consumes <std::vector <reco::CaloCluster> >(iConfig.getParameter <edm::InputTag>("label_HGCALlayerCluster"));
     
     
     // TICL //
-    tok_TICLtrackster = consumes <std::vector <ticl::Trackster> >(iConfig.getUntrackedParameter <edm::InputTag>("label_TICLtrackster"));
-    tok_TICLmultiCluster = consumes <std::vector <reco::HGCalMultiCluster> >(iConfig.getUntrackedParameter <edm::InputTag>("label_TICLmultiCluster"));
-    tok_TICLmultiClusterMIP = consumes <std::vector <reco::HGCalMultiCluster> >(iConfig.getUntrackedParameter <edm::InputTag>("label_TICLmultiClusterMIP"));
+    tok_TICLtrackster = consumes <std::vector <ticl::Trackster> >(iConfig.getParameter <edm::InputTag>("label_TICLtrackster"));
+    tok_TICLmultiCluster = consumes <std::vector <reco::HGCalMultiCluster> >(iConfig.getParameter <edm::InputTag>("label_TICLmultiCluster"));
+    tok_TICLmultiClusterMIP = consumes <std::vector <reco::HGCalMultiCluster> >(iConfig.getParameter <edm::InputTag>("label_TICLmultiClusterMIP"));
     
     
     // Calo particles //
-    tok_caloParticle = consumes <std::vector <CaloParticle> >(iConfig.getUntrackedParameter <edm::InputTag>("label_caloParticle"));
+    tok_caloParticle = consumes <std::vector <CaloParticle> >(iConfig.getParameter <edm::InputTag>("label_caloParticle"));
     
     
     // Gsf electrons from multiclusters //
-    tok_gsfEleFromMultiClus = consumes <std::vector <reco::GsfElectron> >(iConfig.getUntrackedParameter <edm::InputTag>("label_gsfEleFromMultiClus"));
+    tok_gsfEleFromMultiClus = consumes <std::vector <reco::GsfElectron> >(iConfig.getParameter <edm::InputTag>("label_gsfEleFromMultiClus"));
     
     
     // Gsf electrons from TICL //
-    tok_gsfEleFromTICL = consumes <std::vector <reco::GsfElectron> >(iConfig.getUntrackedParameter <edm::InputTag>("label_gsfEleFromTICL"));
+    tok_gsfEleFromTICL = consumes <std::vector <reco::GsfElectron> >(iConfig.getParameter <edm::InputTag>("label_gsfEleFromTICL"));
+    tok_gsfEleFromTICLvarMap = consumes <edm::MapOfVectors <std::string, double> >(iConfig.getParameter <edm::InputTag>("label_gsfEleFromTICLvarMap"));
     
     
     // General tracks //
-    tok_generalTrack = consumes <std::vector <reco::Track> >(iConfig.getUntrackedParameter <edm::InputTag>("label_generalTrack"));
+    tok_generalTrack = consumes <std::vector <reco::Track> >(iConfig.getParameter <edm::InputTag>("label_generalTrack"));
 }
 
 
@@ -1920,6 +1938,9 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     edm::Handle <std::vector <reco::GsfElectron> > v_gsfEleFromTICL;
     iEvent.getByToken(tok_gsfEleFromTICL, v_gsfEleFromTICL);
     
+    edm::Handle <edm::MapOfVectors <std::string, double> > m_gsfEleFromTICLvarMap;
+    iEvent.getByToken(tok_gsfEleFromTICLvarMap, m_gsfEleFromTICLvarMap);
+    
     int nEleFromTICL = v_gsfEleFromTICL->size();
     
     std::map <reco::SuperClusterRef, int> m_gsfEle_superClus;
@@ -2074,6 +2095,14 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             &recHitTools,
             debug
         );
+        
+        //std::vector <std::vector <double> > v_PCAinfo = Common::getSuperClusPCAwidths(
+        //    gsfEle.superCluster(),
+        //    m_recHit,
+        //    &recHitTools,
+        //    2.8,
+        //    debug
+        //);
         
         TMatrixD mat_gsfEleFromTICL_superClus_rEtaPhiCov = std::get<0>(tup_gsfEleFromTICL_superClus_PCAinfo);
         TVectorD v_gsfEleFromTICL_superClus_rEtaPhiCov_eigVal = std::get<2>(tup_gsfEleFromTICL_superClus_PCAinfo);
@@ -2233,75 +2262,75 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         
         
         // 0.15
-        fill_isoVar(
-            treeOutput->m_isoVarContent.at("gsfEleFromTICL_dR0p15"),
-            v_HGCALlayerCluster.product(),
-            v_generalTrack.product(),
-            &gsfEle,
-            0.15, // dR_max
-            0.0, // clusET_min
-            _largeVal, // trackDz_max
-            0.0 // trackPt_min
-        );
-        
-        fill_isoVar(
-            treeOutput->m_isoVarContent.at("gsfEleFromTICL_dR0p15_clusET1_trkDz0p15_trkPt1"),
-            v_HGCALlayerCluster.product(),
-            v_generalTrack.product(),
-            &gsfEle,
-            0.15, // dR_max
-            1.0, // clusET_min
-            _largeVal, // trackDz_max
-            1.0 // trackPt_min
-        );
-        
-        
-        // 0.3
-        fill_isoVar(
-            treeOutput->m_isoVarContent.at("gsfEleFromTICL_dR0p3"),
-            v_HGCALlayerCluster.product(),
-            v_generalTrack.product(),
-            &gsfEle,
-            0.3, // dR_max
-            0.0, // clusET_min
-            _largeVal, // trackDz_max
-            0.0 // trackPt_min
-        );
-        
-        fill_isoVar(
-            treeOutput->m_isoVarContent.at("gsfEleFromTICL_dR0p3_clusET1_trkDz0p15_trkPt1"),
-            v_HGCALlayerCluster.product(),
-            v_generalTrack.product(),
-            &gsfEle,
-            0.3, // dR_max
-            1.0, // clusET_min
-            _largeVal, // trackDz_max
-            1.0 // trackPt_min
-        );
-        
-        
-        // 0.4
-        fill_isoVar(
-            treeOutput->m_isoVarContent.at("gsfEleFromTICL_dR0p4"),
-            v_HGCALlayerCluster.product(),
-            v_generalTrack.product(),
-            &gsfEle,
-            0.4, // dR_max
-            0.0, // clusET_min
-            _largeVal, // trackDz_max
-            0.0 // trackPt_min
-        );
-        
-        fill_isoVar(
-            treeOutput->m_isoVarContent.at("gsfEleFromTICL_dR0p4_clusET1_trkDz0p15_trkPt1"),
-            v_HGCALlayerCluster.product(),
-            v_generalTrack.product(),
-            &gsfEle,
-            0.4, // dR_max
-            1.0, // clusET_min
-            _largeVal, // trackDz_max
-            1.0 // trackPt_min
-        );
+        //fill_isoVar(
+        //    treeOutput->m_isoVarContent.at("gsfEleFromTICL_dR0p15"),
+        //    v_HGCALlayerCluster.product(),
+        //    v_generalTrack.product(),
+        //    &gsfEle,
+        //    0.15, // dR_max
+        //    0.0, // clusET_min
+        //    _largeVal, // trackDz_max
+        //    0.0 // trackPt_min
+        //);
+        //
+        //fill_isoVar(
+        //    treeOutput->m_isoVarContent.at("gsfEleFromTICL_dR0p15_clusET1_trkDz0p15_trkPt1"),
+        //    v_HGCALlayerCluster.product(),
+        //    v_generalTrack.product(),
+        //    &gsfEle,
+        //    0.15, // dR_max
+        //    1.0, // clusET_min
+        //    _largeVal, // trackDz_max
+        //    1.0 // trackPt_min
+        //);
+        //
+        //
+        //// 0.3
+        //fill_isoVar(
+        //    treeOutput->m_isoVarContent.at("gsfEleFromTICL_dR0p3"),
+        //    v_HGCALlayerCluster.product(),
+        //    v_generalTrack.product(),
+        //    &gsfEle,
+        //    0.3, // dR_max
+        //    0.0, // clusET_min
+        //    _largeVal, // trackDz_max
+        //    0.0 // trackPt_min
+        //);
+        //
+        //fill_isoVar(
+        //    treeOutput->m_isoVarContent.at("gsfEleFromTICL_dR0p3_clusET1_trkDz0p15_trkPt1"),
+        //    v_HGCALlayerCluster.product(),
+        //    v_generalTrack.product(),
+        //    &gsfEle,
+        //    0.3, // dR_max
+        //    1.0, // clusET_min
+        //    _largeVal, // trackDz_max
+        //    1.0 // trackPt_min
+        //);
+        //
+        //
+        //// 0.4
+        //fill_isoVar(
+        //    treeOutput->m_isoVarContent.at("gsfEleFromTICL_dR0p4"),
+        //    v_HGCALlayerCluster.product(),
+        //    v_generalTrack.product(),
+        //    &gsfEle,
+        //    0.4, // dR_max
+        //    0.0, // clusET_min
+        //    _largeVal, // trackDz_max
+        //    0.0 // trackPt_min
+        //);
+        //
+        //fill_isoVar(
+        //    treeOutput->m_isoVarContent.at("gsfEleFromTICL_dR0p4_clusET1_trkDz0p15_trkPt1"),
+        //    v_HGCALlayerCluster.product(),
+        //    v_generalTrack.product(),
+        //    &gsfEle,
+        //    0.4, // dR_max
+        //    1.0, // clusET_min
+        //    _largeVal, // trackDz_max
+        //    1.0 // trackPt_min
+        //);
         
         //fill_isoVar(
         //    treeOutput->m_isoVarContent.at("gsfEleFromTICL_dR0p5"),
@@ -2368,6 +2397,10 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         double energy3p0 = 0;
         double energy3p2 = 0;
         
+        double varEtaEta = 0;
+        double varPhiPhi = 0;
+        double varEtaPhi = 0;
+        
         for(int iLayer = 0; iLayer < Constants::HGCalEE_nLayer; iLayer++)
         {
             treeOutput->vv_gsfEleFromTICL_superClus_E_layer.at(iLayer).push_back(0);
@@ -2375,14 +2408,14 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             //treeOutput->vv_gsfEleFromTICL_E2p4_layer.at(iLayer).push_back(0);
             //treeOutput->vv_gsfEleFromTICL_R2p4_layer.at(iLayer).push_back(0);
             
-            treeOutput->vv_gsfEleFromTICL_E2p6_layer.at(iLayer).push_back(0);
-            treeOutput->vv_gsfEleFromTICL_R2p6_layer.at(iLayer).push_back(0);
+            //treeOutput->vv_gsfEleFromTICL_E2p6_layer.at(iLayer).push_back(0);
+            //treeOutput->vv_gsfEleFromTICL_R2p6_layer.at(iLayer).push_back(0);
             
             treeOutput->vv_gsfEleFromTICL_E2p8_layer.at(iLayer).push_back(0);
             treeOutput->vv_gsfEleFromTICL_R2p8_layer.at(iLayer).push_back(0);
             
-            treeOutput->vv_gsfEleFromTICL_E3p0_layer.at(iLayer).push_back(0);
-            treeOutput->vv_gsfEleFromTICL_R3p0_layer.at(iLayer).push_back(0);
+            //treeOutput->vv_gsfEleFromTICL_E3p0_layer.at(iLayer).push_back(0);
+            //treeOutput->vv_gsfEleFromTICL_R3p0_layer.at(iLayer).push_back(0);
             
             //treeOutput->vv_gsfEleFromTICL_E3p2_layer.at(iLayer).push_back(0);
             //treeOutput->vv_gsfEleFromTICL_R3p2_layer.at(iLayer).push_back(0);
@@ -2498,34 +2531,34 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             //treeOutput->vv_gsfEleFromTICL_R2p4_layer.at(iLayer).back() = iLayer_R2p4;
             
             
-            // R2p6
-            std::vector <DetId> v_iLayer_neighbourR2p6_detId = Common::getNeighborR(
-                iLayer_centroid_detId,
-                vv_superClus_layerHandF.at(iLayer),
-                2.6,
-                topo_HGCalEE,
-                &recHitTools
-            );
-            
-            double iLayer_energy2p6 = Common::getEnergySum(
-                v_iLayer_neighbourR2p6_detId,
-                vv_superClus_layerHandF.at(iLayer),
-                m_recHit,
-                &recHitTools,
-                false
-            );
-            
-            energy2p6 += iLayer_energy2p6;
-            
-            double iLayer_R2p6 = 0;
-            
-            if(iLayer_energy)
-            {
-                iLayer_R2p6 = iLayer_energy2p6 / iLayer_energy;
-            }
-            
-            treeOutput->vv_gsfEleFromTICL_E2p6_layer.at(iLayer).back() = iLayer_energy2p6;
-            treeOutput->vv_gsfEleFromTICL_R2p6_layer.at(iLayer).back() = iLayer_R2p6;
+            //// R2p6
+            //std::vector <DetId> v_iLayer_neighbourR2p6_detId = Common::getNeighborR(
+            //    iLayer_centroid_detId,
+            //    vv_superClus_layerHandF.at(iLayer),
+            //    2.6,
+            //    topo_HGCalEE,
+            //    &recHitTools
+            //);
+            //
+            //double iLayer_energy2p6 = Common::getEnergySum(
+            //    v_iLayer_neighbourR2p6_detId,
+            //    vv_superClus_layerHandF.at(iLayer),
+            //    m_recHit,
+            //    &recHitTools,
+            //    false
+            //);
+            //
+            //energy2p6 += iLayer_energy2p6;
+            //
+            //double iLayer_R2p6 = 0;
+            //
+            //if(iLayer_energy)
+            //{
+            //    iLayer_R2p6 = iLayer_energy2p6 / iLayer_energy;
+            //}
+            //
+            //treeOutput->vv_gsfEleFromTICL_E2p6_layer.at(iLayer).back() = iLayer_energy2p6;
+            //treeOutput->vv_gsfEleFromTICL_R2p6_layer.at(iLayer).back() = iLayer_R2p6;
             
             
             // R2p8
@@ -2558,34 +2591,34 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             treeOutput->vv_gsfEleFromTICL_R2p8_layer.at(iLayer).back() = iLayer_R2p8;
             
             
-            // R3p0
-            std::vector <DetId> v_iLayer_neighbourR3p0_detId = Common::getNeighborR(
-                iLayer_centroid_detId,
-                vv_superClus_layerHandF.at(iLayer),
-                3.0,
-                topo_HGCalEE,
-                &recHitTools
-            );
-            
-            double iLayer_energy3p0 = Common::getEnergySum(
-                v_iLayer_neighbourR3p0_detId,
-                vv_superClus_layerHandF.at(iLayer),
-                m_recHit,
-                &recHitTools,
-                false
-            );
-            
-            energy3p0 += iLayer_energy3p0;
-            
-            double iLayer_R3p0 = 0;
-            
-            if(iLayer_energy)
-            {
-                iLayer_R3p0 = iLayer_energy3p0 / iLayer_energy;
-            }
-            
-            treeOutput->vv_gsfEleFromTICL_E3p0_layer.at(iLayer).back() = iLayer_energy3p0;
-            treeOutput->vv_gsfEleFromTICL_R3p0_layer.at(iLayer).back() = iLayer_R3p0;
+            //// R3p0
+            //std::vector <DetId> v_iLayer_neighbourR3p0_detId = Common::getNeighborR(
+            //    iLayer_centroid_detId,
+            //    vv_superClus_layerHandF.at(iLayer),
+            //    3.0,
+            //    topo_HGCalEE,
+            //    &recHitTools
+            //);
+            //
+            //double iLayer_energy3p0 = Common::getEnergySum(
+            //    v_iLayer_neighbourR3p0_detId,
+            //    vv_superClus_layerHandF.at(iLayer),
+            //    m_recHit,
+            //    &recHitTools,
+            //    false
+            //);
+            //
+            //energy3p0 += iLayer_energy3p0;
+            //
+            //double iLayer_R3p0 = 0;
+            //
+            //if(iLayer_energy)
+            //{
+            //    iLayer_R3p0 = iLayer_energy3p0 / iLayer_energy;
+            //}
+            //
+            //treeOutput->vv_gsfEleFromTICL_E3p0_layer.at(iLayer).back() = iLayer_energy3p0;
+            //treeOutput->vv_gsfEleFromTICL_R3p0_layer.at(iLayer).back() = iLayer_R3p0;
             
             
             //// R3p2
@@ -2636,37 +2669,61 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             //);
             
             totalE += iLayer_energy;
+            
+            
+            
+            //std::vector <double> v_variance = Common::getVariances(
+            //    iLayer_centroid_detId,
+            //    vv_superClus_layerHandF.at(iLayer),
+            //    m_recHit,
+            //    &recHitTools,
+            //    2.8
+            //);
+            //
+            //varEtaEta += v_variance.at(0);
+            //varPhiPhi += v_variance.at(1);
+            //varEtaPhi += v_variance.at(2);
         }
         
-        double R7 = energy7/gsfEle.energy();
-        double R19 = energy19/gsfEle.energy();
+        //double R7 = energy7/gsfEle.energy();
+        //double R19 = energy19/gsfEle.energy();
         
-        treeOutput->v_gsfEleFromTICL_E7.push_back(energy7);
-        treeOutput->v_gsfEleFromTICL_R7.push_back(R7);
-        
-        treeOutput->v_gsfEleFromTICL_E19.push_back(energy19);
-        treeOutput->v_gsfEleFromTICL_R19.push_back(R19);
+        //treeOutput->v_gsfEleFromTICL_E7.push_back(energy7);
+        //treeOutput->v_gsfEleFromTICL_R7.push_back(R7);
+        //
+        //treeOutput->v_gsfEleFromTICL_E19.push_back(energy19);
+        //treeOutput->v_gsfEleFromTICL_R19.push_back(R19);
         
         
         //double R2p4 = energy2p4/gsfEle.energy();
         //treeOutput->v_gsfEleFromTICL_E2p4.push_back(energy2p4);
         //treeOutput->v_gsfEleFromTICL_R2p4.push_back(R2p4);
         
-        double R2p6 = energy2p6/gsfEle.energy();
-        treeOutput->v_gsfEleFromTICL_E2p6.push_back(energy2p6);
-        treeOutput->v_gsfEleFromTICL_R2p6.push_back(R2p6);
+        //double R2p6 = energy2p6/gsfEle.energy();
+        //treeOutput->v_gsfEleFromTICL_E2p6.push_back(energy2p6);
+        //treeOutput->v_gsfEleFromTICL_R2p6.push_back(R2p6);
         
         double R2p8 = energy2p8/gsfEle.energy();
         treeOutput->v_gsfEleFromTICL_E2p8.push_back(energy2p8);
         treeOutput->v_gsfEleFromTICL_R2p8.push_back(R2p8);
         
-        double R3p0 = energy3p0/gsfEle.energy();
-        treeOutput->v_gsfEleFromTICL_E3p0.push_back(energy3p0);
-        treeOutput->v_gsfEleFromTICL_R3p0.push_back(R3p0);
+        //double R3p0 = energy3p0/gsfEle.energy();
+        //treeOutput->v_gsfEleFromTICL_E3p0.push_back(energy3p0);
+        //treeOutput->v_gsfEleFromTICL_R3p0.push_back(R3p0);
         
         //double R3p2 = energy3p2/gsfEle.energy();
         //treeOutput->v_gsfEleFromTICL_E3p2.push_back(energy3p2);
         //treeOutput->v_gsfEleFromTICL_R3p2.push_back(R3p2);
+        
+        //if(totalE)
+        //{
+        //    varEtaEta /= totalE;
+        //    varPhiPhi /= totalE;
+        //    varEtaPhi /= totalE;
+        //}
+        
+        //treeOutput->v_gsfEleFromTICL_superClus_sigma2etaEtaLW.push_back(varEtaEta);
+        //treeOutput->v_gsfEleFromTICL_superClus_sigma2phiPhiLW.push_back(varPhiPhi);
         
         //printf("Sum[layer]: E %0.2f \n", totalE);
         //
@@ -2703,6 +2760,53 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         //        topo_HGCalEE.decode(cell_detId).iType
         //    );
         //}
+        
+        //printf(
+        //    "TICLeleRvarProducerR2p8_HGCalElectronRvar %0.4e, "
+        //    "TICLelePCAProducerR2p0_HGCalElectronPCASigma2UU %0.4e, "
+        //    "TICLeleHoverEProducerR0p3_HGCalElectronHoverE %0.4e, "
+        //    "\n",
+        //    m_gsfEleFromTICLvarMap->find("TICLeleRvarProducerR2p8_HGCalElectronRvar")[iEle],
+        //    m_gsfEleFromTICLvarMap->find("TICLelePCAProducerR2p0_HGCalElectronPCASigma2UU")[iEle],
+        //    m_gsfEleFromTICLvarMap->find("TICLeleHoverEProducerR0p3_HGCalElectronHoverE")[iEle]
+        //);
+        
+        treeOutput->m_RvarContent.at("gsfEleFromTICL_cylR2p0")->v_Rvar.push_back(m_gsfEleFromTICLvarMap->find("TICLeleRvarProducerR2p0_HGCalElectronRvar")[iEle]);
+        treeOutput->m_RvarContent.at("gsfEleFromTICL_cylR2p8")->v_Rvar.push_back(m_gsfEleFromTICLvarMap->find("TICLeleRvarProducerR2p8_HGCalElectronRvar")[iEle]);
+        treeOutput->m_RvarContent.at("gsfEleFromTICL_cylR3p5")->v_Rvar.push_back(m_gsfEleFromTICLvarMap->find("TICLeleRvarProducerR3p5_HGCalElectronRvar")[iEle]);
+        
+        
+        treeOutput->m_PCAvarContent.at("gsfEleFromTICL_cylR2p0")->v_sigma2uu.push_back(m_gsfEleFromTICLvarMap->find("TICLelePCAProducerR2p0_HGCalElectronPCASigma2UU")[iEle]);
+        treeOutput->m_PCAvarContent.at("gsfEleFromTICL_cylR2p0")->v_sigma2vv.push_back(m_gsfEleFromTICLvarMap->find("TICLelePCAProducerR2p0_HGCalElectronPCASigma2VV")[iEle]);
+        treeOutput->m_PCAvarContent.at("gsfEleFromTICL_cylR2p0")->v_sigma2ww.push_back(m_gsfEleFromTICLvarMap->find("TICLelePCAProducerR2p0_HGCalElectronPCASigma2WW")[iEle]);
+        
+        treeOutput->m_PCAvarContent.at("gsfEleFromTICL_cylR2p8")->v_sigma2uu.push_back(m_gsfEleFromTICLvarMap->find("TICLelePCAProducerR2p8_HGCalElectronPCASigma2UU")[iEle]);
+        treeOutput->m_PCAvarContent.at("gsfEleFromTICL_cylR2p8")->v_sigma2vv.push_back(m_gsfEleFromTICLvarMap->find("TICLelePCAProducerR2p8_HGCalElectronPCASigma2VV")[iEle]);
+        treeOutput->m_PCAvarContent.at("gsfEleFromTICL_cylR2p8")->v_sigma2ww.push_back(m_gsfEleFromTICLvarMap->find("TICLelePCAProducerR2p8_HGCalElectronPCASigma2WW")[iEle]);
+        
+        treeOutput->m_PCAvarContent.at("gsfEleFromTICL_cylR3p5")->v_sigma2uu.push_back(m_gsfEleFromTICLvarMap->find("TICLelePCAProducerR3p5_HGCalElectronPCASigma2UU")[iEle]);
+        treeOutput->m_PCAvarContent.at("gsfEleFromTICL_cylR3p5")->v_sigma2vv.push_back(m_gsfEleFromTICLvarMap->find("TICLelePCAProducerR3p5_HGCalElectronPCASigma2VV")[iEle]);
+        treeOutput->m_PCAvarContent.at("gsfEleFromTICL_cylR3p5")->v_sigma2ww.push_back(m_gsfEleFromTICLvarMap->find("TICLelePCAProducerR3p5_HGCalElectronPCASigma2WW")[iEle]);
+        
+        
+        treeOutput->m_isoVarContent.at("gsfEleFromTICL_dR0p15")->v_HoverE.push_back(m_gsfEleFromTICLvarMap->find("TICLeleHoverEProducerR0p15_HGCalElectronHoverE")[iEle]);
+        treeOutput->m_isoVarContent.at("gsfEleFromTICL_dR0p15")->v_iso_trackSumPt.push_back(m_gsfEleFromTICLvarMap->find("TICLeleTrackIsoProducerR0p15_HGCalElectronTrackIso")[iEle]);
+        
+        treeOutput->m_isoVarContent.at("gsfEleFromTICL_dR0p2")->v_HoverE.push_back(m_gsfEleFromTICLvarMap->find("TICLeleHoverEProducerR0p2_HGCalElectronHoverE")[iEle]);
+        treeOutput->m_isoVarContent.at("gsfEleFromTICL_dR0p2")->v_iso_trackSumPt.push_back(m_gsfEleFromTICLvarMap->find("TICLeleTrackIsoProducerR0p2_HGCalElectronTrackIso")[iEle]);
+        
+        treeOutput->m_isoVarContent.at("gsfEleFromTICL_dR0p3")->v_HoverE.push_back(m_gsfEleFromTICLvarMap->find("TICLeleHoverEProducerR0p3_HGCalElectronHoverE")[iEle]);
+        treeOutput->m_isoVarContent.at("gsfEleFromTICL_dR0p3")->v_iso_trackSumPt.push_back(m_gsfEleFromTICLvarMap->find("TICLeleTrackIsoProducerR0p3_HGCalElectronTrackIso")[iEle]);
+        
+        
+        treeOutput->m_isoVarContent.at("gsfEleFromTICL_dR0p15_trkDz0p15_trkPt1")->v_HoverE.push_back(m_gsfEleFromTICLvarMap->find("TICLeleHoverEProducerR0p15TrkDz0p15TrkPt1_HGCalElectronHoverE")[iEle]);
+        treeOutput->m_isoVarContent.at("gsfEleFromTICL_dR0p15_trkDz0p15_trkPt1")->v_iso_trackSumPt.push_back(m_gsfEleFromTICLvarMap->find("TICLeleTrackIsoProducerR0p15_HGCalElectronTrackIso")[iEle]);
+        
+        treeOutput->m_isoVarContent.at("gsfEleFromTICL_dR0p2_trkDz0p15_trkPt1")->v_HoverE.push_back(m_gsfEleFromTICLvarMap->find("TICLeleHoverEProducerR0p2TrkDz0p15TrkPt1_HGCalElectronHoverE")[iEle]);
+        treeOutput->m_isoVarContent.at("gsfEleFromTICL_dR0p2_trkDz0p15_trkPt1")->v_iso_trackSumPt.push_back(m_gsfEleFromTICLvarMap->find("TICLeleTrackIsoProducerR0p2TrkDz0p15TrkPt1_HGCalElectronTrackIso")[iEle]);
+        
+        treeOutput->m_isoVarContent.at("gsfEleFromTICL_dR0p3_trkDz0p15_trkPt1")->v_HoverE.push_back(m_gsfEleFromTICLvarMap->find("TICLeleHoverEProducerR0p3TrkDz0p15TrkPt1_HGCalElectronHoverE")[iEle]);
+        treeOutput->m_isoVarContent.at("gsfEleFromTICL_dR0p3_trkDz0p15_trkPt1")->v_iso_trackSumPt.push_back(m_gsfEleFromTICLvarMap->find("TICLeleTrackIsoProducerR0p3TrkDz0p15TrkPt1_HGCalElectronTrackIso")[iEle]);
         
         
         const reco::CaloCluster *superClus_seed = gsfEle.superCluster()->seed().get();
@@ -2991,20 +3095,6 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     
     fflush(stdout);
     fflush(stderr);
-}
-
-
-double TreeMaker::getDeltaPhi(double phi1, double phi2)
-{
-    double deltaPhi = phi1 - phi2;
-    
-    deltaPhi = (deltaPhi > +M_PI)? (deltaPhi - 2*M_PI): deltaPhi;
-    deltaPhi = (deltaPhi < -M_PI)? (deltaPhi + 2*M_PI): deltaPhi;
-    
-    //deltaPhi = (deltaPhi > +M_PI)? (2*M_PI - deltaPhi): deltaPhi;
-    //deltaPhi = (deltaPhi < -M_PI)? (2*M_PI + deltaPhi): deltaPhi;
-    
-    return deltaPhi;
 }
 
 

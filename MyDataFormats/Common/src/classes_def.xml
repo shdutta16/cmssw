@@ -1,0 +1,22 @@
+<lcgdict>
+    <class name="edm::MapOfVectors <std::string, double>"/>
+    <class name="edm::Wrapper <edm::MapOfVectors <std::string, double> >"/>
+    
+    
+    <class name="std::map <std::string, std::vector <double> >"/>
+    <class name="edm::Wrapper <std::map <std::string, std::vector <double> > >"/>
+    
+    <class name="std::pair <std::string, std::vector <double> >"/>
+    <class name="edm::Wrapper <std::pair <std::string, std::vector <double> > >"/>
+    
+    <class name="std::pair <const std::string, std::vector <double> >"/>
+    
+    
+    <class name="std::map <std::string, edm::Handle <std::vector <double> > >"/>
+    <class name="edm::Wrapper <std::map <std::string, edm::Handle <std::vector <double> > > >"/>
+    
+    <class name="std::pair <std::string, edm::Handle <std::vector <double> > >"/>
+    <class name="edm::Wrapper <std::pair <std::string, edm::Handle <std::vector <double> > > >"/>
+    
+    <class name="std::pair <const std::string, edm::Handle <std::vector <double> > >"/>
+</lcgdict>
