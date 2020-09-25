@@ -206,7 +206,7 @@ void HGCalElectronTrackIsoProducer::produce(edm::Event& iEvent, const edm::Event
             // dz cut
             double trkEleDz = std::fabs(track.vz() - ele_track->vz());
             
-            if(trkEleDz < _maxTrackEleDz)
+            if(trkEleDz > _maxTrackEleDz)
             {
                 continue;
             }
