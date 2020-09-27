@@ -94,4 +94,22 @@ namespace CommonUtilities
         
         return m_recHit;
     }
+    
+    
+    double getCellSize(DetId detId, const hgcal::RecHitTools *recHitTools)
+    {
+        double SiThickness = recHitTools->getSiThickness(detId);
+        
+        // HD wafers
+        if(SiThickness < 150)
+        {
+            return 0.465;
+        }
+        
+        // LD wafers
+        else
+        {
+            return 0.698;
+        }
+    }
 }

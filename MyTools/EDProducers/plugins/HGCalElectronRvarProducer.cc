@@ -321,7 +321,9 @@ void HGCalElectronRvarProducer::produce(edm::Event& iEvent, const edm::EventSetu
             
             double R = std::sqrt(dist_xyz.x()*dist_xyz.x() + dist_xyz.y()*dist_xyz.y());
             
-            if(R > _cylinderR)
+            double cellSize = CommonUtilities::getCellSize(hitId, &recHitTools);
+            
+            if(R > _cylinderR+cellSize)
             {
                 continue;
             }

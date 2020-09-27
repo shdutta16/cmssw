@@ -178,6 +178,9 @@ namespace CommonUtilities
         edm::Handle <edm::SortedCollection <HGCRecHit,edm::StrictWeakOrdering <HGCRecHit> > > v_HGCHEFRecHit,
         edm::Handle <edm::SortedCollection <HGCRecHit,edm::StrictWeakOrdering <HGCRecHit> > > v_HGCHEBRecHit
     );
+    
+    
+    double getCellSize(DetId detId, const hgcal::RecHitTools *recHitTools);
 }
 
 

@@ -350,7 +350,10 @@ void HGCalElectronPCAProducer::produce(edm::Event& iEvent, const edm::EventSetup
             
             double rCyl = std::sqrt(distCyl_xyz.x()*distCyl_xyz.x() + distCyl_xyz.y()*distCyl_xyz.y());
             
+            //double cellSize = CommonUtilities::getCellSize(hitId, &recHitTools);
+            
             // Compute in a cylinder
+            //if(rCyl > _cylinderR+cellSize)
             if(rCyl > _cylinderR)
             {
                 continue;
