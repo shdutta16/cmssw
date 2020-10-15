@@ -1,4 +1,4 @@
-# include "MyTools/EDProducers/plugins/CommonUtilities.h"
+# include "MyTools/EDProducers/interface/CommonUtilities.h"
 
 
 
@@ -49,6 +49,21 @@ namespace CommonUtilities
         }
         
         return m_recHitIdx;
+    }
+    
+    
+    std::map <DetId, const reco::PFRecHit*> getPFRecHitPtrMap(
+        const std::vector <reco::PFRecHit> &v_recHit
+    )
+    {
+        std::map <DetId, const reco::PFRecHit*> m_recHitPtr;
+        
+        for(auto &recHit : v_recHit)
+        {
+            m_recHitPtr[recHit.detId()] = &recHit;
+        }
+        
+        return m_recHitPtr;
     }
     
     

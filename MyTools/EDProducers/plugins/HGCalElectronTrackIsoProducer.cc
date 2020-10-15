@@ -79,19 +79,19 @@ class HGCalElectronTrackIsoProducer : public edm::stream::EDProducer<>
     
     // ----------member data ---------------------------
     
-    std::string _instanceName;
+    std::string instanceName_;
     
-    bool _debug;
+    bool debug_;
     
-    double _isoConeDR;
-    double _vetoConeDR;
-    double _vetoPhiStripDeta;
+    double isoConeDR_;
+    double vetoConeDR_;
+    double vetoPhiStripDeta_;
     
-    double _minTrackPt;
-    double _maxTrackEleDz;
+    double minTrackPt_;
+    double maxTrackEleDz_;
     
-    edm::EDGetTokenT <std::vector <reco::GsfElectron> > _tok_electron;
-    edm::EDGetTokenT <std::vector <reco::Track> > _tok_track;
+    edm::EDGetTokenT <std::vector <reco::GsfElectron> > tok_electron_;
+    edm::EDGetTokenT <std::vector <reco::Track> > tok_track_;
 };
 
 //
@@ -120,22 +120,22 @@ HGCalElectronTrackIsoProducer::HGCalElectronTrackIsoProducer(const edm::Paramete
     */
     //now do what ever other initialization is needed
     
-    _instanceName = iConfig.getParameter <std::string>("instanceName");
+    instanceName_ = iConfig.getParameter <std::string>("instanceName");
     
-    _tok_electron = consumes <std::vector <reco::GsfElectron> >(iConfig.getParameter <edm::InputTag>("electrons"));
-    _tok_track = consumes <std::vector <reco::Track> >(iConfig.getParameter <edm::InputTag>("tracks"));
+    tok_electron_ = consumes <std::vector <reco::GsfElectron> >(iConfig.getParameter <edm::InputTag>("electrons"));
+    tok_track_ = consumes <std::vector <reco::Track> >(iConfig.getParameter <edm::InputTag>("tracks"));
     
-    _isoConeDR = iConfig.getParameter <double>("isoConeDR");
-    _vetoConeDR = iConfig.getParameter <double>("vetoConeDR");
-    _vetoPhiStripDeta = iConfig.getParameter <double>("vetoPhiStripDeta");
+    isoConeDR_ = iConfig.getParameter <double>("isoConeDR");
+    vetoConeDR_ = iConfig.getParameter <double>("vetoConeDR");
+    vetoPhiStripDeta_ = iConfig.getParameter <double>("vetoPhiStripDeta");
     
-    _minTrackPt = iConfig.getParameter <double>("minTrackPt");
-    _maxTrackEleDz = iConfig.getParameter <double>("maxTrackEleDz");
+    minTrackPt_ = iConfig.getParameter <double>("minTrackPt");
+    maxTrackEleDz_ = iConfig.getParameter <double>("maxTrackEleDz");
     
-    _debug = iConfig.getParameter <bool>("debug");
+    debug_ = iConfig.getParameter <bool>("debug");
     
     
-    produces <std::vector <double> > (_instanceName);
+    produces <std::vector <double> > (instanceName_);
 }
 
 HGCalElectronTrackIsoProducer::~HGCalElectronTrackIsoProducer() {
@@ -168,10 +168,10 @@ void HGCalElectronTrackIsoProducer::produce(edm::Event& iEvent, const edm::Event
     */
     
     edm::Handle <std::vector <reco::GsfElectron> > v_electron;
-    iEvent.getByToken(_tok_electron, v_electron);
+    iEvent.getByToken(tok_electron_, v_electron);
     
     edm::Handle <std::vector <reco::Track> > v_track;
-    iEvent.getByToken(_tok_track, v_track);
+    iEvent.getByToken(tok_track_, v_track);
     
     
     int nEle = v_electron->size();
@@ -198,7 +198,7 @@ void HGCalElectronTrackIsoProducer::produce(edm::Event& iEvent, const edm::Event
             reco::Track track = v_track->at(iTrack);
             
             // pT cut
-            if(track.pt() < _minTrackPt)
+            if(track.pt() < minTrackPt_)
             {
                 continue;
             }
@@ -206,7 +206,7 @@ void HGCalElectronTrackIsoProducer::produce(edm::Event& iEvent, const edm::Event
             // dz cut
             double trkEleDz = std::fabs(track.vz() - ele_track->vz());
             
-            if(trkEleDz > _maxTrackEleDz)
+            if(trkEleDz > maxTrackEleDz_)
             {
                 continue;
             }
@@ -214,7 +214,7 @@ void HGCalElectronTrackIsoProducer::produce(edm::Event& iEvent, const edm::Event
             // phi-strip veto
             double dEta = std::fabs(track.eta() - ele_track->eta());
             
-            if(dEta < _vetoPhiStripDeta)
+            if(dEta < vetoPhiStripDeta_)
             {
                 continue;
             }
@@ -222,7 +222,7 @@ void HGCalElectronTrackIsoProducer::produce(edm::Event& iEvent, const edm::Event
             // signal and isolation cone veto
             double dR = ROOT::Math::VectorUtil::DeltaR(track.momentum(), ele_track->momentum());
             
-            if(dR > _isoConeDR || dR < _vetoConeDR)
+            if(dR > isoConeDR_ || dR < vetoConeDR_)
             {
                 continue;
             }
@@ -232,7 +232,7 @@ void HGCalElectronTrackIsoProducer::produce(edm::Event& iEvent, const edm::Event
         }
         
         
-        if(_debug)
+        if(debug_)
         {
             printf("In HGCalElectronTrackIsoProducer --> Ele %d/%d: isoTrack %0.4f \n", iEle+1, nEle, trackIso);
         }
@@ -243,7 +243,7 @@ void HGCalElectronTrackIsoProducer::produce(edm::Event& iEvent, const edm::Event
     
     iEvent.put(
         std::make_unique <std::vector <double> >(v_trackIso),
-        _instanceName
+        instanceName_
     );
 }
 

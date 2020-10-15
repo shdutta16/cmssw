@@ -87,19 +87,19 @@ class MapProducer : public edm::stream::EDProducer<>
     
     // ----------member data ---------------------------
     
-    std::string _instanceName;
+    std::string instanceName_;
     
-    bool _debug;
-    bool _useProcessName;
+    bool debug_;
+    bool useProcessName_;
     
-    int _nLayer;
-    double _cylinderR;
-    double _minHitE;
-    double _minHitET;
+    int nLayer_;
+    double cylinderR_;
+    double minHitE_;
+    double minHitET_;
     
-    std::vector <edm::InputTag> _v_inputTag;
+    std::vector <edm::InputTag> v_inputTag_;
     
-    std::vector <edm::EDGetTokenT <std::vector <double> > > _v_tok_collection;
+    std::vector <edm::EDGetTokenT <std::vector <double> > > v_tok_collection_;
 };
 
 //
@@ -128,24 +128,24 @@ MapProducer::MapProducer(const edm::ParameterSet& iConfig)
     */
     //now do what ever other initialization is needed
     
-    _instanceName = iConfig.getParameter <std::string>("instanceName");
+    instanceName_ = iConfig.getParameter <std::string>("instanceName");
     
-    _debug = iConfig.getParameter <bool>("debug");
-    _useProcessName = iConfig.getParameter <bool>("useProcessName");
+    debug_ = iConfig.getParameter <bool>("debug");
+    useProcessName_ = iConfig.getParameter <bool>("useProcessName");
     
-    _v_inputTag = iConfig.getParameter <std::vector <edm::InputTag> >("collections");
+    v_inputTag_ = iConfig.getParameter <std::vector <edm::InputTag> >("collections");
     
-    for(int iTag = 0; iTag < (int) _v_inputTag.size(); iTag++)
+    for(int iTag = 0; iTag < (int) v_inputTag_.size(); iTag++)
     {
-        edm::InputTag tag = _v_inputTag.at(iTag);
+        edm::InputTag tag = v_inputTag_.at(iTag);
         
-        _v_tok_collection.push_back(
+        v_tok_collection_.push_back(
             consumes <std::vector <double> >(tag)
         );
     }
     
     
-    produces <edm::MapOfVectors <std::string, double> > (_instanceName);
+    produces <edm::MapOfVectors <std::string, double> > (instanceName_);
 }
 
 MapProducer::~MapProducer() {
@@ -179,12 +179,12 @@ void MapProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     
     std::map <std::string, std::vector <double> > m_collection;
     
-    for(int iTag = 0; iTag < (int) _v_inputTag.size(); iTag++)
+    for(int iTag = 0; iTag < (int) v_inputTag_.size(); iTag++)
     {
         edm::Handle <std::vector <double> > v_value;
-        iEvent.getByToken(_v_tok_collection.at(iTag), v_value);
+        iEvent.getByToken(v_tok_collection_.at(iTag), v_value);
         
-        edm::InputTag tag = _v_inputTag.at(iTag);
+        edm::InputTag tag = v_inputTag_.at(iTag);
         
         std::string key = tag.label();
         
@@ -193,12 +193,12 @@ void MapProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
             key += "_" + tag.instance();
         }
         
-        if(!tag.process().empty() && _useProcessName)
+        if(!tag.process().empty() && useProcessName_)
         {
             key += "_" + tag.process();
         }
         
-        if(_debug)
+        if(debug_)
         {
             printf("In MapProducer::produce(...): Adding collection \"%s\" to map. \n", key.c_str());
             
@@ -220,7 +220,7 @@ void MapProducer::produce(edm::Event& iEvent, const edm::EventSetup& iSetup)
     
     iEvent.put(
         std::make_unique <edm::MapOfVectors <std::string, double> >(outputMap),
-        _instanceName
+        instanceName_
     );
 }
 

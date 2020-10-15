@@ -161,15 +161,20 @@ namespace CommonUtilities
         }
     };
     
+    
     void initRecHitTools(
         hgcal::RecHitTools &recHitTools,
         const edm::EventSetup *iSetup
     );
     
     
-    
     std::map <DetId, int> getPFRecHitIndexMap(
         edm::Handle <std::vector <reco::PFRecHit> > v_recHit
+    );
+    
+    
+    std::map <DetId, const reco::PFRecHit*> getPFRecHitPtrMap(
+        const std::vector <reco::PFRecHit> &v_recHit
     );
     
     

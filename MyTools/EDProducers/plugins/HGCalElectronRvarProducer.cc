@@ -55,7 +55,7 @@
 # include <utility>
 # include <vector>
 
-# include "MyTools/EDProducers/plugins/CommonUtilities.h"
+# include "MyTools/EDProducers/interface/HGCalAlgoSuperClusterRvar.h"
 
 
 //
@@ -85,24 +85,14 @@ class HGCalElectronRvarProducer : public edm::stream::EDProducer<>
     
     // ----------member data ---------------------------
     
-    std::string _instanceName;
+    HGCalAlgoSuperClusterRvar algo_Rvar_;
     
-    bool _debug;
+    std::string instanceName_;
     
-    int _nLayer;
-    double _cylinderR;
-    double _minHitE;
-    double _minHitET;
+    bool debug_;
     
-    edm::EDGetTokenT <std::vector <reco::GsfElectron> > _tok_electron;
-    
-    edm::EDGetTokenT <std::vector <reco::PFRecHit> > _tok_PFRecHit;
-    
-    edm::EDGetTokenT <edm::SortedCollection <HGCRecHit,edm::StrictWeakOrdering <HGCRecHit> > > _tok_HGCEERecHit;
-    edm::EDGetTokenT <edm::SortedCollection <HGCRecHit,edm::StrictWeakOrdering <HGCRecHit> > > _tok_HGCHEFRecHit;
-    edm::EDGetTokenT <edm::SortedCollection <HGCRecHit,edm::StrictWeakOrdering <HGCRecHit> > > _tok_HGCHEBRecHit;
-    
-    hgcal::RecHitTools recHitTools;
+    edm::EDGetTokenT <std::vector <reco::GsfElectron> > tok_electron_;
+    edm::EDGetTokenT <std::vector <reco::PFRecHit> > tok_PFRecHit_;
 };
 
 //
@@ -117,7 +107,8 @@ class HGCalElectronRvarProducer : public edm::stream::EDProducer<>
 //
 // constructors and destructor
 //
-HGCalElectronRvarProducer::HGCalElectronRvarProducer(const edm::ParameterSet& iConfig)
+HGCalElectronRvarProducer::HGCalElectronRvarProducer(const edm::ParameterSet& iConfig) :
+    algo_Rvar_(iConfig)
 {
     //register your products
     /* Examples
@@ -131,26 +122,15 @@ HGCalElectronRvarProducer::HGCalElectronRvarProducer(const edm::ParameterSet& iC
     */
     //now do what ever other initialization is needed
     
-    _instanceName = iConfig.getParameter <std::string>("instanceName");
+    instanceName_ = iConfig.getParameter <std::string>("instanceName");
     
-    _tok_electron = consumes <std::vector <reco::GsfElectron> >(iConfig.getParameter <edm::InputTag>("electrons"));
+    tok_electron_ = consumes <std::vector <reco::GsfElectron> >(iConfig.getParameter <edm::InputTag>("electrons"));
+    tok_PFRecHit_ = consumes <std::vector <reco::PFRecHit> >(iConfig.getParameter <edm::InputTag>("PFRecHits"));
     
-    _tok_PFRecHit = consumes <std::vector <reco::PFRecHit> >(iConfig.getParameter <edm::InputTag>("PFRecHits"));
-    
-    _tok_HGCEERecHit = consumes <edm::SortedCollection <HGCRecHit,edm::StrictWeakOrdering <HGCRecHit> > >(iConfig.getUntrackedParameter <edm::InputTag>("HGCEERecHits"));
-    _tok_HGCHEFRecHit = consumes <edm::SortedCollection <HGCRecHit,edm::StrictWeakOrdering <HGCRecHit> > >(iConfig.getUntrackedParameter <edm::InputTag>("HGCHEFRecHits"));
-    _tok_HGCHEBRecHit = consumes <edm::SortedCollection <HGCRecHit,edm::StrictWeakOrdering <HGCRecHit> > >(iConfig.getUntrackedParameter <edm::InputTag>("HGCHEBRecHits"));
-    
-    _nLayer = iConfig.getParameter <int>("nLayer");
-    _cylinderR = iConfig.getParameter <double>("cylinderR");
-    
-    _minHitE = iConfig.getParameter <double>("minHitE");
-    _minHitET = iConfig.getParameter <double>("minHitET");
-    
-    _debug = iConfig.getParameter <bool>("debug");
+    debug_ = iConfig.getParameter <bool>("debug");
     
     
-    produces <std::vector <double> > (_instanceName);
+    produces <std::vector <double> > (instanceName_);
 }
 
 HGCalElectronRvarProducer::~HGCalElectronRvarProducer() {
@@ -182,175 +162,33 @@ void HGCalElectronRvarProducer::produce(edm::Event& iEvent, const edm::EventSetu
     SetupData& setup = iSetup.getData(setupToken_);
     */
     
-    CommonUtilities::initRecHitTools(recHitTools, &iSetup);
+    edm::Handle <std::vector <reco::PFRecHit> > h_PFRecHit;
+    iEvent.getByToken(tok_PFRecHit_, h_PFRecHit);
+    auto recHits = *h_PFRecHit;
     
+    edm::Handle <std::vector <reco::GsfElectron> > h_electron;
+    iEvent.getByToken(tok_electron_, h_electron);
+    auto electrons = *h_electron;
     
-    edm::Handle <std::vector <reco::PFRecHit> > v_PFRecHit;
-    iEvent.getByToken(_tok_PFRecHit, v_PFRecHit);
-    
-    //edm::Handle <edm::SortedCollection <HGCRecHit,edm::StrictWeakOrdering <HGCRecHit> > > v_HGCEERecHit;
-    //iEvent.getByToken(_tok_HGCEERecHit, v_HGCEERecHit);
-    //
-    //edm::Handle <edm::SortedCollection <HGCRecHit,edm::StrictWeakOrdering <HGCRecHit> > > v_HGCHEFRecHit;
-    //iEvent.getByToken(_tok_HGCHEFRecHit, v_HGCHEFRecHit);
-    //
-    //edm::Handle <edm::SortedCollection <HGCRecHit,edm::StrictWeakOrdering <HGCRecHit> > > v_HGCHEBRecHit;
-    //iEvent.getByToken(_tok_HGCHEBRecHit, v_HGCHEBRecHit);
-    
-    std::map <DetId, int> m_recHitIdx = CommonUtilities::getPFRecHitIndexMap(v_PFRecHit);
-    //std::map <DetId, const HGCRecHit*> m_recHitPtr = CommonUtilities::getHGCRecHitPtrMap(v_HGCEERecHit, v_HGCHEFRecHit, v_HGCHEBRecHit);
-    
-    
-    edm::Handle <std::vector <reco::GsfElectron> > v_electron;
-    iEvent.getByToken(_tok_electron, v_electron);
-    
-    int nEle = v_electron->size();
+    int iEle = -1;
+    int nEle = h_electron->size();
     
     std::vector <double> v_Rvar;
     
-    for(int iEle = 0; iEle < nEle; iEle++)
+    for(auto &ele : electrons)
     {
-        reco::GsfElectron ele = v_electron->at(iEle);
+        iEle++;
         
-        std::vector <std::pair <DetId, float> > v_superClus_HandF = ele.superCluster()->hitsAndFractions();
+        double Rvar = algo_Rvar_.getRvar(
+            iSetup,
+            ele.superCluster(),
+            recHits
+        );
         
-        std::vector <double> v_layerEnergy(_nLayer, 0.0);
-        std::vector <double> v_layerEnergyInR(_nLayer, 0.0);
-        std::vector <double> v_layerRvar(_nLayer, 0.0);
-        
-        std::vector <double> v_superClus_isHitValid(v_superClus_HandF.size(), false);
-        
-        std::vector <ROOT::Math::XYZVector> v_layerCentroid;
-        
-        for(int iLayer = 0; iLayer < _nLayer; iLayer++)
+        if(debug_)
         {
-            ROOT::Math::XYZVector xyz_temp(0, 0, 0);
-            
-            v_layerCentroid.push_back(xyz_temp);
+            printf("In HGCalElectronRvarProducer --> Ele %d/%d: Rvar %0.4f \n", iEle+1, nEle, Rvar);
         }
-        
-        
-        double totalE = 0;
-        
-        // Compute the centroid per layer
-        for(int iHit = 0; iHit < (int) v_superClus_HandF.size(); iHit++)
-        {
-            DetId hitId = v_superClus_HandF.at(iHit).first;
-            DetId hitEfrac = v_superClus_HandF.at(iHit).second;
-            
-            if(hitId.det() != DetId::HGCalEE)
-            {
-                continue;
-            }
-            
-            int hitLayer = recHitTools.getLayer(hitId) - 1;
-            
-            if(hitLayer+1 > _nLayer)
-            {
-                continue;
-            }
-            
-            //if(m_recHitPtr.find(hitId) == m_recHitPtr.end())
-            //{
-            //    continue;
-            //}
-            
-            int hitIdx = m_recHitIdx.at(hitId);
-            
-            if(v_PFRecHit->at(hitIdx).energy() < _minHitE)
-            {
-                continue;
-            }
-            
-            if(sqrt(v_PFRecHit->at(hitIdx).pt2()) < _minHitET)
-            {
-                continue;
-            }
-            
-            v_superClus_isHitValid.at(iHit) = true;
-            
-            double hitE = v_PFRecHit->at(hitIdx).energy() * hitEfrac;
-            
-            //const HGCRecHit *recHit = m_recHitPtr.at(hitId);
-            //double hitE = recHit->energy() * hitEfrac;
-            
-            totalE += hitE;
-            
-            auto hitPos = recHitTools.getPosition(hitId);
-            ROOT::Math::XYZVector hit_xyz(hitPos.x(), hitPos.y(), hitPos.z());
-            
-            v_layerEnergy.at(hitLayer) += hitE;
-            
-            v_layerCentroid.at(hitLayer) += hitE * hit_xyz;
-        }
-        
-        for(int iLayer = 0; iLayer < _nLayer; iLayer++)
-        {
-            if(v_layerEnergy.at(iLayer))
-            {
-                v_layerCentroid.at(iLayer) /= v_layerEnergy.at(iLayer);
-            }
-            
-            //printf("Layer %d: energy %0.2f \n", iLayer+1, v_layerEnergy.at(iLayer));
-        }
-        
-        
-        // Compute the Rvar per layer
-        for(int iHit = 0; iHit < (int) v_superClus_HandF.size(); iHit++)
-        {
-            DetId hitId = v_superClus_HandF.at(iHit).first;
-            DetId hitEfrac = v_superClus_HandF.at(iHit).second;
-            
-            int hitLayer = recHitTools.getLayer(hitId) - 1;
-            
-            if(!v_superClus_isHitValid.at(iHit))
-            {
-                continue;
-            }
-            
-            int hitIdx = m_recHitIdx.at(hitId);
-            double hitE = v_PFRecHit->at(hitIdx).energy() * hitEfrac;
-            
-            //const HGCRecHit *recHit = m_recHitPtr.at(hitId);
-            //double hitE = recHit->energy() * hitEfrac;
-            
-            auto hitPos = recHitTools.getPosition(hitId);
-            ROOT::Math::XYZVector hit_xyz(hitPos.x(), hitPos.y(), hitPos.z());
-            
-            auto dist_xyz = hit_xyz - v_layerCentroid.at(hitLayer);
-            
-            double R = std::sqrt(dist_xyz.x()*dist_xyz.x() + dist_xyz.y()*dist_xyz.y());
-            
-            double cellSize = CommonUtilities::getCellSize(hitId, &recHitTools);
-            
-            if(R > _cylinderR+cellSize)
-            {
-                continue;
-            }
-            
-            v_layerEnergyInR.at(hitLayer) += hitE;
-        }
-        
-        double Rvar = 0;
-        
-        for(int iLayer = 0; iLayer < _nLayer; iLayer++)
-        {
-            if(v_layerEnergy.at(iLayer))
-            {
-                Rvar += v_layerEnergyInR.at(iLayer);
-                
-                v_layerRvar.at(iLayer) = v_layerEnergyInR.at(iLayer) / v_layerEnergy.at(iLayer);
-            }
-        }
-        
-        Rvar /= ele.energy();
-        
-        
-        if(_debug)
-        {
-            printf("In HGCalElectronRvarProducer::produce(...) --> Ele %d/%d: Rvar %0.4f, totalE %0.4f \n", iEle+1, nEle, Rvar, totalE);
-        }
-        
         
         v_Rvar.push_back(Rvar);
     }
@@ -358,7 +196,7 @@ void HGCalElectronRvarProducer::produce(edm::Event& iEvent, const edm::EventSetu
     
     iEvent.put(
         std::make_unique <std::vector <double> >(v_Rvar),
-        _instanceName
+        instanceName_
     );
 }
 

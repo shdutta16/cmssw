@@ -14,8 +14,8 @@ process = cms.Process(processName, eras.Phase2C9)
 
 #process = cms.Process("RECO", eras.Phase2C8_timing_layer_bar)
 
-process.load("FWCore.MessageService.MessageLogger_cfi")
-MessageLogger = cms.Service("MessageLogger")
+#process.load("FWCore.MessageService.MessageLogger_cfi")
+#MessageLogger = cms.Service("MessageLogger")
 
 
 # import of standard configurations
@@ -597,7 +597,7 @@ for iRad, rad in enumerate(l_rad) :
 process.HGCalElectronVarMap = mapProducer.clone(
     collections = cms.VInputTag(l_mapProdVars),
     
-    #debug = cms.bool(True),
+    debug = cms.bool(False),
 )
 
 process.HGCalVar_seq = cms.Sequence(
@@ -854,6 +854,20 @@ if (options.debugFile) :
     
     process.output_step = cms.EndPath(process.out)
     process.schedule.extend([process.output_step])
+
+
+process.MessageLogger = cms.Service(
+    "MessageLogger",
+    destinations = cms.untracked.vstring(
+        "cerr",
+    ),
+    cerr = cms.untracked.PSet(
+        #threshold  = cms.untracked.string("ERROR"),
+        DEBUG = cms.untracked.PSet(limit = cms.untracked.int32(0)),
+        WARNING = cms.untracked.PSet(limit = cms.untracked.int32(0)),
+        ERROR = cms.untracked.PSet(limit = cms.untracked.int32(0)),
+    )
+)
 
 
 from FWCore.ParameterSet.Utilities import convertToUnscheduled

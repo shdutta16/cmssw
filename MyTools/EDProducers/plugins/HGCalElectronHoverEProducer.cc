@@ -47,6 +47,7 @@
 # include <utility>
 # include <vector>
 
+# include "MyTools/EDProducers/interface/HGCalAlgoSuperClusterHoverE.h"
 
 //
 // class declaration
@@ -75,16 +76,14 @@ class HGCalElectronHoverEProducer : public edm::stream::EDProducer<>
     
     // ----------member data ---------------------------
     
-    std::string _instanceName;
+    HGCalAlgoSuperClusterHoverE algo_HoverE_;
     
-    bool _debug;
+    std::string instanceName_;
     
-    double _coneDR;
-    double _minClusE;
-    double _minClusET;
+    bool debug_;
     
-    edm::EDGetTokenT <std::vector <reco::GsfElectron> > _tok_electron;
-    edm::EDGetTokenT <std::vector <reco::CaloCluster> > _tok_layerCluster;
+    edm::EDGetTokenT <std::vector <reco::GsfElectron> > tok_electron_;
+    edm::EDGetTokenT <std::vector <reco::CaloCluster> > tok_layerCluster_;
 };
 
 //
@@ -99,7 +98,8 @@ class HGCalElectronHoverEProducer : public edm::stream::EDProducer<>
 //
 // constructors and destructor
 //
-HGCalElectronHoverEProducer::HGCalElectronHoverEProducer(const edm::ParameterSet& iConfig)
+HGCalElectronHoverEProducer::HGCalElectronHoverEProducer(const edm::ParameterSet& iConfig) :
+    algo_HoverE_(iConfig)
 {
     //register your products
     /* Examples
@@ -113,20 +113,15 @@ HGCalElectronHoverEProducer::HGCalElectronHoverEProducer(const edm::ParameterSet
     */
     //now do what ever other initialization is needed
     
-    _instanceName = iConfig.getParameter <std::string>("instanceName");
+    instanceName_ = iConfig.getParameter <std::string>("instanceName");
     
-    _tok_electron = consumes <std::vector <reco::GsfElectron> >(iConfig.getParameter <edm::InputTag>("electrons"));
-    _tok_layerCluster = consumes <std::vector <reco::CaloCluster> >(iConfig.getParameter <edm::InputTag>("layerClusters"));
+    tok_electron_ = consumes <std::vector <reco::GsfElectron> >(iConfig.getParameter <edm::InputTag>("electrons"));
+    tok_layerCluster_ = consumes <std::vector <reco::CaloCluster> >(iConfig.getParameter <edm::InputTag>("layerClusters"));
     
-    _coneDR = iConfig.getParameter <double>("coneDR");
-    
-    _minClusE = iConfig.getParameter <double>("minClusE");
-    _minClusET = iConfig.getParameter <double>("minClusET");
-    
-    _debug = iConfig.getParameter <bool>("debug");
+    debug_ = iConfig.getParameter <bool>("debug");
     
     
-    produces <std::vector <double> > (_instanceName);
+    produces <std::vector <double> > (instanceName_);
 }
 
 HGCalElectronHoverEProducer::~HGCalElectronHoverEProducer() {
@@ -158,73 +153,29 @@ void HGCalElectronHoverEProducer::produce(edm::Event& iEvent, const edm::EventSe
     SetupData& setup = iSetup.getData(setupToken_);
     */
     
-    edm::Handle <std::vector <reco::GsfElectron> > v_electron;
-    iEvent.getByToken(_tok_electron, v_electron);
+    edm::Handle <std::vector <reco::GsfElectron> > h_electron;
+    iEvent.getByToken(tok_electron_, h_electron);
+    auto electrons = *h_electron;
     
-    edm::Handle <std::vector <reco::CaloCluster> > v_layerCluster;
-    iEvent.getByToken(_tok_layerCluster, v_layerCluster);
+    edm::Handle <std::vector <reco::CaloCluster> > h_layerCluster;
+    iEvent.getByToken(tok_layerCluster_, h_layerCluster);
+    auto layerClusters = *h_layerCluster;
     
-    
-    int nEle = v_electron->size();
-    int nLayerClus = v_layerCluster->size();
+    int iEle = -1;
+    int nEle = h_electron->size();
     
     std::vector <double> v_HoverE;
     
-    for(int iEle = 0; iEle < nEle; iEle++)
+    for(auto &ele : electrons)
     {
-        reco::GsfElectron ele = v_electron->at(iEle);
+        iEle++;
         
-        CLHEP::HepLorentzVector ele_4mom;
-        ele_4mom.setT(ele.energy());
-        ele_4mom.setX(ele.px());
-        ele_4mom.setY(ele.py());
-        ele_4mom.setZ(ele.pz());
+        double HoverE = algo_HoverE_.getClusterBasedHoverE(
+            ele.superCluster(),
+            layerClusters
+        );
         
-        double HoverE = 0;
-        
-        for(int iClus = 0; iClus < nLayerClus; iClus++)
-        {
-            reco::CaloCluster cluster = v_layerCluster->at(iClus);
-            
-            // E cut
-            if(cluster.energy() < _minClusE)
-            {
-                continue;
-            }
-            
-            // ET cut
-            double clusET = cluster.energy() * std::sin(cluster.position().theta());
-            
-            if(clusET < _minClusET)
-            {
-                continue;
-            }
-            
-            CLHEP::Hep3Vector cluster_3vec(
-                cluster.x(),
-                cluster.y(),
-                cluster.z()
-            );
-            
-            // dR cut
-            double dR = cluster_3vec.deltaR(ele_4mom.v());
-            
-            if(dR > _coneDR)
-            {
-                continue;
-            }
-            
-            
-            if(cluster.seed().det() == DetId::HGCalHSi || cluster.seed().det() == DetId::HGCalHSc)
-            {
-                HoverE += cluster.energy();
-            }
-        }
-        
-        
-        HoverE /= ele.energy();
-        
-        if(_debug)
+        if(debug_)
         {
             printf("In HGCalElectronHoverEProducer --> Ele %d/%d: H/E %0.4f \n", iEle+1, nEle, HoverE);
         }
@@ -235,7 +186,7 @@ void HGCalElectronHoverEProducer::produce(edm::Event& iEvent, const edm::EventSe
     
     iEvent.put(
         std::make_unique <std::vector <double> >(v_HoverE),
-        _instanceName
+        instanceName_
     );
 }
 

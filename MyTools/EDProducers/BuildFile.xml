@@ -40,7 +40,6 @@
 <use name="TrackingTools/TrackAssociator"/>
 
 <use name="MyDataFormats/Common"/>
-<use name="MyTools/EDProducers"/>
 
 <use name="boost"/>
 <use name="hepmc"/>
@@ -48,4 +47,6 @@
 <use name="rootmath"/>
 <use name="rootrflx"/>
 
-<flags EDM_PLUGIN="1"/>
+<export>
+<lib name="1"/>
+</export>
