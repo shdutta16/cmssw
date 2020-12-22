@@ -1,7 +1,7 @@
 from RecoEcal.EgammaClusterProducers.hybridSuperClusters_cfi import cleanedHybridSuperClusters
 from RecoEcal.EgammaClusterProducers.multi5x5BasicClusters_cfi import multi5x5BasicClustersCleaned
 
-from RecoEgamma.EgammaIsolationAlgos.electronTrackIsolations_cfi import trkIsol03CfgV1,trkIsol04CfgV1,trkIsol03CfgV2,trkIsol04CfgV2
+from RecoEgamma.EgammaIsolationAlgos.electronTrackIsolations_cfi import trkIsol03CfgV1,trkIsol03CfgHGCalV1,trkIsol04CfgV1,trkIsol03CfgV2,trkIsol04CfgV2
 
 from RecoEgamma.EgammaElectronProducers.gsfElectronProducer_cfi import gsfElectronProducer
 
@@ -35,4 +35,7 @@ ecalDrivenGsfElectronsFromMultiCl = ecalDrivenGsfElectrons.clone(
     ambClustersOverlapStrategy = 0,
     applyAmbResolution = True,
     ignoreNotPreselected = False,
+    
+    # isolation
+    trkIsol03Cfg = trkIsol03CfgHGCalV1,
 )

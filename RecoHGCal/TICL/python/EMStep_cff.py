@@ -16,6 +16,10 @@ filteredLayerClustersEM = _filteredLayerClustersProducer.clone(
     iteration_label = "EM"
 )
 
+filteredLayerClustersEMnoTrk = filteredLayerClustersEM.clone(
+    LayerClustersInputMask = cms.InputTag("hgcalLayerClusters","InitialLayerClustersMask")
+)
+
 # CA - PATTERN RECOGNITION
 
 ticlTrackstersEM = _trackstersProducer.clone(
@@ -38,16 +42,27 @@ ticlTrackstersEM = _trackstersProducer.clone(
     algo_verbosity = 0,
 )
 
+ticlTrackstersEMnoTrk = ticlTrackstersEM.clone(
+    filtered_mask = "filteredLayerClustersEMnoTrk:EM",
+    original_mask = cms.InputTag("hgcalLayerClusters","InitialLayerClustersMask"),
+)
+
 # MULTICLUSTERS
 
 ticlMultiClustersFromTrackstersEM = _multiClustersFromTrackstersProducer.clone(
     Tracksters = "ticlTrackstersEM"
 )
 
+ticlMultiClustersFromTrackstersEMnoTrk = ticlMultiClustersFromTrackstersEM.clone(Tracksters = "ticlTrackstersEMnoTrk")
+
 ticlEMStepTask = cms.Task(ticlSeedingGlobal
     ,filteredLayerClustersEM
     ,ticlTrackstersEM
-    ,ticlMultiClustersFromTrackstersEM)
+    ,ticlMultiClustersFromTrackstersEM
+    ,filteredLayerClustersEMnoTrk
+    ,ticlTrackstersEMnoTrk
+    ,ticlMultiClustersFromTrackstersEMnoTrk
+)
 
 filteredLayerClustersHFNoseEM = filteredLayerClustersEM.clone(
     LayerClusters = 'hgcalLayerClustersHFNose',

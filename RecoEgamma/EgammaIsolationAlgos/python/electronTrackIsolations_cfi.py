@@ -21,6 +21,22 @@ trkIsol03CfgV1 = cms.PSet(
     endcapCuts=_defaultCuts.clone(minPt=0.7,minDEta=0.015,maxDZ=0.2,
                                   maxDPtPt=-1,minHits=-1,minPixelHits=-1)
     )
+
+trkIsol03CfgHGCalV1 = cms.PSet(
+    barrelCuts = _defaultCuts.clone(minPt=0.7,minDEta=0.015,maxDZ=0.2,
+                                  maxDPtPt=-1,minHits=-1,minPixelHits=-1),
+    endcapCuts = _defaultCuts.clone(
+        maxDR = 0.3,
+        minDR = 0.01,
+        minPt = 1.0,
+        minDEta = 0.01,
+        maxDZ = 0.15,
+        maxDPtPt = -1,
+        minHits = -1,
+        minPixelHits = -1
+    )
+)
+
 trkIsol04CfgV1 = cms.PSet(
     barrelCuts=trkIsol03CfgV1.barrelCuts.clone(maxDR=0.4),
     endcapCuts=trkIsol03CfgV1.endcapCuts.clone(maxDR=0.4)
@@ -28,8 +44,8 @@ trkIsol04CfgV1 = cms.PSet(
 
 #V2, used by HEEP ID in 2016
 trkIsol03CfgV2 = cms.PSet(
-    barrelCuts=_defaultCuts.clone(algosToReject = cms.vstring()),
-    endcapCuts=_defaultCuts.clone(algosToReject = cms.vstring(),maxDZ=0.5)
+    barrelCuts=_defaultCuts.clone(algosToReject = []),
+    endcapCuts=_defaultCuts.clone(algosToReject = [],maxDZ=0.5)
 )
 trkIsol04CfgV2 = cms.PSet(
     barrelCuts=trkIsol03CfgV2.barrelCuts.clone(maxDR=0.4),
