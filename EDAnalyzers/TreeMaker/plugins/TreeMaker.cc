@@ -160,6 +160,10 @@ class TreeMaker : public edm::one::EDAnalyzer<edm::one::SharedResources>
     std::vector <std::string> v_phoFromTICLvar;
     
     
+    // GenEventInfoProduct //
+    edm::EDGetTokenT <GenEventInfoProduct> tok_generator;
+    
+    
     // Gen particles //
     edm::EDGetTokenT <std::vector <reco::GenParticle> > tok_genParticle;
     
@@ -295,6 +299,10 @@ TreeMaker::TreeMaker(const edm::ParameterSet& iConfig)
     treeOutput->addToCustomVarMap("gsfEleFromTICL", v_gsfEleFromTICLvar);
     treeOutput->addToCustomVarMap("phoFromTICL", v_phoFromTICLvar);
     
+    
+    // GenEventInfoProduct //
+    tok_generator = consumes <GenEventInfoProduct>(iConfig.getParameter <edm::InputTag>("label_generator"));
+
     
     // Gen particles //
     tok_genParticle = consumes <std::vector <reco::GenParticle> >(iConfig.getParameter <edm::InputTag>("label_genParticle"));
@@ -542,6 +550,14 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     }
     
     const auto& topo_HGCalEE = *handle_topo_HGCalEE;
+    
+    
+    //////////////////// GenEventInfoProduct ////////////////////
+    edm::Handle <GenEventInfoProduct> generatorHandle;
+    iEvent.getByToken(tok_generator, generatorHandle);
+    GenEventInfoProduct generator = *generatorHandle;
+    
+    printf("[%llu] Gen. evt. wt. %0.4g \n", eventNumber, generator.weight());
     
     
     //////////////////// Gen particle ////////////////////

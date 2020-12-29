@@ -535,9 +535,9 @@ namespace TreeOutputInfo
         
         TreeOutput(std::string details, edm::Service<TFileService> fs)
         {
-            printf("Loading custom ROOT dictionaries. \n");
-            gROOT->ProcessLine(".L EDAnalyzers/TreeMaker/interface/CustomRootDict.cc+");
-            printf("Loaded custom ROOT dictionaries. \n");
+            //printf("Loading custom ROOT dictionaries. \n");
+            //gROOT->ProcessLine(".L EDAnalyzers/TreeMaker/interface/CustomRootDict.cc+");
+            //printf("Loaded custom ROOT dictionaries. \n");
             
             tree = fs->make<TTree>(details.c_str(), details.c_str());
             

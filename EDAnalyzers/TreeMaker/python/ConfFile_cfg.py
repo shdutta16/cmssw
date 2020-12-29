@@ -705,6 +705,36 @@ for iRad, rad in enumerate(l_rad) :
         l_var_TICLpho.append("%s_%s" %(prodLabel, getattr(process, prodLabel).instanceName.value()+"Sigma2WW"))
 
 
+# Ele cluster isolation
+prodLabel = "TICLeleClusIsoProducer"
+
+setattr(
+    process,
+    prodLabel,
+    HGCalElectronClusIsoProducer.clone(
+        #debug = cms.bool(True),
+    )
+)
+
+TICLeleVar_task.add(getattr(process, prodLabel))
+l_var_TICLele.append("%s_%s" %(prodLabel, getattr(process, prodLabel).instanceName.value()))
+
+
+# Pho cluster isolation
+prodLabel = "TICLphoClusIsoProducer"
+
+setattr(
+    process,
+    prodLabel,
+    HGCalPhotonClusIsoProducer.clone(
+        #debug = cms.bool(True),
+    )
+)
+
+TICLphoVar_task.add(getattr(process, prodLabel))
+l_var_TICLpho.append("%s_%s" %(prodLabel, getattr(process, prodLabel).instanceName.value()))
+
+
 # TICL ele
 process.HGCalElectronVarMap = mapProducer.clone(
     collections = cms.VInputTag(l_mapProdVars_TICLele),
@@ -957,7 +987,9 @@ process.p = cms.Path(
     process.filter_seq_genPart *
     
     process.reco_seq *
+    
     #process.TICLele_seq *
+    
     process.HGCalVar_seq *
     process.treeMaker
 )
@@ -1021,8 +1053,8 @@ process.MessageLogger = cms.Service(
 )
 
 
-from FWCore.ParameterSet.Utilities import convertToUnscheduled
-process = convertToUnscheduled(process)
+#from FWCore.ParameterSet.Utilities import convertToUnscheduled
+#process = convertToUnscheduled(process)
 
 
 # Add early deletion of temporary data products to reduce peak memory need
