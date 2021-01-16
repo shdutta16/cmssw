@@ -251,6 +251,7 @@ if (__name__ == "__main__") :
         
         # Submit job
         command = "condor_submit %s" %(condorConfig_mod)
+        #command = "_CONDOR_SCHEDD_HOST=bigbird15.cern.ch _CONDOR_CREDD_HOST=bigbird15.cern.ch condor_submit %s" %(condorConfig_mod)
         print "Command:", command
         
         commandReturn = 1

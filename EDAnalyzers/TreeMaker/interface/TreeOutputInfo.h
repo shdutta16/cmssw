@@ -84,6 +84,13 @@ namespace TreeOutputInfo
         double rho;
         
         
+        // Hit counts (pileup estimator) //
+        double nHit_EcalEB;
+        double nHit_HGCEE;
+        double nHit_HGCHEF;
+        double nHit_HGCHEB;
+        
+        
         // HGCAL layer clusters //
         int HGCALlayerClus_n;
         std::vector <double> v_HGCALlayerClus_E;
@@ -311,6 +318,9 @@ namespace TreeOutputInfo
         std::vector <double> v_gsfEleFromTICL_dr03TkSumPt;
         
         std::vector <double> v_gsfEleFromTICL_superClus_E;
+        std::vector <double> v_gsfEleFromTICL_superClus_rawE;
+        std::vector <double> v_gsfEleFromTICL_superClus_eta;
+        std::vector <double> v_gsfEleFromTICL_superClus_phi;
         std::vector <double> v_gsfEleFromTICL_superClus_etaWidth;
         std::vector <double> v_gsfEleFromTICL_superClus_phiWidth;
         std::vector <double> v_gsfEleFromTICL_superClus_nClus;
@@ -318,6 +328,7 @@ namespace TreeOutputInfo
         std::vector <double> v_gsfEleFromTICL_superClus_nearestCellDist;
         std::vector <double> v_gsfEleFromTICL_superClus_cellNeighbour1ringWindow_n;
         std::vector <double> v_gsfEleFromTICL_superClus_cellNeighbour2ringWindow_n;
+        std::vector <double> v_gsfEleFromTICL_superClus_clusMaxDR;
         
         std::vector <double> v_gsfEleFromTICL_superClus_seed_dEta;
         std::vector <double> v_gsfEleFromTICL_superClus_seed_dPhi;
@@ -430,10 +441,14 @@ namespace TreeOutputInfo
         std::vector <double> v_phoFromTICL_matchedGenPh_phi;
         
         std::vector <double> v_phoFromTICL_superClus_E;
+        std::vector <double> v_phoFromTICL_superClus_rawE;
+        std::vector <double> v_phoFromTICL_superClus_eta;
+        std::vector <double> v_phoFromTICL_superClus_phi;
         std::vector <double> v_phoFromTICL_superClus_etaWidth;
         std::vector <double> v_phoFromTICL_superClus_phiWidth;
         std::vector <double> v_phoFromTICL_superClus_nClus;
         std::vector <double> v_phoFromTICL_superClus_nHit;
+        std::vector <double> v_phoFromTICL_superClus_clusMaxDR;
         
         std::vector <double> v_phoFromTICL_superClus_seed_dEta;
         std::vector <double> v_phoFromTICL_superClus_seed_dPhi;
@@ -518,6 +533,8 @@ namespace TreeOutputInfo
         
         
         std::map <std::string, std::vector <double> > m_customVarContent;
+        
+        std::map <std::string, std::vector <double> > m_hitCount;
         
         
         double caloParticle_n;
@@ -677,6 +694,19 @@ namespace TreeOutputInfo
             // Rho //
             sprintf(name, "rho");
             tree->Branch(name, &rho);
+            
+            
+            sprintf(name, "nHit_EcalEB");
+            tree->Branch(name, &nHit_EcalEB);
+            
+            sprintf(name, "nHit_HGCEE");
+            tree->Branch(name, &nHit_HGCEE);
+            
+            sprintf(name, "nHit_HGCHEF");
+            tree->Branch(name, &nHit_HGCHEF);
+            
+            sprintf(name, "nHit_HGCHEB");
+            tree->Branch(name, &nHit_HGCHEB);
             
             
             // HGCAL layer clusters //
@@ -1214,6 +1244,15 @@ namespace TreeOutputInfo
             sprintf(name, "gsfEleFromTICL_superClus_E");
             tree->Branch(name, &v_gsfEleFromTICL_superClus_E);
             
+            sprintf(name, "gsfEleFromTICL_superClus_rawE");
+            tree->Branch(name, &v_gsfEleFromTICL_superClus_rawE);
+            
+            sprintf(name, "gsfEleFromTICL_superClus_eta");
+            tree->Branch(name, &v_gsfEleFromTICL_superClus_eta);
+            
+            sprintf(name, "gsfEleFromTICL_superClus_phi");
+            tree->Branch(name, &v_gsfEleFromTICL_superClus_phi);
+            
             sprintf(name, "gsfEleFromTICL_superClus_etaWidth");
             tree->Branch(name, &v_gsfEleFromTICL_superClus_etaWidth);
             
@@ -1234,6 +1273,9 @@ namespace TreeOutputInfo
             
             sprintf(name, "gsfEleFromTICL_superClus_cellNeighbour2ringWindow_n");
             tree->Branch(name, &v_gsfEleFromTICL_superClus_cellNeighbour2ringWindow_n);
+            
+            sprintf(name, "gsfEleFromTICL_superClus_clusMaxDR");
+            tree->Branch(name, &v_gsfEleFromTICL_superClus_clusMaxDR);
             
             
             sprintf(name, "gsfEleFromTICL_superClus_seed_dEta");
@@ -1528,6 +1570,15 @@ namespace TreeOutputInfo
             sprintf(name, "phoFromTICL_superClus_E");
             tree->Branch(name, &v_phoFromTICL_superClus_E);
             
+            sprintf(name, "phoFromTICL_superClus_rawE");
+            tree->Branch(name, &v_phoFromTICL_superClus_rawE);
+            
+            sprintf(name, "phoFromTICL_superClus_eta");
+            tree->Branch(name, &v_phoFromTICL_superClus_eta);
+            
+            sprintf(name, "phoFromTICL_superClus_phi");
+            tree->Branch(name, &v_phoFromTICL_superClus_phi);
+            
             sprintf(name, "phoFromTICL_superClus_etaWidth");
             tree->Branch(name, &v_phoFromTICL_superClus_etaWidth);
             
@@ -1539,6 +1590,9 @@ namespace TreeOutputInfo
             
             sprintf(name, "phoFromTICL_superClus_nHit");
             tree->Branch(name, &v_phoFromTICL_superClus_nHit);
+            
+            sprintf(name, "phoFromTICL_superClus_clusMaxDR");
+            tree->Branch(name, &v_phoFromTICL_superClus_clusMaxDR);
             
             
             sprintf(name, "phoFromTICL_superClus_seed_dEta");
@@ -1827,6 +1881,12 @@ namespace TreeOutputInfo
             rho = 0;
             
             
+            nHit_EcalEB = 0;
+            nHit_HGCEE = 0;
+            nHit_HGCHEF = 0;
+            nHit_HGCHEB = 0;
+            
+            
             // HGCAL layer clusters //
             HGCALlayerClus_n = 0;
             v_HGCALlayerClus_E.clear();
@@ -2048,6 +2108,9 @@ namespace TreeOutputInfo
             v_gsfEleFromTICL_dr03TkSumPt.clear();
             
             v_gsfEleFromTICL_superClus_E.clear();
+            v_gsfEleFromTICL_superClus_rawE.clear();
+            v_gsfEleFromTICL_superClus_eta.clear();
+            v_gsfEleFromTICL_superClus_phi.clear();
             v_gsfEleFromTICL_superClus_etaWidth.clear();
             v_gsfEleFromTICL_superClus_phiWidth.clear();
             v_gsfEleFromTICL_superClus_nClus.clear();
@@ -2055,6 +2118,7 @@ namespace TreeOutputInfo
             v_gsfEleFromTICL_superClus_nearestCellDist.clear();
             v_gsfEleFromTICL_superClus_cellNeighbour1ringWindow_n.clear();
             v_gsfEleFromTICL_superClus_cellNeighbour2ringWindow_n.clear();
+            v_gsfEleFromTICL_superClus_clusMaxDR.clear();
             
             v_gsfEleFromTICL_superClus_seed_dEta.clear();
             v_gsfEleFromTICL_superClus_seed_dPhi.clear();
@@ -2191,10 +2255,14 @@ namespace TreeOutputInfo
             v_phoFromTICL_matchedGenPh_phi.clear();
             
             v_phoFromTICL_superClus_E.clear();
+            v_phoFromTICL_superClus_rawE.clear();
+            v_phoFromTICL_superClus_eta.clear();
+            v_phoFromTICL_superClus_phi.clear();
             v_phoFromTICL_superClus_etaWidth.clear();
             v_phoFromTICL_superClus_phiWidth.clear();
             v_phoFromTICL_superClus_nClus.clear();
             v_phoFromTICL_superClus_nHit.clear();
+            v_phoFromTICL_superClus_clusMaxDR.clear();
             
             v_phoFromTICL_superClus_seed_dEta.clear();
             v_phoFromTICL_superClus_seed_dPhi.clear();

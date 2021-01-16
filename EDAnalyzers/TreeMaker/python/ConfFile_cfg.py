@@ -506,10 +506,10 @@ TICLphoVar_task = cms.Task()
 
 l_rad = [1.8, 2.0, 2.8, 3.5]
 #l_rad = [2.8]
-l_hitEnCut = [0.0, 0.02, 0.5, 1.0, 1.5]
+l_hitEnCut = [0.0, 0.02, 0.05, 0.07, 0.1, 0.5, 1.0, 1.5, 2.0, 3.0]
 
 l_isoCone = [0.12, 0.15, 0.2, 0.25]
-l_clusEnCut = [0.0, 0.02, 0.5, 1.0, 1.5]
+l_clusEnCut = [0.0, 0.02, 0.05, 0.07, 0.1, 0.5, 1.0, 1.5, 2.0, 3.0]
 
 
 for iCone, cone in enumerate(l_isoCone) :
@@ -712,6 +712,7 @@ setattr(
     process,
     prodLabel,
     HGCalElectronClusIsoProducer.clone(
+        minPt = 10.0,
         #debug = cms.bool(True),
     )
 )
@@ -727,6 +728,7 @@ setattr(
     process,
     prodLabel,
     HGCalPhotonClusIsoProducer.clone(
+        minPt = 10.0,
         #debug = cms.bool(True),
     )
 )
@@ -786,6 +788,8 @@ process.treeMaker = cms.EDAnalyzer(
     
     label_pileup = cms.InputTag("addPileupInfo"),
     label_rho = cms.InputTag("fixedGridRhoFastjetAll"),
+    
+    label_EcalEBRecHit = cms.InputTag("ecalRecHit", "EcalRecHitsEB"),
     
     label_HGCEESimHit = cms.InputTag("g4SimHits", "HGCHitsEE"),
     #label_HGCEESimHit = cms.InputTag("g4SimHits", "HGCHitsEE", "SIM"),

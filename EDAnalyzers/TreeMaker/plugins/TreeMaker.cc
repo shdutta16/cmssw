@@ -27,6 +27,7 @@
 # include "CommonTools/UtilAlgos/interface/TFileService.h"
 # include "DataFormats/CaloTowers/interface/CaloTowerDefs.h"
 # include "DataFormats/Common/interface/MapOfVectors.h"
+# include "DataFormats/EcalRecHit/interface/EcalRecHit.h"
 # include "DataFormats/EgammaCandidates/interface/GsfElectron.h"
 # include "DataFormats/EgammaCandidates/interface/Photon.h"
 # include "DataFormats/ForwardDetId/interface/HGCEEDetId.h"
@@ -181,10 +182,12 @@ class TreeMaker : public edm::one::EDAnalyzer<edm::one::SharedResources>
     
     
     // RecHits //
+    edm::EDGetTokenT <edm::SortedCollection <EcalRecHit, edm::StrictWeakOrdering <EcalRecHit> > > tok_EcalEBRechit;
+    
     edm::EDGetTokenT <std::vector <reco::PFRecHit> > tok_PFRecHit;
-    edm::EDGetTokenT <edm::SortedCollection <HGCRecHit,edm::StrictWeakOrdering <HGCRecHit> > > tok_HGCEERecHit;
-    edm::EDGetTokenT <edm::SortedCollection <HGCRecHit,edm::StrictWeakOrdering <HGCRecHit> > > tok_HGCHEFRecHit;
-    edm::EDGetTokenT <edm::SortedCollection <HGCRecHit,edm::StrictWeakOrdering <HGCRecHit> > > tok_HGCHEBRecHit;
+    edm::EDGetTokenT <edm::SortedCollection <HGCRecHit, edm::StrictWeakOrdering <HGCRecHit> > > tok_HGCEERecHit;
+    edm::EDGetTokenT <edm::SortedCollection <HGCRecHit, edm::StrictWeakOrdering <HGCRecHit> > > tok_HGCHEFRecHit;
+    edm::EDGetTokenT <edm::SortedCollection <HGCRecHit, edm::StrictWeakOrdering <HGCRecHit> > > tok_HGCHEBRecHit;
     
     
     // HGCAL layer clusters //
@@ -252,21 +255,21 @@ TreeMaker::TreeMaker(const edm::ParameterSet& iConfig)
     
     treeOutput = new TreeOutputInfo::TreeOutput("tree", fs);
     
-    treeOutput->init_RvarContent("gsfEleFromTICL", "cylR2p0");
-    treeOutput->init_RvarContent("gsfEleFromTICL", "cylR2p8");
-    treeOutput->init_RvarContent("gsfEleFromTICL", "cylR3p5");
-    
-    treeOutput->init_PCAvarContent("gsfEleFromTICL", "cylR2p0");
-    treeOutput->init_PCAvarContent("gsfEleFromTICL", "cylR2p8");
-    treeOutput->init_PCAvarContent("gsfEleFromTICL", "cylR3p5");
-    
-    treeOutput->init_isoVarContent("gsfEleFromTICL", "dR0p15");
-    treeOutput->init_isoVarContent("gsfEleFromTICL", "dR0p2");
-    treeOutput->init_isoVarContent("gsfEleFromTICL", "dR0p3");
-    
-    treeOutput->init_isoVarContent("gsfEleFromTICL", "dR0p15_trkDz0p15_trkPt1");
-    treeOutput->init_isoVarContent("gsfEleFromTICL", "dR0p2_trkDz0p15_trkPt1");
-    treeOutput->init_isoVarContent("gsfEleFromTICL", "dR0p3_trkDz0p15_trkPt1");
+    //treeOutput->init_RvarContent("gsfEleFromTICL", "cylR2p0");
+    //treeOutput->init_RvarContent("gsfEleFromTICL", "cylR2p8");
+    //treeOutput->init_RvarContent("gsfEleFromTICL", "cylR3p5");
+    //
+    //treeOutput->init_PCAvarContent("gsfEleFromTICL", "cylR2p0");
+    //treeOutput->init_PCAvarContent("gsfEleFromTICL", "cylR2p8");
+    //treeOutput->init_PCAvarContent("gsfEleFromTICL", "cylR3p5");
+    //
+    //treeOutput->init_isoVarContent("gsfEleFromTICL", "dR0p15");
+    //treeOutput->init_isoVarContent("gsfEleFromTICL", "dR0p2");
+    //treeOutput->init_isoVarContent("gsfEleFromTICL", "dR0p3");
+    //
+    //treeOutput->init_isoVarContent("gsfEleFromTICL", "dR0p15_trkDz0p15_trkPt1");
+    //treeOutput->init_isoVarContent("gsfEleFromTICL", "dR0p2_trkDz0p15_trkPt1");
+    //treeOutput->init_isoVarContent("gsfEleFromTICL", "dR0p3_trkDz0p15_trkPt1");
     
     //treeOutput->init_isoVarContent("gsfEleFromTICL", "dR0p15");
     //treeOutput->init_isoVarContent("gsfEleFromTICL", "dR0p15_clusET1_trkDz0p15_trkPt1");
@@ -321,11 +324,13 @@ TreeMaker::TreeMaker(const edm::ParameterSet& iConfig)
     
     
     // RecHits //
+    tok_EcalEBRechit = consumes <edm::SortedCollection <EcalRecHit, edm::StrictWeakOrdering <EcalRecHit> > >(iConfig.getParameter <edm::InputTag>("label_EcalEBRecHit"));
+    
     tok_PFRecHit = consumes <std::vector <reco::PFRecHit> >(iConfig.getParameter <edm::InputTag>("label_PFRecHit"));
     
-    tok_HGCEERecHit = consumes <edm::SortedCollection <HGCRecHit,edm::StrictWeakOrdering <HGCRecHit> > >(iConfig.getParameter <edm::InputTag>("label_HGCEERecHit"));
-    tok_HGCHEFRecHit = consumes <edm::SortedCollection <HGCRecHit,edm::StrictWeakOrdering <HGCRecHit> > >(iConfig.getParameter <edm::InputTag>("label_HGCHEFRecHit"));
-    tok_HGCHEBRecHit = consumes <edm::SortedCollection <HGCRecHit,edm::StrictWeakOrdering <HGCRecHit> > >(iConfig.getParameter <edm::InputTag>("label_HGCHEBRecHit"));
+    tok_HGCEERecHit = consumes <edm::SortedCollection <HGCRecHit, edm::StrictWeakOrdering <HGCRecHit> > >(iConfig.getParameter <edm::InputTag>("label_HGCEERecHit"));
+    tok_HGCHEFRecHit = consumes <edm::SortedCollection <HGCRecHit, edm::StrictWeakOrdering <HGCRecHit> > >(iConfig.getParameter <edm::InputTag>("label_HGCHEFRecHit"));
+    tok_HGCHEBRecHit = consumes <edm::SortedCollection <HGCRecHit, edm::StrictWeakOrdering <HGCRecHit> > >(iConfig.getParameter <edm::InputTag>("label_HGCHEBRecHit"));
     
     
     // HGCAL layer clusters //
@@ -669,6 +674,39 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
             }
         }
         
+        else if(abs(pdgId) == 22 && Common::isPromptPhoton(part))
+        {
+            printf(
+                "[%llu] "
+                "Prompt gen-pho found: E %0.2f, pT %0.2f, eta %+0.2f, pz %+0.2f, "
+                "\n",
+                eventNumber,
+                part.energy(), part.pt(), part.eta(), part.pz()
+            );
+            
+            if(fabs(part.eta()) > HGCal_minEta && fabs(part.eta()) < HGCal_maxEta && part.pt() > ph_minPt && part.pt() < ph_maxPt)
+            {
+                CLHEP::HepLorentzVector genPh_4mom;
+                
+                genPh_4mom.setT(part.energy());
+                genPh_4mom.setX(part.px());
+                genPh_4mom.setY(part.py());
+                genPh_4mom.setZ(part.pz());
+                
+                v_genPh_4mom.push_back(genPh_4mom);
+                
+                treeOutput->v_genPh_E.push_back(genPh_4mom.e());
+                treeOutput->v_genPh_px.push_back(genPh_4mom.px());
+                treeOutput->v_genPh_py.push_back(genPh_4mom.py());
+                treeOutput->v_genPh_pz.push_back(genPh_4mom.pz());
+                treeOutput->v_genPh_pT.push_back(genPh_4mom.perp());
+                treeOutput->v_genPh_eta.push_back(genPh_4mom.eta());
+                treeOutput->v_genPh_phi.push_back(genPh_4mom.phi());
+                
+                treeOutput->genPh_n++;
+            }
+        }
+        
         
         //// Gen pi0
         //if(abs(pdgId) == 111 && part.isLastCopy())
@@ -812,13 +850,16 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     
     
     // RecHit dictionary
-    edm::Handle <edm::SortedCollection <HGCRecHit,edm::StrictWeakOrdering <HGCRecHit> > > v_HGCEERecHit;
+    edm::Handle <edm::SortedCollection <EcalRecHit, edm::StrictWeakOrdering <EcalRecHit> > > v_EcalEBRecHit;
+    iEvent.getByToken(tok_EcalEBRechit, v_EcalEBRecHit);
+    
+    edm::Handle <edm::SortedCollection <HGCRecHit, edm::StrictWeakOrdering <HGCRecHit> > > v_HGCEERecHit;
     iEvent.getByToken(tok_HGCEERecHit, v_HGCEERecHit);
     
-    edm::Handle <edm::SortedCollection <HGCRecHit,edm::StrictWeakOrdering <HGCRecHit> > > v_HGCHEFRecHit;
+    edm::Handle <edm::SortedCollection <HGCRecHit, edm::StrictWeakOrdering <HGCRecHit> > > v_HGCHEFRecHit;
     iEvent.getByToken(tok_HGCHEFRecHit, v_HGCHEFRecHit);
     
-    edm::Handle <edm::SortedCollection <HGCRecHit,edm::StrictWeakOrdering <HGCRecHit> > > v_HGCHEBRecHit;
+    edm::Handle <edm::SortedCollection <HGCRecHit, edm::StrictWeakOrdering <HGCRecHit> > > v_HGCHEBRecHit;
     iEvent.getByToken(tok_HGCHEBRecHit, v_HGCHEBRecHit);
     
     
@@ -2181,12 +2222,19 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         treeOutput->v_gsfEleFromTICL_dr03TkSumPt.push_back(gsfEle.dr03TkSumPt());
         
         treeOutput->v_gsfEleFromTICL_superClus_E.push_back(gsfEle.superCluster()->energy());
+        treeOutput->v_gsfEleFromTICL_superClus_rawE.push_back(gsfEle.superCluster()->rawEnergy());
+        
+        treeOutput->v_gsfEleFromTICL_superClus_eta.push_back(gsfEle.superCluster()->eta());
+        treeOutput->v_gsfEleFromTICL_superClus_phi.push_back(gsfEle.superCluster()->phi());
         
         treeOutput->v_gsfEleFromTICL_superClus_etaWidth.push_back(gsfEle.superCluster()->etaWidth());
         treeOutput->v_gsfEleFromTICL_superClus_phiWidth.push_back(gsfEle.superCluster()->phiWidth());
         
         treeOutput->v_gsfEleFromTICL_superClus_nClus.push_back(gsfEle.superCluster()->clusters().size());
         treeOutput->v_gsfEleFromTICL_superClus_nHit.push_back(gsfEle.superCluster()->hitsAndFractions().size());
+        
+        std::pair <double, const edm::Ptr <reco::CaloCluster> > p_clusMaxDR = Common::getSCclusterMaxDR2(&(*(gsfEle.superCluster())));
+        treeOutput->v_gsfEleFromTICL_superClus_clusMaxDR.push_back(std::sqrt(p_clusMaxDR.first));
         
         std::vector <std::pair <DetId, float> > v_superClus_HandF = gsfEle.superCluster()->hitsAndFractions();
         math::XYZPoint superClus_xyz = gsfEle.superCluster()->position();
@@ -3318,12 +3366,19 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         treeOutput->phoFromTICL_n++;
         
         treeOutput->v_phoFromTICL_superClus_E.push_back(pho.superCluster()->energy());
+        treeOutput->v_phoFromTICL_superClus_rawE.push_back(pho.superCluster()->rawEnergy());
+        
+        treeOutput->v_phoFromTICL_superClus_eta.push_back(pho.superCluster()->eta());
+        treeOutput->v_phoFromTICL_superClus_phi.push_back(pho.superCluster()->phi());
         
         treeOutput->v_phoFromTICL_superClus_etaWidth.push_back(pho.superCluster()->etaWidth());
         treeOutput->v_phoFromTICL_superClus_phiWidth.push_back(pho.superCluster()->phiWidth());
         
         treeOutput->v_phoFromTICL_superClus_nClus.push_back(pho.superCluster()->clusters().size());
         treeOutput->v_phoFromTICL_superClus_nHit.push_back(pho.superCluster()->hitsAndFractions().size());
+        
+        std::pair <double, const edm::Ptr <reco::CaloCluster> > p_clusMaxDR = Common::getSCclusterMaxDR2(&(*(pho.superCluster())));
+        treeOutput->v_phoFromTICL_superClus_clusMaxDR.push_back(std::sqrt(p_clusMaxDR.first));
         
         std::vector <std::pair <DetId, float> > v_superClus_HandF = pho.superCluster()->hitsAndFractions();
         //math::XYZPoint superClus_xyz = pho.superCluster()->position();
@@ -3496,6 +3551,14 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     //    //    treeOutput->v_recHit_HGCalEEMlayer_totE.at(layer) += recHit.energy();
     //    //}
     //}
+    
+    
+    // Rechit counts for pileup
+    treeOutput->nHit_EcalEB = Common::countHits(*v_EcalEBRecHit, 1.0);
+    treeOutput->nHit_HGCEE  = Common::countHits(*v_HGCEERecHit , 1.0);
+    treeOutput->nHit_HGCHEF = Common::countHits(*v_HGCHEFRecHit, 1.0);
+    treeOutput->nHit_HGCHEB = Common::countHits(*v_HGCHEBRecHit, 1.0);
+    
     
     // Fill tree
     treeOutput->fill();

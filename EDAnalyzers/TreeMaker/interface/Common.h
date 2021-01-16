@@ -18,12 +18,68 @@
 # include <TVectorD.h>
 # include <Math/Point3D.h>
 # include <Math/Point3Dfwd.h>
+# include <Math/VectorUtil.h>
 
 # include "Constants.h"
 
 
 namespace Common
 {
+    bool isAfromB(const reco::GenParticle &particleA, int particleBid)
+    {
+        for(unsigned int iMother = 0; iMother < particleA.numberOfMothers(); iMother++)
+        {
+            const reco::GenParticle *mother = particleA.motherRef(iMother).get();
+            
+            int motherId = mother->pdgId();
+            
+            if(motherId == particleBid)
+            {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    
+    bool isAfromB(const reco::GenParticle &particleA, std::vector <int> v_particleBid)
+    {
+        for(unsigned int iB = 0; iB < v_particleBid.size(); iB++)
+        {
+            if(isAfromB(particleA, v_particleBid[iB]))
+            {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    
+    bool isPromptPhoton(const reco::GenParticle &photon)
+    {
+        if(std::abs(photon.pdgId()) != 22 || photon.status() != 1)
+        {
+            return false;
+        }
+        
+        for(unsigned int iMother = 0; iMother < photon.numberOfMothers(); iMother++)
+        {
+            const reco::GenParticle *mother = photon.motherRef(iMother).get();
+            
+            int motherId = std::abs(mother->pdgId());
+            
+            if(motherId <= 22 || motherId == 2212)
+            {
+                return true;
+            }
+        }
+        
+        return false;
+    }
+    
+    
     int getPileup(edm::Handle <std::vector <PileupSummaryInfo> > pileUps_reco)
     {
         int pileup_n = 0;
@@ -1284,6 +1340,76 @@ namespace Common
         }
         
         return v_deltaR_min;
+    }
+    
+    
+    std::pair <double, const edm::Ptr <reco::CaloCluster> > getSCclusterMaxDR2(
+        const reco::SuperCluster *sc
+    )
+    {
+        double refEta = sc->eta();
+        double refPhi = sc->phi();
+        
+        edm::PtrVector <reco::CaloCluster> clusters = sc->clusters();
+        edm::Ptr <reco::CaloCluster> maxDRclus;
+        
+        double maxDR2 = 0.0;
+        
+        for(auto clusIter = clusters.begin(); clusIter != clusters.end(); clusIter++)
+        {
+            const edm::Ptr <reco::CaloCluster> &clus = *clusIter;
+            
+            // Skip the seed
+            if(clus == sc->seed())
+            {
+                continue;
+            }
+            
+            double dEta = clus->eta() - refEta;
+            double dPhi = ROOT::Math::VectorUtil::Phi_mpi_pi(clus->phi() - refPhi);
+            
+            double dR2 = (dEta*dEta + dPhi*dPhi);
+            
+            if(dR2 > maxDR2)
+            {
+                maxDR2 = dR2;
+                maxDRclus = clus;
+            }
+        }
+        
+        // Return the cluster-pointer also in case one wants to do more operations with that
+        return std::make_pair(
+            maxDR2,
+             maxDRclus
+        );
+    }
+    
+    
+    template< typename T> int countHits(
+        T &hits,
+        double minE = 0,
+        std::vector <DetId::Detector> subDets = {}
+    )
+    {
+        int nHit = 0;
+        
+        for(const auto &hit : hits)
+        {
+            if(hit.energy() < minE)
+            {
+                continue;
+            }
+            
+            if(!subDets.empty() && std::find(subDets.begin(), subDets.end(), hit.id().det()) == subDets.end())
+            {
+                continue;
+            }
+            
+            
+            nHit++;
+        }
+        
+        return nHit;
     }
 }
 
