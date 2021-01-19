@@ -391,6 +391,9 @@ namespace TreeOutputInfo
         std::vector <double> v_gsfEleFromTICL_superClusSeed_eta;
         std::vector <double> v_gsfEleFromTICL_superClusSeed_phi;
         
+        std::vector <double> v_gsfEleFromTICL_superClusSeed_recHit1_E;
+        std::vector <double> v_gsfEleFromTICL_superClusSeed_recHit2_E;
+        
         std::vector <std::vector<double> > vv_gsfEleFromTICL_superClusSeed_clus_dEta;
         std::vector <std::vector<double> > vv_gsfEleFromTICL_superClusSeed_clus_dPhi;
         
@@ -472,6 +475,9 @@ namespace TreeOutputInfo
         std::vector <double> v_phoFromTICL_superClusSeed_ET;
         std::vector <double> v_phoFromTICL_superClusSeed_eta;
         std::vector <double> v_phoFromTICL_superClusSeed_phi;
+        
+        std::vector <double> v_phoFromTICL_superClusSeed_recHit1_E;
+        std::vector <double> v_phoFromTICL_superClusSeed_recHit2_E;
         
         
         
@@ -1391,6 +1397,13 @@ namespace TreeOutputInfo
             sprintf(name, "gsfEleFromTICL_superClusSeed_phi");
             tree->Branch(name, &v_gsfEleFromTICL_superClusSeed_phi);
             
+            sprintf(name, "gsfEleFromTICL_superClusSeed_recHit1_E");
+            tree->Branch(name, &v_gsfEleFromTICL_superClusSeed_recHit1_E);
+            
+            sprintf(name, "gsfEleFromTICL_superClusSeed_recHit2_E");
+            tree->Branch(name, &v_gsfEleFromTICL_superClusSeed_recHit2_E);
+            
+            
             sprintf(name, "gsfEleFromTICL_superClusSeed_clus_dEta");
             tree->Branch(name, &vv_gsfEleFromTICL_superClusSeed_clus_dEta);
             
@@ -1648,6 +1661,12 @@ namespace TreeOutputInfo
             
             sprintf(name, "phoFromTICL_superClusSeed_phi");
             tree->Branch(name, &v_phoFromTICL_superClusSeed_phi);
+            
+            sprintf(name, "phoFromTICL_superClusSeed_recHit1_E");
+            tree->Branch(name, &v_phoFromTICL_superClusSeed_recHit1_E);
+            
+            sprintf(name, "phoFromTICL_superClusSeed_recHit2_E");
+            tree->Branch(name, &v_phoFromTICL_superClusSeed_recHit2_E);
             
             
             //
@@ -2167,6 +2186,9 @@ namespace TreeOutputInfo
             v_gsfEleFromTICL_superClusSeed_eta.clear();
             v_gsfEleFromTICL_superClusSeed_phi.clear();
             
+            v_gsfEleFromTICL_superClusSeed_recHit1_E.clear();
+            v_gsfEleFromTICL_superClusSeed_recHit2_E.clear();
+            
             vv_gsfEleFromTICL_superClusSeed_clus_dEta.clear();
             vv_gsfEleFromTICL_superClusSeed_clus_dPhi.clear();
             
@@ -2286,6 +2308,9 @@ namespace TreeOutputInfo
             v_phoFromTICL_superClusSeed_ET.clear();
             v_phoFromTICL_superClusSeed_eta.clear();
             v_phoFromTICL_superClusSeed_phi.clear();
+            
+            v_phoFromTICL_superClusSeed_recHit1_E.clear();
+            v_phoFromTICL_superClusSeed_recHit2_E.clear();
             
             
             //

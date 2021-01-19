@@ -2985,6 +2985,29 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         treeOutput->v_gsfEleFromTICL_superClusSeed_phi.push_back(superClus_seed->phi());
         
         
+        // Sorted SC seed hit energies
+        std::vector <std::pair <int, double> > vp_gsfEleFromTICL_superClusSeed_sortedRecHit_index_energy = Common::getSortedHitIndex(
+            superClus_seed->hitsAndFractions(),
+            m_recHit
+        );
+        
+        double gsfEleFromTICL_superClusSeed_recHit1_E = 0;
+        double gsfEleFromTICL_superClusSeed_recHit2_E = 0;
+        
+        if(vp_gsfEleFromTICL_superClusSeed_sortedRecHit_index_energy.size() >= 1)
+        {
+            gsfEleFromTICL_superClusSeed_recHit1_E = vp_gsfEleFromTICL_superClusSeed_sortedRecHit_index_energy.at(0).second;
+        }
+        
+        if(vp_gsfEleFromTICL_superClusSeed_sortedRecHit_index_energy.size() >= 2)
+        {
+            gsfEleFromTICL_superClusSeed_recHit2_E = vp_gsfEleFromTICL_superClusSeed_sortedRecHit_index_energy.at(1).second;
+        }
+        
+        treeOutput->v_gsfEleFromTICL_superClusSeed_recHit1_E.push_back(gsfEleFromTICL_superClusSeed_recHit1_E);
+        treeOutput->v_gsfEleFromTICL_superClusSeed_recHit2_E.push_back(gsfEleFromTICL_superClusSeed_recHit2_E);
+        
+        
         //
         if(storeSuperClusTICLclus)
         {
@@ -3493,6 +3516,29 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
         treeOutput->v_phoFromTICL_superClusSeed_ET.push_back(superClus_seed->energy() * sin(superClus_seed_3vec.theta()));
         treeOutput->v_phoFromTICL_superClusSeed_eta.push_back(superClus_seed->eta());
         treeOutput->v_phoFromTICL_superClusSeed_phi.push_back(superClus_seed->phi());
+        
+        
+        // Sorted SC seed hit energies
+        std::vector <std::pair <int, double> > vp_phoFromTICL_superClusSeed_sortedRecHit_index_energy = Common::getSortedHitIndex(
+            superClus_seed->hitsAndFractions(),
+            m_recHit
+        );
+        
+        double phoFromTICL_superClusSeed_recHit1_E = 0;
+        double phoFromTICL_superClusSeed_recHit2_E = 0;
+        
+        if(vp_phoFromTICL_superClusSeed_sortedRecHit_index_energy.size() >= 1)
+        {
+            phoFromTICL_superClusSeed_recHit1_E = vp_phoFromTICL_superClusSeed_sortedRecHit_index_energy.at(0).second;
+        }
+        
+        if(vp_phoFromTICL_superClusSeed_sortedRecHit_index_energy.size() >= 2)
+        {
+            phoFromTICL_superClusSeed_recHit2_E = vp_phoFromTICL_superClusSeed_sortedRecHit_index_energy.at(1).second;
+        }
+        
+        treeOutput->v_phoFromTICL_superClusSeed_recHit1_E.push_back(phoFromTICL_superClusSeed_recHit1_E);
+        treeOutput->v_phoFromTICL_superClusSeed_recHit2_E.push_back(phoFromTICL_superClusSeed_recHit2_E);
     }
     
     

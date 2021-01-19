@@ -1353,6 +1353,7 @@ namespace Common
         edm::PtrVector <reco::CaloCluster> clusters = sc->clusters();
         edm::Ptr <reco::CaloCluster> maxDRclus;
         
+        int nClus = 0;
         double maxDR2 = 0.0;
         
         for(auto clusIter = clusters.begin(); clusIter != clusters.end(); clusIter++)
@@ -1375,12 +1376,19 @@ namespace Common
                 maxDR2 = dR2;
                 maxDRclus = clus;
             }
+            
+            nClus++;
+        }
+        
+        if(!nClus)
+        {
+            maxDR2 = 999*999;
         }
         
         // Return the cluster-pointer also in case one wants to do more operations with that
         return std::make_pair(
             maxDR2,
-             maxDRclus
+            maxDRclus
         );
     }
     
