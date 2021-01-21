@@ -37,6 +37,10 @@ namespace TreeOutputInfo
         ULong64_t bunchCrossingNumber;
         
         
+        // Gen event info //
+        double genEventWeight;
+        
+        
         // Gen electron //
         int genEl_n;
         std::vector <double> v_genEl_E;
@@ -570,6 +574,11 @@ namespace TreeOutputInfo
             tree->Branch("eventNumber", &eventNumber);
             tree->Branch("luminosityNumber", &luminosityNumber);
             tree->Branch("bunchCrossingNumber", &bunchCrossingNumber);
+            
+            
+            // Gen event info //
+            sprintf(name, "genEventWeight");
+            tree->Branch(name, &genEventWeight);
             
             
             // Gen electron //

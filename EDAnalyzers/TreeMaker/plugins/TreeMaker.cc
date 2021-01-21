@@ -563,6 +563,7 @@ void TreeMaker::analyze(const edm::Event& iEvent, const edm::EventSetup& iSetup)
     GenEventInfoProduct generator = *generatorHandle;
     
     printf("[%llu] Gen. evt. wt. %0.4g \n", eventNumber, generator.weight());
+    treeOutput->genEventWeight = generator.weight();
     
     
     //////////////////// Gen particle ////////////////////
