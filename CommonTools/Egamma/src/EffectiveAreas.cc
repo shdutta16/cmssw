@@ -178,14 +178,13 @@ void EffectiveAreas::printEffectiveAreas() const {
 void EffectiveAreas::checkConsistency() const {
     // There should be at least one eta range with one constant
 
-    if (effectiveAreaValues_.empty())
-        throw cms::Exception("EffectiveAreas config failure")
-            << "found no effective area constans in the file " << filename_ << std::endl;
-
-    uint nEtaBins = absEtaMin_.size();
-
-
     if( !quadraticEAflag_ ){
+
+        if (effectiveAreaValues_.empty())
+            throw cms::Exception("EffectiveAreas config failure")
+                << "found no effective area constants in the file " << filename_ << std::endl;
+
+        uint nEtaBins = absEtaMin_.size();
 
 
         for (uint iEta = 0; iEta < nEtaBins; iEta++) {
@@ -212,6 +211,12 @@ void EffectiveAreas::checkConsistency() const {
     }
 
     else {
+
+        if (linearEffectiveAreaValues_.empty() || quadraticEffectiveAreaValues_.empty())
+            throw cms::Exception("EffectiveAreas config failure")
+                << "found no effective area constants (linear and/or quadratic) in the file " << filename_ << std::endl;
+
+        uint nEtaBins = absEtaMin_.size();
 
         for (uint iEta = 0; iEta < nEtaBins; iEta++) {
 

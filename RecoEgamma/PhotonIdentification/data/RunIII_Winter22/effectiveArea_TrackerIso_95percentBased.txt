@@ -1,0 +1,4 @@
+# This file contains the Effective Area (EA) constants for computing
+# PU-corrections for the variable tracker isolation (IsoT)
+#
+# THIS IS A DUMMY FILE

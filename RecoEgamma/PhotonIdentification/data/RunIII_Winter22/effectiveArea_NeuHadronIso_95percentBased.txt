@@ -1,0 +1,5 @@
+# This file contains the Effective Area (EA) constants for computing
+# PU-corrections for the variable neutral hadron isolation (IsoN)
+#
+# THIS IS A DUMMY FILE
+
