@@ -1,6 +1,7 @@
 #include "CommonTools/Egamma/interface/EffectiveAreas.h"
 #include "FWCore/Utilities/interface/Exception.h"
 
+#include <iostream>
 #include <cmath>
 #include <fstream>
 #include <string>
@@ -8,8 +9,12 @@
 
 
 
-EffectiveAreas::EffectiveAreas(const std::string& filename) : filename_(filename) {
-  // Open the file with the effective area constants
+EffectiveAreas::EffectiveAreas(const std::string& filename) :
+    filename_(filename),
+    quadraticEAflag_(false) { // Setting the quadraticEAflag_ to false since this constructor is
+                              // for linear pile-up correction
+
+   // Open the file with the effective area constants
   std::ifstream inputFile;
   inputFile.open(filename_.c_str());
   if (!inputFile.is_open())
@@ -47,7 +52,8 @@ EffectiveAreas::EffectiveAreas(const std::string& filename) : filename_(filename
 
 
 EffectiveAreas::EffectiveAreas(const std::string& filename, const bool quadraticEAflag) :
-    filename_(filename), quadraticEAflag_(quadraticEAflag) {
+    filename_(filename),
+    quadraticEAflag_(quadraticEAflag) {
 
     // Open the file with the effective area constants
     std::ifstream inputFile;
@@ -178,7 +184,9 @@ void EffectiveAreas::checkConsistency() const {
 
     uint nEtaBins = absEtaMin_.size();
 
+
     if( !quadraticEAflag_ ){
+
 
         for (uint iEta = 0; iEta < nEtaBins; iEta++) {
 

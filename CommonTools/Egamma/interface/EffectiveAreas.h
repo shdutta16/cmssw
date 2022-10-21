@@ -28,7 +28,7 @@ private:
   std::vector<float> effectiveAreaValues_;  // effective area for this eta range
 
   // Following members are for quadratic PU-correction (introduced for cutBasedPhotonID in Run3_122X)
-  bool quadraticEAflag_;
+  const bool quadraticEAflag_;
   std::vector<float> linearEffectiveAreaValues_;
   std::vector<float> quadraticEffectiveAreaValues_;
 
